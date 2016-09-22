@@ -4327,6 +4327,8 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   const std::string kTestsuites = "testsuites";
 
   *stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  *stream << "<?xml-stylesheet type=\"text/xsl\" href=\"gtest-result.xsl\" ?>\n";
+  *stream << "<!DOCTYPE testsuites SYSTEM \"gtest-result.dtd\">\n";
   *stream << "<" << kTestsuites;
 
   OutputXmlAttribute(stream, kTestsuites, "tests",
