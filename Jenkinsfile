@@ -30,7 +30,7 @@ node('build && docker') {
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
 
     build_configs.each { target, build_config ->
-        git_info = pipeline.checkoutRepo(target)
+        git_info = common_pipeline.checkoutRepo(target)
 
         build(target, build_config)
 
