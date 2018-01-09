@@ -94,25 +94,6 @@ def cleanUp(target) {
     }
 }
 
-def getGitHash() {
-    return sh(script: "git log -n1 --pretty='%h'", returnStdout: true).trim()
-}
-
-def getGitTag() {
-    def hash = getGitHash()
-    def tag = ""
-    try {
-        tag = sh(script: "git describe --exact-match --tags ${hash}", returnStdout: true).trim()
-    } catch (e) {
-      echo "No current tag."
-    }
-    return tag
-}
-
-def getGitBranch() {
-    return sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-}
-
 def deleteDockerOutdated() {
     // Delete stopped docker containers.
     sh(script: "docker ps -aq --no-trunc | xargs --no-run-if-empty docker rm")
