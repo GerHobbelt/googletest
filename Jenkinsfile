@@ -4,6 +4,8 @@
 // Author: Frankie Li, Daran He, John Inacay
 // TODO - Need to migrate to a standardize Debian package deployment script.
 
+@Library('jenkins-shared-library') _
+
 
 build_configs = [
     'ubuntu_16_04' : [
@@ -28,7 +30,7 @@ node('build && docker') {
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
 
     build_configs.each { target, build_config ->
-        git_info = checkoutRepo(target)
+        git_info = pipeline.checkoutRepo(target)
 
         build(target, build_config)
 
@@ -36,33 +38,6 @@ node('build && docker') {
 
         cleanUp(target)
     }
-}
-
-def checkoutRepo(target) {
-    def is_rc = false
-    def is_release = false
-
-    stage("Checkout ${target}") {
-        // Pull the code from the repo. `checkout` is a special Jenkins cmd.
-        def scm_vars = checkout scm
-        git_tag = getGitTag()
-        git_branch = getGitBranch()
-
-        if(git_tag) {
-            is_rc = (git_tag.indexOf("-rc") >= 0)
-            is_release = (git_tag.indexOf("release") >= 0)
-        }
-        echo "Current branch is: ${git_branch}, current tag is: ${git_tag}"
-        echo "Current tag is a RC tag: ${is_rc}"
-        echo "Current tag is a Release tag: ${is_release}"
-    }
-
-    git_info = [
-        'is_release': is_release,
-        'is_rc': is_rc,
-    ]
-
-    return git_info
 }
 
 def build(target, build_config) {
