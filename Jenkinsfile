@@ -35,57 +35,62 @@ def BUILD_CONFIGS = [
     ]
 ]
 
-def input_result = ""
+def S3_PACKAGE_CREDS = "package-uploads"
 
-node('build && docker') {
-  BUILD_CONFIGS.each { target, build_config ->
-    stage("Checkout ${target}") {
-      git_info = ditto_git.checkoutRepo()
-    }
+BUILD_CONFIGS.each { target, build_config ->
+  node('build && docker') {
+      stage("Checkout ${target}") {
+        git_info = ditto_git.checkoutRepo()
+      }
 
-    stage("Prepare Build Env ${target}") {
-      buildDockerImage(build_config)
-      deleteDockerOutdated()
-    }
-  }
-}
-
-stage("Tag and deploy?") {
-  input_result = promptReleaseAction()
-}
-
-node('build && docker') {
-  BUILD_CONFIGS.each { target, build_config ->
-    stage("Publishing deb package ${target}") {
-
-      if (!git_info.branch.startsWith("release/") ||
-          input_result.contains("skip"))
-        // SET DEV VERSION
-        buildInsideDocker(build_config, new_rc_number)
-        publishDebToS3(build_config.staging_repo, build_config.dist, git_info)
-
-      } else if (input_result.contains(" RC ")) {
-        new_rc_number = calcRcNumber(version_number)
-        version_suffix = "rc${new_rc_number}"
-
-        // SET RC VERSION
-        buildInsideDocker(build_config, new_rc_number)
-        archiveArtifacts(artifacts: 'build/*.deb')
-
-        pushTag("release-v${version_number}rc${new_rc_number}")
-        publishDebToS3(build_config.staging_repo, build_config.dist, git_info)
-
-      } else if (input_result.contains(" RELEASE ")) {
-        buildInsideDocker(build_config, release=true)
-        archiveArtifacts(artifacts: 'build/*.deb')
-
-        pushTag("release-v${version_number}")
-        publishDebToS3(build_config.repo, build_config.dist, git_info)
+      stage("Prepare Build Env ${target}") {
+        ditto_docker.buildDockerImage(build_config)
+        ditto_docker.deleteDockerOutdated()
       }
     }
+
+  // Master Node.
+  stage("Tag and deploy?") {
+    input_result = ditto_utils.promptReleaseAction(git_info)
+    def timestamp = ditto_utils.getDateTime()
+
+    if (!git_info.branch.startsWith("release/") ||
+            input_result.contains("skip"))
+
+          publish_repo = build_config.staging_repo
+          publish_revision = "ditto~{$timestamp}+git.${git_info.commit}"
+
+        } else if (input_result.contains(" RC ")) {
+
+          new_rc_number = calcRcNumber(version_number)
+          ditto_git.pushTag("release-v${version_number}rc${new_rc_number}")
+          publish_repo = build_config.staging_repo
+          publish_revision = "ditto~rc{new_rc_number}"
+
+        } else if (input_result.contains(" RELEASE ")) {
+
+          ditto_git.pushTag("release-v${version_number}")
+          publish_repo = build_config.repo
+          publish_revision = "ditto"
+
+        }
   }
 
-  stage("Clean up") {
-    deleteDirectory(pwd())
+  node('build && docker') {
+    stage("Build and Publish to Test Repo ${target}") {
+      ditto_deb.buildDebianPackage(build_config.docker_name, revision)
+      archiveArtifacts(artifacts: 'build/*.deb')
+      ditto_deb.publishDebToS3(build_config.staging_repo, build_config.dist, S3_PACKAGE_CREDS)
+    }
+
+    stage("Publish ${target}") {
+      if (publish_repo != build_config.staging_repo) {
+        publishDebToS3(publish_repo, build_config.dist, S3_PACKAGE_CREDS)
+      }
+    }
+
+    stage("Clean up ${target}") {
+      ditto_utils.deleteDirectory(pwd())
+    }
   }
 }
