@@ -51,7 +51,7 @@ BUILD_CONFIGS.each { target, build_config ->
 
   // Master Node.
   stage("Tag and deploy?") {
-    Matcher m = git_info.branch =~ "(\\d+\\.\\d+)$"
+    Matcher m = git_info.branch =~ "(\\d+\\.\\d+)\$"
     m.find()
     version_number = m.group(1)
     input_result = ditto_utils.promptReleaseAction(git_info,  version_number)
