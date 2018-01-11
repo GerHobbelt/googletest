@@ -55,25 +55,25 @@ BUILD_CONFIGS.each { target, build_config ->
     def timestamp = ditto_utils.getDateTime()
 
     if (!git_info.branch.startsWith("release/") ||
-            input_result.contains("skip"))
+            input_result.contains("skip")) {
 
-          publish_repo = build_config.staging_repo
-          publish_revision = "ditto~{$timestamp}+git.${git_info.commit}"
+      publish_repo = build_config.staging_repo
+      publish_revision = "ditto~{$timestamp}+git.${git_info.commit}"
 
-        } else if (input_result.contains(" RC ")) {
+    } else if (input_result.contains(" RC ")) {
 
-          new_rc_number = calcRcNumber(version_number)
-          ditto_git.pushTag("release-v${version_number}rc${new_rc_number}")
-          publish_repo = build_config.staging_repo
-          publish_revision = "ditto~rc{new_rc_number}"
+      new_rc_number = calcRcNumber(version_number)
+      ditto_git.pushTag("release-v${version_number}rc${new_rc_number}")
+      publish_repo = build_config.staging_repo
+      publish_revision = "ditto~rc{new_rc_number}"
 
-        } else if (input_result.contains(" RELEASE ")) {
+    } else if (input_result.contains(" RELEASE ")) {
 
-          ditto_git.pushTag("release-v${version_number}")
-          publish_repo = build_config.repo
-          publish_revision = "ditto"
+      ditto_git.pushTag("release-v${version_number}")
+      publish_repo = build_config.repo
+      publish_revision = "ditto"
 
-        }
+    }
   }
 
   node('build && docker') {
