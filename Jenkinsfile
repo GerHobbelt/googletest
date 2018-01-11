@@ -39,19 +39,22 @@ def S3_PACKAGE_CREDS = "package-uploads"
 
 BUILD_CONFIGS.each { target, build_config ->
   node('build && docker') {
-      stage("Checkout ${target}") {
-        git_info = ditto_git.checkoutRepo()
-      }
-
-      stage("Prepare Build Env ${target}") {
-        ditto_docker.buildDockerImage(build_config)
-        ditto_docker.deleteDockerOutdated()
-      }
+    stage("Checkout ${target}") {
+      git_info = ditto_git.checkoutRepo()
     }
+
+    stage("Prepare Build Env ${target}") {
+      ditto_docker.buildDockerImage(build_config)
+      ditto_docker.deleteDockerOutdated()
+    }
+  }
 
   // Master Node.
   stage("Tag and deploy?") {
-    input_result = ditto_utils.promptReleaseAction(git_info)
+    Matcher m = git_info.branch =~ "(\\d+\\.\\d+)$"
+    m.find()
+    version_number = m.group(1)
+    input_result = ditto_utils.promptReleaseAction(git_info,  version_number)
     def timestamp = ditto_utils.getDateTime()
 
     if (!git_info.branch.startsWith("release/") ||
@@ -90,7 +93,7 @@ BUILD_CONFIGS.each { target, build_config ->
     }
 
     stage("Clean up ${target}") {
-      ditto_utils.deleteDirectory(pwd())
+      deleteDir()
     }
   }
 }
