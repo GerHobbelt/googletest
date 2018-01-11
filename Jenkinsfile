@@ -51,9 +51,8 @@ BUILD_CONFIGS.each { target, build_config ->
 
   // Master Node.
   stage("Tag and deploy?") {
-    Matcher m = git_info.branch =~ "(\\d+\\.\\d+)\$"
-    m.find()
-    version_number = m.group(1)
+    def m = git_info.branch =~ "(\\d+\\.\\d+)\$"
+    version_number = m[0][1]
     input_result = ditto_utils.promptReleaseAction(git_info,  version_number)
     def timestamp = ditto_utils.getDateTime()
 
