@@ -78,7 +78,7 @@ BUILD_CONFIGS.each { target, build_config ->
 
   node('build && docker') {
     stage("Build and Publish to Test Repo ${target}") {
-      ditto_deb.buildDebianPackage(build_config.docker_name, revision)
+      ditto_deb.buildDebianPackage(build_config.docker_name, publish_revision)
       archiveArtifacts(artifacts: 'build/*.deb')
       ditto_deb.publishDebToS3(build_config.staging_repo, build_config.dist, S3_PACKAGE_CREDS)
     }
