@@ -16,9 +16,9 @@ properties([[
   ]
 ]]);
 
-@Library('jenkins-shared-library') _
+@Library('jenkins-shared-library@olegs-test') _
 
-BUILD_CONFIGS = [
+def BUILD_CONFIGS = [
     'ubuntu_16_04' : [
         'docker_name' : 'ubuntu16-build-env',
         'docker_file' : 'Dockerfile.xenial',
@@ -35,45 +35,28 @@ BUILD_CONFIGS = [
     ]
 ]
 
+def input_result = ""
 
 node('build && docker') {
   BUILD_CONFIGS.each { target, build_config ->
     stage("Checkout ${target}") {
-      git_info = common_pipeline.checkoutRepo()
+      git_info = ditto_git.checkoutRepo()
     }
 
     stage("Prepare Build Env ${target}") {
       buildDockerImage(build_config)
+      deleteDockerOutdated()
     }
   }
 }
 
 stage("Tag and deploy?") {
-  if (git_branch.startsWith("release/")) {
-    input_result = input(
-      message: "User input required",
-      parameters: [
-        choice(
-          name: "Do you want to tag and deploy \"${version_number}\" at hash " +
-                " \"${git_commit}\"",
-          choices: [
-            "skip",
-            "tag and deploy RC package",
-            "tag and deploy RELEASE package"
-          ].join("\n")
-        )
-      ]
-    )
-    echo "[i] The answer is ${input_result}"
-  } else {
-    echo "[i] Not a release branch, skipped"
-  }
+  input_result = promptReleaseAction()
 }
 
 node('build && docker') {
   BUILD_CONFIGS.each { target, build_config ->
     stage("Publishing deb package ${target}") {
-      deleteDockerOutdated()
 
       if (!git_info.branch.startsWith("release/") ||
           input_result.contains("skip"))
@@ -90,20 +73,19 @@ node('build && docker') {
         archiveArtifacts(artifacts: 'build/*.deb')
 
         pushTag("release-v${version_number}rc${new_rc_number}")
-        publishDebToS3(build_config.repo, build_config.dist, git_info)
+        publishDebToS3(build_config.staging_repo, build_config.dist, git_info)
 
       } else if (input_result.contains(" RELEASE ")) {
         buildInsideDocker(build_config, release=true)
         archiveArtifacts(artifacts: 'build/*.deb')
 
         pushTag("release-v${version_number}")
-        publishDebToS3(build_config.staging_repo, build_config.dist, git_info)
-
+        publishDebToS3(build_config.repo, build_config.dist, git_info)
       }
     }
   }
 
   stage("Clean up") {
-    deleteDir(pwd())
+    deleteDirectory(pwd())
   }
 }
