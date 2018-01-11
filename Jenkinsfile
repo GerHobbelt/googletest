@@ -58,7 +58,7 @@ BUILD_CONFIGS.each { target, build_config ->
             input_result.contains("skip")) {
 
       publish_repo = build_config.staging_repo
-      publish_revision = "ditto~{$timestamp}+git.${git_info.commit}"
+      publish_revision = "ditto~${timestamp}+git.${git_info.commit}"
 
     } else if (input_result.contains(" RC ")) {
 
