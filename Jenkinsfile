@@ -42,7 +42,6 @@ node('build && docker') {
     def docker_name = build_config.docker_name
     def docker_file = build_config.docker_file
     def staging_repo = build_config.staging_repo
-    def repo = build_config.staging_repo
     def dist = build_config.dist
 
     dir(target) {
@@ -72,7 +71,7 @@ node('build && docker') {
 // Master Node.
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
-  // if (git_info.is_release) {
+  if (git_info.is_release) {
     deploy_mode = input(
       message: "User input required",
       parameters: [
@@ -80,7 +79,7 @@ stage("Tag and deploy?") {
           name: "Deploy \"${version_number}\" at hash " +
                 " \"${git_info.commit}\"?",
           choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
-  // }
+  }
 }
 
 node('build && docker') {
@@ -109,7 +108,7 @@ node('build && docker') {
         ditto_deb.publishDebToS3(publish_repo, dist, S3_PACKAGE_CREDS)
 
         // Push tags.
-        ditto_git.pushTag(rc_tag)
+        ditto_git.pushTag(tag)
       }
     }
 
