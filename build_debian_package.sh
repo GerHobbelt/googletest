@@ -1,37 +1,32 @@
 #!/bin/bash
-# Changes deb package version. (Run make package before this!)
+# Changes deb package version. Requires Version.cmake (Run make package before this!)
 # https://dittovto.atlassian.net/wiki/spaces/DIT/pages/238845953/Jenkins+Build+Pipeline
 #
 # Copyright: 2017 Ditto Technologies. All Rights Reserved.
 # Author: Daran He
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     prog=`basename "$0"`
-    echo "Usage: ./$prog <REVISION>"
+    echo "Usage: ./$prog <VERSION> <REVISION>"
     exit 1
 fi
 
-REVISION=$1
+VERSION=$1
+REVISION=$2
 BUILD_DIR=build
 CPACK_CONFIG_FILE=$BUILD_DIR/CPackConfig.cmake
+DITTO_VERSION_FILE=DittoVersion.cmake
 ARCH=`dpkg --print-architecture`
-
-get_cmake_var() {
-  echo `grep $1 $CPACK_CONFIG_FILE | tail -1 | cut -d '"' -f2`
-}
-
-VERSION_MAJOR=$(get_cmake_var CPACK_PACKAGE_VERSION_MAJOR)
-VERSION_MINOR=$(get_cmake_var CPACK_PACKAGE_VERSION_MINOR)
-VERSION_PATCH=$(get_cmake_var CPACK_PACKAGE_VERSION_PATCH)
-VERSION="$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
 VERSION_REVISION="$VERSION-$REVISION"
 
-# Override existing variables in CPack config.
+# Override version information in CPack configuration.
+cat $DITTO_VERSION_FILE >> $CPACK_CONFIG_FILE
 echo 'SET(CPACK_PACKAGE_VERSION "$VERSION_REVISION")' >> $CPACK_CONFIG_FILE
 
 # Rebuild packages with new version info.
 cd $BUILD_DIR
 rm *.deb
+make  -j$(nproc) package
 cpack
 
 # Rename all deb packages generated to ditto specifications.

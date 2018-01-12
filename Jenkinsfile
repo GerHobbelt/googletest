@@ -38,56 +38,76 @@ def BUILD_CONFIGS = [
 def S3_PACKAGE_CREDS = "package-uploads"
 
 BUILD_CONFIGS.each { target, build_config ->
+  docker_name = build_config.docker_name
+  docker_file = build_config.docker_file
+  staging_repo = build_config.staging_repo
+  repo = build_config.staging_repo
+  dist = build_config.dist
+
   node('build && docker') {
-    stage("Checkout ${target}") {
-      git_info = ditto_git.checkoutRepo()
-    }
+    dir(target) {
+      stage("Checkout ${target}") {
+        git_info = ditto_git.checkoutRepo()
+      }
 
-    stage("Prepare Build Env ${target}") {
-      ditto_docker.buildDockerImage(build_config)
-      ditto_docker.deleteDockerOutdated()
-    }
-  }
+      stage("Build and Publish to Test Repo ${target}") {
+        ditto_docker.buildDockerImage(docker_name, docker_file)
+        ditto_docker.deleteDockerOutdated()
 
-  // Master Node.
-  stage("Tag and deploy?") {
-    def m = git_info.branch =~ "(\\d+\\.\\d+)\$"
-    version_number = m[0][1]
-    input_result = ditto_utils.promptReleaseAction(git_info,  version_number)
-    def timestamp = ditto_utils.getDateTime()
+        version_number = ditto_deb.getDittoVersion()
+        ditto_utils.checkVersionNumber(version_number)
+        revision = getDevRevision(git_info)
 
-    if (!git_info.branch.startsWith("release/") ||
-            input_result.contains("skip")) {
+        ditto_deb.buildSource(docker_name)
+        ditto_deb.buildDebianPackage(docker_name, version_number, revision)
+        archiveArtifacts(artifacts: 'build/*.deb')
+        ditto_deb.publishDebToS3(staging_repo, dist, S3_PACKAGE_CREDS)
+      }
 
-      publish_repo = build_config.staging_repo
-      publish_revision = "ditto~${timestamp}+git.${git_info.commit}"
-
-    } else if (input_result.contains(" RC ")) {
-
-      new_rc_number = calcRcNumber(version_number)
-      ditto_git.pushTag("release-v${version_number}rc${new_rc_number}")
-      publish_repo = build_config.staging_repo
-      publish_revision = "ditto~rc{new_rc_number}"
-
-    } else if (input_result.contains(" RELEASE ")) {
-
-      ditto_git.pushTag("release-v${version_number}")
-      publish_repo = build_config.repo
-      publish_revision = "ditto"
-
+      stage("Install and Test from Test Repo ${target}") {
+      }
     }
   }
+
+// Master Node.
+stage("Tag and deploy?") {
+  input_result = ""
+  push_rc = false
+  push_release = false
+  if (git_info.is_release) {
+    checkReleaseBranch(git_info.branch, version_number)
+    input_result = ditto_utils.promptReleaseAction(git_info, version_number)
+  }
+}
+
+BUILD_CONFIGS.each { target, build_config ->
+  docker_name = build_config.docker_name
+  docker_file = build_config.docker_file
+  staging_repo = build_config.staging_repo
+  repo = build_config.staging_repo
+  dist = build_config.dist
 
   node('build && docker') {
     stage("Build and Publish to Test Repo ${target}") {
-      ditto_deb.buildDebianPackage(build_config.docker_name, publish_revision)
-      archiveArtifacts(artifacts: 'build/*.deb')
-      ditto_deb.publishDebToS3(build_config.staging_repo, build_config.dist, S3_PACKAGE_CREDS)
-    }
+      if (input_result) {
+        if (input_result.contains(" RC ")) {
+          new_rc_number = ditto_git.calcRcNumber(version_number)
+          tag = ditto_git.getRcTag(version_number, new_rc_number)
+          revision = ditto_deb.getRcRevision(rc_number)
+          publish_repo = staging_repo
+        } else if (input_result.contains(" RELEASE ")) {
+          tag = ditto_git.getReleaseTag(version_number)
+          revision = ditto_deb.getReleaseRevision()
+          publish_repo = repo
+        }
 
-    stage("Publish ${target}") {
-      if (publish_repo != build_config.staging_repo) {
-        publishDebToS3(publish_repo, build_config.dist, S3_PACKAGE_CREDS)
+        // Build and publish.
+        ditto_deb.buildDebianPackage(docker_name, version_number, revision)
+        archiveArtifacts(artifacts: 'build/*.deb')
+        ditto_deb.publishDebToS3(publish_repo, dist, S3_PACKAGE_CREDS)
+
+        // Push tags.
+        ditto_git.pushTag(rc_tag)
       }
     }
 
