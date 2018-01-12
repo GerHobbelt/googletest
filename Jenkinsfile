@@ -55,7 +55,7 @@ node('build && docker') {
         ditto_docker.deleteDockerOutdated()
 
         version_number = ditto_deb.getDittoVersion()
-        ditto_utils.foo()
+        ditto_utils.promptReleaseAction(git_info, version_number)
         revision = ditto_deb.getDevRevision(git_info.commit)
 
         ditto_deb.buildSource(docker_name)
@@ -72,10 +72,7 @@ node('build && docker') {
 
 // Master Node.
 stage("Tag and deploy?") {
-  input_result = ""
-  if (git_info.is_release) {
-    input_result = ditto_utils.promptReleaseAction(git_info, version_number)
-  }
+  deploy_mode = ditto_utils.promptReleaseAction(git_info, version_number)
 }
 
 node('build && docker') {
@@ -86,14 +83,14 @@ node('build && docker') {
     repo = build_config.staging_repo
     dist = build_config.dist
 
-    if (input_result) {
+    if (deploy_mode != "SKIP") {
       stage("Build and Publish to Test Repo ${target}") {
-        if (input_result.contains(" RC ")) {
+        if (deploy_mode == "RC") {
           new_rc_number = ditto_git.calcRcNumber(version_number)
           tag = ditto_git.getRcTag(version_number, new_rc_number)
           revision = ditto_deb.getRcRevision(rc_number)
           publish_repo = staging_repo
-        } else if (input_result.contains(" RELEASE ")) {
+        } else if (deploy_mode == "RELEASE") {
           tag = ditto_git.getReleaseTag(version_number)
           revision = ditto_deb.getReleaseRevision()
           publish_repo = repo
