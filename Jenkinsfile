@@ -37,14 +37,14 @@ def BUILD_CONFIGS = [
 
 def S3_PACKAGE_CREDS = "package-uploads"
 
-BUILD_CONFIGS.each { target, build_config ->
-  def docker_name = build_config.docker_name
-  def docker_file = build_config.docker_file
-  def staging_repo = build_config.staging_repo
-  def repo = build_config.staging_repo
-  def dist = build_config.dist
+node('build && docker') {
+  BUILD_CONFIGS.each { target, build_config ->
+    def docker_name = build_config.docker_name
+    def docker_file = build_config.docker_file
+    def staging_repo = build_config.staging_repo
+    def repo = build_config.staging_repo
+    def dist = build_config.dist
 
-  node('build && docker') {
     dir(target) {
       stage("Checkout ${target}") {
         git_info = ditto_git.checkoutRepo()
@@ -73,24 +73,22 @@ BUILD_CONFIGS.each { target, build_config ->
 // Master Node.
 stage("Tag and deploy?") {
   input_result = ""
-  push_rc = false
-  push_release = false
   if (git_info.is_release) {
     ditto_utils.checkReleaseBranch(git_info.branch, version_number)
     input_result = ditto_utils.promptReleaseAction(git_info, version_number)
   }
 }
 
-BUILD_CONFIGS.each { target, build_config ->
-  docker_name = build_config.docker_name
-  docker_file = build_config.docker_file
-  staging_repo = build_config.staging_repo
-  repo = build_config.staging_repo
-  dist = build_config.dist
+node('build && docker') {
+  BUILD_CONFIGS.each { target, build_config ->
+    docker_name = build_config.docker_name
+    docker_file = build_config.docker_file
+    staging_repo = build_config.staging_repo
+    repo = build_config.staging_repo
+    dist = build_config.dist
 
-  node('build && docker') {
-    stage("Build and Publish to Test Repo ${target}") {
-      if (input_result) {
+    if (input_result) {
+      stage("Build and Publish to Test Repo ${target}") {
         if (input_result.contains(" RC ")) {
           new_rc_number = ditto_git.calcRcNumber(version_number)
           tag = ditto_git.getRcTag(version_number, new_rc_number)
