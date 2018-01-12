@@ -74,7 +74,7 @@ node('build && docker') {
 stage("Tag and deploy?") {
   input_result = ""
   if (git_info.is_release) {
-    ditto_utils.checkReleaseBranch(git_info.branch, version_number)
+    // ditto_utils.checkReleaseBranch(git_info.branch, version_number)
     input_result = ditto_utils.promptReleaseAction(git_info, version_number)
   }
 }
