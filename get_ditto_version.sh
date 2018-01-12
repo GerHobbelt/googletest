@@ -4,7 +4,7 @@
 # Copyright: 2017 Ditto Technologies. All Rights Reserved.
 # Author: Daran He
 
-CPACK_CONFIG_FILE=$1
+CPACK_CONFIG_FILE=DittoVersion.cmake
 
 get_cmake_var() {
 	VAR_NAME=$1
