@@ -55,7 +55,6 @@ node('build && docker') {
         ditto_docker.deleteDockerOutdated()
 
         version_number = ditto_deb.getDittoVersion()
-        ditto_utils.checkFullVersion(version_number)
         revision = ditto_deb.getDevRevision(git_info.commit)
 
         ditto_deb.buildSource(docker_name)
