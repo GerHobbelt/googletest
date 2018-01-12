@@ -38,11 +38,11 @@ def BUILD_CONFIGS = [
 def S3_PACKAGE_CREDS = "package-uploads"
 
 BUILD_CONFIGS.each { target, build_config ->
-  docker_name = build_config.docker_name
-  docker_file = build_config.docker_file
-  staging_repo = build_config.staging_repo
-  repo = build_config.staging_repo
-  dist = build_config.dist
+  def docker_name = build_config.docker_name
+  def docker_file = build_config.docker_file
+  def staging_repo = build_config.staging_repo
+  def repo = build_config.staging_repo
+  def dist = build_config.dist
 
   node('build && docker') {
     dir(target) {
@@ -54,9 +54,9 @@ BUILD_CONFIGS.each { target, build_config ->
         ditto_docker.buildDockerImage(docker_name, docker_file)
         ditto_docker.deleteDockerOutdated()
 
-        version_number = ditto_deb.getDittoVersion()
+        // version_number = ditto_deb.getDittoVersion()
         // ditto_utils.checkVersionNumber(version_number)
-        revision = ditto_deb.getDevRevision(git_info)
+        revision = ditto_deb.getDevRevision(git_info.commit_hash)
 
         ditto_deb.buildSource(docker_name)
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
