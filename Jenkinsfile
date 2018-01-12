@@ -57,9 +57,7 @@ BUILD_CONFIGS.each { target, build_config ->
         version_number = ditto_deb.getDittoVersion()
         echo version_number
         // ditto_utils.checkVersionNumber(version_number)
-        echo "before"
-        // revision = ditto_deb.getDevRevision(git_info.commit)
-        echo "passed"
+        revision = ditto_deb.getDevRevision(git_info.commit)
 
         ditto_deb.buildSource(docker_name)
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
