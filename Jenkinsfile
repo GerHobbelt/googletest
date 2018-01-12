@@ -56,7 +56,7 @@ node('build && docker') {
 
         version_number = ditto_deb.getDittoVersion()
         revision = ditto_deb.getDevRevision(git_info.commit)
-        ditto_utils.checkFullVersion()
+        a = ditto_utils.haha()
 
         ditto_deb.buildSource(docker_name)
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
