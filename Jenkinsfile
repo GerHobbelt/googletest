@@ -54,9 +54,9 @@ BUILD_CONFIGS.each { target, build_config ->
         ditto_docker.buildDockerImage(docker_name, docker_file)
         ditto_docker.deleteDockerOutdated()
 
-        // version_number = ditto_deb.getDittoVersion()
+        version_number = ditto_deb.getDittoVersion()
         // ditto_utils.checkVersionNumber(version_number)
-        revision = ditto_deb.getDevRevision(git_info.commit_hash)
+        revision = ditto_deb.getDevRevision(git_info.commit)
 
         ditto_deb.buildSource(docker_name)
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
