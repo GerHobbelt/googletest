@@ -74,7 +74,7 @@ stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release) {
     deploy_mode = input(
-      message: "User input required"
+      message: "User input required",
       parameters: [
         choice(
           name: "Deploy \"${version_number}\" at hash " +
