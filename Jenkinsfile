@@ -55,7 +55,6 @@ node('build && docker') {
         ditto_docker.deleteDockerOutdated()
 
         version_number = ditto_deb.getDittoVersion()
-        ditto_utils.promptReleaseAction(git_info, version_number)
         revision = ditto_deb.getDevRevision(git_info.commit)
 
         ditto_deb.buildSource(docker_name)
@@ -72,13 +71,21 @@ node('build && docker') {
 
 // Master Node.
 stage("Tag and deploy?") {
-  deploy_mode = ditto_utils.promptReleaseAction(git_info, version_number)
+  deploy_mode = "SKIP"
+  if (git_info.is_release) {
+    deploy_mode = input(
+      message: "User input required"
+      parameters: [
+        choice(
+          name: "Deploy \"${version_number}\" at hash " +
+                " \"${git_info.commit}\"?",
+          choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
+  }
 }
 
 node('build && docker') {
   BUILD_CONFIGS.each { target, build_config ->
     docker_name = build_config.docker_name
-    docker_file = build_config.docker_file
     staging_repo = build_config.staging_repo
     repo = build_config.staging_repo
     dist = build_config.dist
