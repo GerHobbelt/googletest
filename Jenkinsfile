@@ -56,7 +56,6 @@ node('build && docker') {
 
         version_number = ditto_deb.getDittoVersion()
         revision = ditto_deb.getDevRevision(git_info.commit)
-        a = ditto_utils.haha()
 
         ditto_deb.buildSource(docker_name)
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
@@ -74,7 +73,6 @@ node('build && docker') {
 stage("Tag and deploy?") {
   input_result = ""
   if (git_info.is_release) {
-    // ditto_utils.checkReleaseBranch(git_info.branch, version_number)
     input_result = ditto_utils.promptReleaseAction(git_info, version_number)
   }
 }
