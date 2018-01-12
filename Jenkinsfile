@@ -55,8 +55,8 @@ BUILD_CONFIGS.each { target, build_config ->
         ditto_docker.deleteDockerOutdated()
 
         version_number = ditto_deb.getDittoVersion()
-        ditto_utils.checkVersionNumber(version_number)
-        revision = getDevRevision(git_info)
+        // ditto_utils.checkVersionNumber(version_number)
+        revision = ditto_deb.getDevRevision(git_info)
 
         ditto_deb.buildSource(docker_name)
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
@@ -76,7 +76,7 @@ stage("Tag and deploy?") {
   push_rc = false
   push_release = false
   if (git_info.is_release) {
-    checkReleaseBranch(git_info.branch, version_number)
+    // ditto_utils.checkReleaseBranch(git_info.branch, version_number)
     input_result = ditto_utils.promptReleaseAction(git_info, version_number)
   }
 }
