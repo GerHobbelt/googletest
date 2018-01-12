@@ -54,6 +54,7 @@ node('build && docker') {
         ditto_docker.deleteDockerOutdated()
 
         version_number = ditto_deb.getDittoVersion()
+        ditto_utils.checkVersionNumber(version_number)
         revision = ditto_deb.getDevRevision(git_info.commit)
 
         ditto_deb.buildSource(docker_name)
@@ -72,6 +73,7 @@ node('build && docker') {
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release) {
+    ditto_utils.checkReleaseBranch(git_info.branch, version_number)
     deploy_mode = input(
       message: "User input required",
       parameters: [
