@@ -72,7 +72,7 @@ node('build && docker') {
 // Master Node.
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
-  if (git_info.is_release) {
+  // if (git_info.is_release) {
     deploy_mode = input(
       message: "User input required",
       parameters: [
@@ -80,7 +80,7 @@ stage("Tag and deploy?") {
           name: "Deploy \"${version_number}\" at hash " +
                 " \"${git_info.commit}\"?",
           choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
-  }
+  // }
 }
 
 node('build && docker') {
