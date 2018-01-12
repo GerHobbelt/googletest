@@ -57,10 +57,8 @@ BUILD_CONFIGS.each { target, build_config ->
         version_number = ditto_deb.getDittoVersion()
         // ditto_utils.checkVersionNumber(version_number)
         revision = ditto_deb.getDevRevision(git_info.commit)
-        echo "revision: ${revision}"
 
         ditto_deb.buildSource(docker_name)
-        echo "revision: ${revision}"
         ditto_deb.buildDebianPackage(docker_name, version_number, revision)
         archiveArtifacts(artifacts: 'build/*.deb')
         ditto_deb.publishDebToS3(staging_repo, dist, S3_PACKAGE_CREDS)
