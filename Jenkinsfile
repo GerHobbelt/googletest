@@ -68,6 +68,7 @@ BUILD_CONFIGS.each { target, build_config ->
       }
     }
   }
+}
 
 // Master Node.
 stage("Tag and deploy?") {
