@@ -19,57 +19,48 @@ properties([[
 @Library('jenkins-shared-library@olegs-test') _
 
 def BUILD_CONFIGS = [
-    'ubuntu_16_04' : [
-        'docker_name' : 'ubuntu16-build-env',
-        'docker_file' : 'Dockerfile.xenial',
-        'repo'        : '3rdparty-16.04',
-        'staging_repo': '3rdparty-16.04-staging',
-        'dist'        : 'xenial',
+    'ubuntu-16-04' : [
+        'docker_file'   : 'Dockerfile.xenial',
+        'apt_prod_repo' : '3rdparty-16.04',
+        'apt_test_repo' : '3rdparty-16.04-staging',
+        'dist'          : 'xenial',
     ],
-    'ubuntu_14_04' : [
-        'docker_name' : 'ubuntu14-build-env',
-        'docker_file' : 'Dockerfile.trusty',
-        'repo'        : '3rdparty-14.04',
-        'staging_repo': '3rdparty-14.04-staging',
-        'dist'        : 'trusty',
+    'ubuntu-14-04' : [
+        'docker_file'   : 'Dockerfile.trusty',
+        'apt_prod_repo' : '3rdparty-14.04',
+        'apt_test_repo' : '3rdparty-14.04-staging',
+        'dist'          : 'trusty',
     ]
 ]
 
-def S3_PACKAGE_CREDS = "package-uploads"
-
 node('build && docker') {
-  BUILD_CONFIGS.each { target, build_config ->
-    def docker_name = build_config.docker_name
-    def docker_file = build_config.docker_file
-    def staging_repo = build_config.staging_repo
-    def dist = build_config.dist
+  stage("Init") {
+    version = ditto_deb.getAndValidateVersion()
+  }
 
-    dir(target) {
-      stage("Checkout ${target}") {
+  BUILD_CONFIGS.each { platform, build_config ->
+    dir(platform) {
+      stage("Checking out ${platform}") {
         git_info = ditto_git.checkoutRepo()
       }
 
-      stage("Build and Publish to Test Repo ${target}") {
-        ditto_docker.buildDockerImage(docker_name, docker_file)
-        ditto_docker.deleteDockerOutdated()
+      stage("Building and publishing dev revision ${platform}") {
+        revision = ditto_deb.buildDevRevisionString(git_info.commit)
 
-        version_number = ditto_deb.getDittoVersion()
-        ditto_utils.checkVersionNumber(version_number)
-        revision = ditto_deb.getDevRevision(git_info.commit)
-
-        ditto_deb.buildSource(docker_name)
-        ditto_deb.buildDebianPackage(docker_name, version_number, revision)
-        archiveArtifacts(artifacts: 'build/*.deb')
-        ditto_deb.publishDebToS3(staging_repo, dist, S3_PACKAGE_CREDS)
+        ditto_deb.buildWithDocker(platform, git_info.repo_name)
+        ditto_deb.generatePackage(version, revision)
+        ditto_deb.publishPackageToS3(build_config.apt_test_repo,
+                                     build_config.dist)
       }
 
-      stage("Install and Test from Test Repo ${target}") {
+      stage("Install from ${platform} repo and test") {
+        ditto_deb.installPackageInsideDocker(
+          docker_image_name, apt_repo_name, dist, version_number, revision)
       }
     }
   }
 }
 
-// Master Node.
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release) {
@@ -78,44 +69,37 @@ stage("Tag and deploy?") {
       message: "User input required",
       parameters: [
         choice(
-          name: "Deploy \"${version_number}\" at hash " +
-                " \"${git_info.commit}\"?",
+          name: "Deploy \"${version_number}\" at hash \"${git_info.commit}\"?",
           choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
   }
 }
 
 node('build && docker') {
-  BUILD_CONFIGS.each { target, build_config ->
-    docker_name = build_config.docker_name
-    staging_repo = build_config.staging_repo
-    repo = build_config.staging_repo
-    dist = build_config.dist
+  stage("Build and Publish to Test") {
+    if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
-    if (deploy_mode != "SKIP") {
-      stage("Build and Publish to Test Repo ${target}") {
-        if (deploy_mode == "RC") {
-          new_rc_number = ditto_git.calcRcNumber(version_number)
-          tag = ditto_git.getRcTag(version_number, new_rc_number)
-          revision = ditto_deb.getRcRevision(rc_number)
-          publish_repo = staging_repo
-        } else if (deploy_mode == "RELEASE") {
-          tag = ditto_git.getReleaseTag(version_number)
-          revision = ditto_deb.getReleaseRevision()
-          publish_repo = repo
-        }
+    if (deploy_mode == "RC") {
+      new_rc_number = ditto_git.calcRcNumber(version_number)
+      tag = ditto_git.getRcTag(version_number, new_rc_number)
+      revision = ditto_deb.getRcRevision(new_rc_number)
+      apt_repo_to_publish = build_config.apt_test_repo
 
-        // Build and publish.
-        ditto_deb.buildDebianPackage(docker_name, version_number, revision)
-        archiveArtifacts(artifacts: 'build/*.deb')
-        ditto_deb.publishDebToS3(publish_repo, dist, S3_PACKAGE_CREDS)
+    } else if (deploy_mode == "RELEASE") {
+      tag = ditto_git.getReleaseTag(version_number)
+      revision = ditto_deb.getReleaseRevision()
+      apt_repo_to_publish = build_config.apt_prod_repo
+    }
 
-        // Push tags.
-        ditto_git.pushTag(tag)
+    BUILD_CONFIGS.each { platform, build_config ->
+      dir(platform) {
+        ditto_deb.generatePackage(version, revision)
+        ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
       }
     }
+    ditto_git.pushTag(tag)
+  }
 
-    stage("Clean up ${target}") {
-      deleteDir()
-    }
+  stage("Clean up ${platform}") {
+    deleteDir()
   }
 }
