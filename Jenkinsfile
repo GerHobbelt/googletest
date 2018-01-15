@@ -34,10 +34,6 @@ def BUILD_CONFIGS = [
 ]
 
 node('build && docker') {
-  stage("Init") {
-    version = ditto_deb.getAndValidateVersion()
-  }
-
   BUILD_CONFIGS.each { platform, build_config ->
     dir(platform) {
       stage("Checking out ${platform}") {
@@ -45,6 +41,7 @@ node('build && docker') {
       }
 
       stage("Building and publishing dev revision ${platform}") {
+        version = ditto_deb.getAndValidateVersion()
         revision = ditto_deb.buildDevRevisionString(git_info.commit)
 
         ditto_deb.buildWithDocker(platform, git_info.repo_name)
