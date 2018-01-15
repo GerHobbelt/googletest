@@ -81,12 +81,12 @@ node('build && docker') {
     if (deploy_mode == "RC") {
       new_rc_number = ditto_git.calcRcNumber(version_number)
       tag = ditto_git.getRcTag(version_number, new_rc_number)
-      revision = ditto_deb.getRcRevision(new_rc_number)
+      revision = ditto_deb.buildRcRevisionString(new_rc_number)
       apt_repo_to_publish = build_config.apt_test_repo
 
     } else if (deploy_mode == "RELEASE") {
       tag = ditto_git.getReleaseTag(version_number)
-      revision = ditto_deb.getReleaseRevision()
+      revision = ditto_deb.buildReleaseRevisionString()
       apt_repo_to_publish = build_config.apt_prod_repo
     }
 
