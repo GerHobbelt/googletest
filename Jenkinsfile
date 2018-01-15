@@ -44,15 +44,17 @@ node('build && docker') {
         version = ditto_deb.getAndValidateVersion()
         revision = ditto_deb.buildDevRevisionString(git_info.commit)
 
-        ditto_deb.buildWithDocker(platform, git_info.repo_name)
-        ditto_deb.generatePackage(version, revision)
+        image_name =
+          ditto_utils.buildDockerImageName(git_info.repo_name, platform)
+        ditto_deb.buildInsideDocker(image_name, build_config.docker_file)
+        ditto_deb.generatePackageInsideDocker(image_name, version, revision)
         ditto_deb.publishPackageToS3(build_config.apt_test_repo,
                                      build_config.dist)
       }
 
       stage("Install from ${platform} repo and test") {
         ditto_deb.installPackageInsideDocker(
-          docker_image_name, apt_repo_name, dist, version_number, revision)
+          image_name, apt_repo_name, dist, version_number, revision)
       }
     }
   }
@@ -89,7 +91,9 @@ node('build && docker') {
 
     BUILD_CONFIGS.each { platform, build_config ->
       dir(platform) {
-        ditto_deb.generatePackage(version, revision)
+        image_name =
+          ditto_utils.buildDockerImageName(git_info.repo_name, platform)
+        ditto_deb.generatePackage(image_name, version, revision)
         ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
       }
     }
