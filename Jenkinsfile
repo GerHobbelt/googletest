@@ -101,7 +101,7 @@ node('build && docker') {
     ditto_git.pushTag(tag)
   }
 
-  stage("Clean up ${platform}") {
+  stage("Clean up") {
     deleteDir()
   }
 }
