@@ -22,13 +22,14 @@ fi
 VERSION=$1
 REVISION=$2
 BUILD_DIR=build
-CPACK_CONFIG_FILE=$BUILD_DIR/CPackConfig.cmake
+CPACK_CONFIG_FILE=CPackConfig.cmake
 DITTO_VERSION_FILE=DittoVersion.cmake
 ARCH=`dpkg --print-architecture`
 VERSION_REVISION="$VERSION-$REVISION"
 
-# Generate CPack Configuration.
 cd $BUILD_DIR
+
+# Generate CPack Configuration.
 rm -f $CPACK_CONFIG_FILE
 make -j$(nproc) package
 
