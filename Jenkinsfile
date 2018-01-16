@@ -55,7 +55,7 @@ node('build && docker') {
       stage("Install from ${platform} repo and test") {
         ditto_deb.installPackageInsideDocker(
           image_name, build_config.apt_test_repo,
-          dist, version_number, revision)
+          build_config.dist, version, revision)
       }
     }
   }
@@ -64,12 +64,12 @@ node('build && docker') {
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release_branch) {
-    ditto_utils.checkReleaseBranch(git_info.branch, version_number)
+    ditto_utils.checkReleaseBranch(git_info.branch, version)
     deploy_mode = input(
       message: "User input required",
       parameters: [
         choice(
-          name: "Deploy \"${version_number}\" at hash \"${git_info.commit}\"?",
+          name: "Deploy \"${version}\" at hash \"${git_info.commit}\"?",
           choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
   }
 }
@@ -79,13 +79,13 @@ node('build && docker') {
     if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
     if (deploy_mode == "RC") {
-      new_rc_number = ditto_git.calcRcNumber(version_number)
-      tag = ditto_git.getRcTag(version_number, new_rc_number)
+      new_rc_number = ditto_git.calcRcNumber(version)
+      tag = ditto_git.getRcTag(version, new_rc_number)
       revision = ditto_deb.buildRcRevisionString(new_rc_number)
       apt_repo_to_publish = build_config.apt_test_repo
 
     } else if (deploy_mode == "RELEASE") {
-      tag = ditto_git.getReleaseTag(version_number)
+      tag = ditto_git.getReleaseTag(version)
       revision = ditto_deb.buildReleaseRevisionString()
       apt_repo_to_publish = build_config.apt_prod_repo
     }
