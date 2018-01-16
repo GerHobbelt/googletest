@@ -54,7 +54,8 @@ node('build && docker') {
 
       stage("Install from ${platform} repo and test") {
         ditto_deb.installPackageInsideDocker(
-          image_name, apt_repo_name, dist, version_number, revision)
+          image_name, build_config.apt_test_repo,
+          dist, version_number, revision)
       }
     }
   }
