@@ -64,7 +64,7 @@ node('build && docker') {
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release_branch) {
-    ditto_utils.checkReleaseBranch(git_info.branch, version)
+    ditto_utils.checkVersionInReleaseBranchName(git_info.branch, version)
     deploy_mode = input(
       message: "User input required",
       parameters: [
