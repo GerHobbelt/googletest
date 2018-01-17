@@ -90,15 +90,21 @@ node('build && docker') {
       apt_repo_to_publish = build_config.apt_prod_repo
     }
 
+    def tag_pushed = false
     BUILD_CONFIGS.each { platform, build_config ->
       dir(platform) {
         image_name =
           ditto_utils.buildDockerImageName(git_info.repo_name, platform)
         ditto_deb.generatePackageInsideDocker(image_name, version, revision)
         ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
+
+        // Push tag only once because it's the same repo.
+        if (!tag_pushed) {
+          ditto_git.pushTag(tag)
+          tag_pushed = true
+        }
       }
     }
-    ditto_git.pushTag(tag)
   }
 
   stage("Cleaning up") {
