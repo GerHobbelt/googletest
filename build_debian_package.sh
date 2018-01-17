@@ -35,7 +35,7 @@ make -j$(nproc) package
 
 # Override version information in CPack configuration.
 cat ../$DITTO_VERSION_FILE >> $CPACK_CONFIG_FILE
-echo 'SET(CPACK_PACKAGE_VERSION "$VERSION_REVISION")' >> $CPACK_CONFIG_FILE
+echo "SET(CPACK_PACKAGE_VERSION \"$VERSION_REVISION\")" >> $CPACK_CONFIG_FILE
 
 # Rebuild packages.
 rm -f *.deb
