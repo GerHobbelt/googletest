@@ -82,20 +82,18 @@ node('build && docker') {
 
 
     // Do this only once inside a git directory.
-    BUILD_CONFIGS.each { platform, build_config ->
+    BUILD_CONFIGS.any { platform, build_config ->
       dir(platform) {
         if (deploy_mode == "RC") {
           new_rc_number = ditto_git.calcRcNumber(version)
           tag = ditto_git.getRcTag(version, new_rc_number)
           revision = ditto_deb.buildRcRevisionString(new_rc_number)
-          apt_repo_to_publish = build_config.apt_test_repo
         } else if (deploy_mode == "RELEASE") {
           tag = ditto_git.getReleaseTag(version)
           revision = ditto_deb.buildReleaseRevisionString()
-          apt_repo_to_publish = build_config.apt_prod_repo
         }
         ditto_git.pushTag(tag, GIT_CREDENTIALS_ID)
-        break
+        return true
       }
     }
 
@@ -103,6 +101,9 @@ node('build && docker') {
       dir(platform) {
         image_name =
           ditto_utils.buildDockerImageName(git_info.repo_name, platform)
+        apt_repo_to_publish = deploy_mode == "RC" ?
+          build_config.apt_test_repo : build_config.apt_prod_repo
+
         ditto_deb.generatePackageInsideDocker(image_name, version, revision)
         ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
       }
