@@ -78,19 +78,24 @@ node('build && docker') {
   stage("Building and publishing to rc or release") {
     if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
-    if (deploy_mode == "RC") {
-      new_rc_number = ditto_git.calcRcNumber(version)
-      tag = ditto_git.getRcTag(version, new_rc_number)
-      revision = ditto_deb.buildRcRevisionString(new_rc_number)
-      apt_repo_to_publish = build_config.apt_test_repo
 
-    } else if (deploy_mode == "RELEASE") {
-      tag = ditto_git.getReleaseTag(version)
-      revision = ditto_deb.buildReleaseRevisionString()
-      apt_repo_to_publish = build_config.apt_prod_repo
+    BUILD_CONFIGS.each { platform, build_config ->
+      dir(platform) {
+        if (deploy_mode == "RC") {
+          new_rc_number = ditto_git.calcRcNumber(version)
+          tag = ditto_git.getRcTag(version, new_rc_number)
+          revision = ditto_deb.buildRcRevisionString(new_rc_number)
+          apt_repo_to_publish = build_config.apt_test_repo
+        } else if (deploy_mode == "RELEASE") {
+          tag = ditto_git.getReleaseTag(version)
+          revision = ditto_deb.buildReleaseRevisionString()
+          apt_repo_to_publish = build_config.apt_prod_repo
+        }
+        ditto_git.pushTag(tag)
+        break
+      }
     }
 
-    def tag_pushed = false
     BUILD_CONFIGS.each { platform, build_config ->
       dir(platform) {
         image_name =
@@ -99,10 +104,6 @@ node('build && docker') {
         ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
 
         // Push tag only once because it's the same repo.
-        if (!tag_pushed) {
-          ditto_git.pushTag(tag)
-          tag_pushed = true
-        }
       }
     }
   }
