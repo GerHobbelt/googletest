@@ -18,6 +18,8 @@ properties([[
 
 @Library('jenkins-shared-library@olegs-test') _
 
+def GIT_CREDENTIALS_ID = 'dittovto-buildbot'
+
 def BUILD_CONFIGS = [
     'ubuntu-16-04' : [
         'docker_file'   : 'Dockerfile.xenial',
@@ -92,7 +94,7 @@ node('build && docker') {
           revision = ditto_deb.buildReleaseRevisionString()
           apt_repo_to_publish = build_config.apt_prod_repo
         }
-        ditto_git.pushTag(tag)
+        ditto_git.pushTag(tag, GIT_CREDENTIALS_ID)
         break
       }
     }
