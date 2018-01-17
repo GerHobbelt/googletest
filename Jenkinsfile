@@ -79,6 +79,7 @@ node('build && docker') {
     if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
 
+    // Do this only once inside a git directory.
     BUILD_CONFIGS.each { platform, build_config ->
       dir(platform) {
         if (deploy_mode == "RC") {
@@ -102,8 +103,6 @@ node('build && docker') {
           ditto_utils.buildDockerImageName(git_info.repo_name, platform)
         ditto_deb.generatePackageInsideDocker(image_name, version, revision)
         ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
-
-        // Push tag only once because it's the same repo.
       }
     }
   }
