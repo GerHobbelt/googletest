@@ -75,7 +75,7 @@ stage("Tag and deploy?") {
 }
 
 node('build && docker') {
-  stage("Building and Publishing to Test") {
+  stage("Building and publishing to rc or release") {
     if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
     if (deploy_mode == "RC") {
