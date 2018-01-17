@@ -40,7 +40,7 @@ node('build && docker') {
         git_info = ditto_git.checkoutRepo()
       }
 
-      stage("Building and publishing dev revision ${platform}") {
+      stage("Building and publishing ${platform} dev revision") {
         version = ditto_deb.getAndValidateVersion()
         revision = ditto_deb.buildDevRevisionString(git_info.commit)
 
@@ -52,7 +52,7 @@ node('build && docker') {
                                      build_config.dist)
       }
 
-      stage("Install from ${platform} repo and test") {
+      stage("Installing from ${platform} repo and test") {
         ditto_deb.installPackageInsideDocker(
           image_name, build_config.apt_test_repo,
           build_config.dist, version, revision)
@@ -75,7 +75,7 @@ stage("Tag and deploy?") {
 }
 
 node('build && docker') {
-  stage("Build and Publish to Test") {
+  stage("Building and Publishing to Test") {
     if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
     if (deploy_mode == "RC") {
@@ -101,7 +101,7 @@ node('build && docker') {
     ditto_git.pushTag(tag)
   }
 
-  stage("Clean up") {
+  stage("Cleaning up") {
     deleteDir()
   }
 }
