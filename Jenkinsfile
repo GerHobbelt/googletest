@@ -42,6 +42,10 @@ node('build && docker') {
         git_info = ditto_git.checkoutRepo()
       }
 
+      stage("Copying over debian packaging resources ${platform}") {
+        ditto_deb.copyDebianPipelineResourceFilesHere()
+      }
+
       stage("Building and publishing ${platform} dev revision") {
         version = ditto_deb.getAndValidateVersion()
         revision = ditto_deb.buildDevRevisionString(git_info.commit)
