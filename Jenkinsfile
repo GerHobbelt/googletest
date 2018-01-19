@@ -84,7 +84,7 @@ stage("Tag and deploy?") {
         choice(
           name: "Deploy \"${version_info.version}\"" +
                 " at hash \"${git_info.commit}\"?",
-          choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
+          choices: version_info.deploy_choices.join("\n"))])
   }
 }
 
