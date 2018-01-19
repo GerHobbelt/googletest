@@ -82,7 +82,8 @@ stage("Tag and deploy?") {
       message: "User input required",
       parameters: [
         choice(
-          name: "Deploy \"${version}\" at hash \"${git_info.commit}\"?",
+          name: "Deploy \"${version_info.version}\"" +
+                " at hash \"${git_info.commit}\"?",
           choices: [ "SKIP", "RC", "RELEASE" ].join("\n"))])
   }
 }
