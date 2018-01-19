@@ -16,7 +16,7 @@ properties([[
   ]
 ]]);
 
-@Library('jenkins-shared-library@release/v1.0') _
+@Library('jenkins-shared-library@new_repo_version_tag_strategy') _
 
 def GIT_CREDENTIALS_ID = 'dittovto-buildbot'
 
@@ -35,6 +35,8 @@ def BUILD_CONFIGS = [
     ]
 ]
 
+def git_variables_calculated = [:]
+
 node('build && docker') {
   BUILD_CONFIGS.each { platform, build_config ->
     dir(platform) {
@@ -47,21 +49,24 @@ node('build && docker') {
       }
 
       stage("Building and publishing ${platform} dev revision") {
-        version = ditto_deb.getAndValidateVersion()
-        revision = ditto_deb.buildDevRevisionString(git_info.commit)
+        version_info = ditto_version.buildVersionInfo(
+          git_info.is_release_branch, "SKIP", git_info.commit,
+          git_variables_calculated)
+        git_variables_calculated = version_info.new_calculated
 
         image_name =
           ditto_utils.buildDockerImageName(git_info.repo_name, platform)
         ditto_deb.buildInsideDocker(image_name, build_config.docker_file)
-        ditto_deb.generatePackageInsideDocker(image_name, version, revision)
+        ditto_deb.generatePackageInsideDocker(image_name, version_info.version,
+                                              version_info.deb_revision)
         ditto_deb.publishPackageToS3(build_config.apt_test_repo,
                                      build_config.dist)
       }
 
       stage("Installing from ${platform} repo and test") {
         ditto_deb.installPackageInsideDocker(
-          image_name, build_config.apt_test_repo,
-          build_config.dist, version, revision)
+          image_name, build_config.apt_test_repo, build_config.dist,
+          version_info.version, version_info.deb_revision)
       }
     }
   }
@@ -70,7 +75,8 @@ node('build && docker') {
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release_branch) {
-    ditto_utils.checkVersionInReleaseBranchName(git_info.branch, version)
+    ditto_utils.checkVersionInReleaseBranchName(git_info.branch,
+                                                version_info.version)
     deploy_mode = input(
       message: "User input required",
       parameters: [
@@ -87,14 +93,10 @@ node('build && docker') {
     // Do this only once inside a git directory.
     BUILD_CONFIGS.any { platform, build_config ->
       dir(platform) {
-        if (deploy_mode == "RC") {
-          new_rc_number = ditto_git.calcRcNumber(version)
-          tag = ditto_git.getRcTag(version, new_rc_number)
-          revision = ditto_deb.buildRcRevisionString(new_rc_number)
-        } else if (deploy_mode == "RELEASE") {
-          tag = ditto_git.getReleaseTag(version)
-          revision = ditto_deb.buildReleaseRevisionString()
-        }
+        version_info = ditto_version.buildVersionInfo(
+          git_info.is_release_branch, deploy_mode, git_info.commit,
+          git_variables_calculated)
+        git_variables_calculated = version_info.new_calculated
         ditto_git.pushTag(tag, GIT_CREDENTIALS_ID)
         return true
       }
@@ -107,7 +109,8 @@ node('build && docker') {
         apt_repo_to_publish = deploy_mode == "RC" ?
           build_config.apt_test_repo : build_config.apt_prod_repo
 
-        ditto_deb.generatePackageInsideDocker(image_name, version, revision)
+        ditto_deb.generatePackageInsideDocker(
+          image_name, version_info.version, version_info.deb_revision)
         ditto_deb.publishPackageToS3(apt_repo_to_publish, build_config.dist)
       }
     }
