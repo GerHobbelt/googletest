@@ -42,6 +42,14 @@ node('build && docker') {
     dir(platform) {
       stage("Checking out ${platform}") {
         git_info = ditto_git.checkoutRepo()
+        version_info = ditto_version.buildVersionInfo(
+          git_info.is_release_branch, "SKIP", git_info.commit,
+          git_variables_calculated)
+        git_variables_calculated = version_info.new_calculated
+        if (git_info.is_release_branch) {
+          ditto_utils.checkVersionInReleaseBranchName(git_info.branch,
+                                                      version_info.version)
+        }
       }
 
       stage("Copying over debian packaging resources ${platform}") {
@@ -49,11 +57,6 @@ node('build && docker') {
       }
 
       stage("Building and publishing ${platform} dev revision") {
-        version_info = ditto_version.buildVersionInfo(
-          git_info.is_release_branch, "SKIP", git_info.commit,
-          git_variables_calculated)
-        git_variables_calculated = version_info.new_calculated
-
         image_name =
           ditto_utils.buildDockerImageName(git_info.repo_name, platform)
         ditto_deb.buildInsideDocker(image_name, build_config.docker_file)
@@ -75,8 +78,6 @@ node('build && docker') {
 stage("Tag and deploy?") {
   deploy_mode = "SKIP"
   if (git_info.is_release_branch) {
-    ditto_utils.checkVersionInReleaseBranchName(git_info.branch,
-                                                version_info.version)
     deploy_mode = input(
       message: "User input required",
       parameters: [
