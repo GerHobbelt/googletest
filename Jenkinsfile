@@ -99,7 +99,7 @@ node('build && docker') {
           git_info.is_release_branch, deploy_mode, git_info.commit,
           git_variables_calculated)
         git_variables_calculated = version_info.new_calculated
-        ditto_git.pushTag(tag, GIT_CREDENTIALS_ID)
+        ditto_git.pushTag(version_info.tag, GIT_CREDENTIALS_ID)
         return true
       }
     }
