@@ -98,7 +98,7 @@ node('build && docker') {
         revision = ditto_deb.buildRcRevisionString(version)
       } else if (deploy_mode == "RELEASE") {
         tag = ditto_git.getReleaseTag(origin, version)
-        revision = ditto_deb.buildReleaseRevisionString()
+        revision = ditto_deb.buildReleaseRevisionString(origin)
       }
     }
 
