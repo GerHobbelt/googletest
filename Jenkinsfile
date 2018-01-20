@@ -83,7 +83,7 @@ stage("Tag and deploy?") {
       parameters: [
         choice(
           name: "Deploy \"${version}\" at hash \"${git_info.commit}\"?",
-          choices: ditto_deb.getDeployChoices().join("\n"))])
+          choices: ditto_deb.getDeployChoices(origin).join("\n"))])
   }
 }
 
