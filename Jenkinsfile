@@ -91,19 +91,16 @@ node('build && docker') {
   stage("Building and publishing to rc or release") {
     if (!(deploy_mode == "RC" || deploy_mode == "RELEASE")) return;
 
-    // Do this only once inside a git directory.
-    dir(FIRST_PLATFORM) {
-      if (deploy_mode == "RC") {
-        tag = ditto_git.getRcTag(version)
-        revision = ditto_deb.buildRcRevisionString(version)
-      } else if (deploy_mode == "RELEASE") {
-        tag = ditto_git.getReleaseTag(origin, version)
-        revision = ditto_deb.buildReleaseRevisionString(origin)
-      }
-    }
-
     BUILD_CONFIGS.each { platform, build_config ->
       dir(platform) {
+        if (deploy_mode == "RC") {
+          tag = ditto_git.getRcTag(version)
+          revision = ditto_deb.buildRcRevisionString(version)
+        } else if (deploy_mode == "RELEASE") {
+          tag = ditto_git.getReleaseTag(origin, version)
+          revision = ditto_deb.buildReleaseRevisionString(origin)
+        }
+
         image_name =
           ditto_utils.buildDockerImageName(git_info.repo_name, platform)
         apt_repo_to_publish = deploy_mode == "RC" ?
