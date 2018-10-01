@@ -148,10 +148,10 @@ set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
   string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
-  target_include_directories(gtest SYSTEM INTERFACE
+  target_include_directories(gtest INTERFACE
     "$<BUILD_INTERFACE:${dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-  target_include_directories(gtest_main SYSTEM INTERFACE
+  target_include_directories(gtest_main INTERFACE
     "$<BUILD_INTERFACE:${dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 endif()
