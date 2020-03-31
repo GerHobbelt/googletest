@@ -650,7 +650,9 @@ static ::std::vector<std::string> g_argvs;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_OS2)
+#if defined(GTEST_OS_WINDOWS_WINELIB)
+  result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe.so"));
+#elif defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_OS2)
   result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe"));
 #else
   result.Set(FilePath(GetArgvs()[0]));
