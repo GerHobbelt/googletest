@@ -39,7 +39,7 @@
 
 #include "gtest/gtest.h"
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 #include <stdlib.h>
 #include <windows.h>
 #endif
@@ -49,23 +49,30 @@ namespace {
 // A test that's expected to fail.
 TEST(Foo, Bar) { EXPECT_EQ(2, 3); }
 
-#if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
+#if (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE) || GTEST_OS_WINDOWS_WINELIB
 // On Windows Mobile global exception handlers are not supported.
 LONG WINAPI
 ExitWithExceptionCode(struct _EXCEPTION_POINTERS* exception_pointers) {
+#if GTEST_OS_WINDOWS_WINELIB
+  // wine translates posix signals into SEH, but we want to actually die of a signal, so raise one wine can't catch
+  raise(SIGKILL);
+#else
   exit(exception_pointers->ExceptionRecord->ExceptionCode);
+#endif
+  // unreachable: the above will never return, but should it somehow happen tell Win32 the SEH exception remains unhandled
+  return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
 
 }  // namespace
 
 int main(int argc, char** argv) {
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
   // Suppresses display of the Windows error dialog upon encountering
   // a general protection fault (segment violation).
   SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
 
-#if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
+#if (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE) || GTEST_OS_WINDOWS_WINELIB
 
   // The default unhandled exception filter does not always exit
   // with the exception code as exit code - for example it exits with
