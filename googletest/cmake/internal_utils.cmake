@@ -279,6 +279,10 @@ function(py_test name)
     return()
   endif()
 
+  if (CMAKE_EXECUTABLE_SUFFIX)
+    set(EXECUTABLE_SUFFIX_ARG --executable_suffix=${CMAKE_EXECUTABLE_SUFFIX})
+  endif()
+
   get_cmake_property(is_multi "GENERATOR_IS_MULTI_CONFIG")
   set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
   if (is_multi)
@@ -287,7 +291,7 @@ function(py_test name)
 
   add_test(NAME ${name}
       COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-          --build_dir=${build_dir} ${ARGN})
+          --build_dir=${build_dir} ${EXECUTABLE_SUFFIX_ARG} ${ARGN})
 
   # Make the Python import path consistent between Bazel and CMake.
   set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
