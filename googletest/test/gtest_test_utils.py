@@ -76,7 +76,8 @@ TestCase = _test_module.TestCase  # pylint: disable=C6409
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
 _flag_map = {'source_dir': os.path.dirname(sys.argv[0]),
-             'build_dir': os.path.dirname(sys.argv[0])}
+             'build_dir': os.path.dirname(sys.argv[0]),
+             'executable_suffix': ".exe" if IS_WINDOWS or IS_CYGWIN or IS_OS2 else None}
 _gtest_flags_are_parsed = False
 
 
@@ -165,8 +166,10 @@ def GetTestExecutablePath(executable_name, build_dir=None):
 
   path = os.path.abspath(os.path.join(build_dir or GetBuildDir(),
                                       executable_name))
-  if (IS_WINDOWS or IS_CYGWIN or IS_OS2) and not path.endswith('.exe'):
-    path += '.exe'
+
+  executable_suffix = GetFlag('executable_suffix')
+  if executable_suffix and not path.endswith(executable_suffix):
+    path += executable_suffix
 
   if not os.path.exists(path):
     message = (
