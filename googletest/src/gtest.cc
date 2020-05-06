@@ -673,16 +673,29 @@ static ::std::vector<std::string> g_argvs;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
+#if defined(GTEST_OS_WINDOWS_WINELIB)
+  // wine passes argv[0] as a Win32 path, and also launches via $WINELOADER
+  // Furthermore, the narrow argv[0] is of rather uncertain encoding
+  // To avoid this causing confusion, use GetModuleFileNameW to ask for
+  // process executable and have wine translate this to a posix path
+  WCHAR wide_path[MAX_PATH] = { '\0' };
+  char *unix_path = nullptr;
+  if(GetModuleFileNameW(nullptr,wide_path,MAX_PATH)) {
+    if((unix_path = wine_get_unix_file_name(wide_path))) {
+      result.Set(FilePath(unix_path).RemoveExtension("so").RemoveExtension("exe"));
+    }
+    HeapFree(GetProcessHeap(),0,unix_path);
+  }
+#else
   auto args = GetArgvs();
   if (!args.empty()) {
-#if defined(GTEST_OS_WINDOWS_WINELIB)
-    result.Set(FilePath(args[0]).RemoveExtension("exe.so"));
-#elif defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_OS2)
+#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_OS2)
     result.Set(FilePath(args[0]).RemoveExtension("exe"));
 #else
     result.Set(FilePath(args[0]));
 #endif  // GTEST_OS_WINDOWS
   }
+#endif  // GTEST_OS_WINDOWS_WINELIB
 
   return result.RemoveDirectoryName();
 }
