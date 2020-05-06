@@ -78,13 +78,6 @@ const char kCurrentDirectoryString[] = ".\\";
 # endif  // GTEST_OS_WINDOWS_MOBILE
 #else
 const char kPathSeparator = '/';
-# if GTEST_OS_WINDOWS_WINELIB
-// On winelib, the POSIX C runtime uses '/' as the standard path separator,
-// but the Windows API calls still accept (but mostly don't require) use of '\\',
-// and it may be seen, i.e. in argv[0].
-const char kAlternatePathSeparator = '\\';
-const char kAlternatePathSeparatorString[] = "\\";
-# endif
 const char kCurrentDirectoryString[] = "./";
 #endif  // GTEST_OS_WINDOWS
 
