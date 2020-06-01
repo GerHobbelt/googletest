@@ -31,45 +31,8 @@
 #include "gtest/gtest.h"
 #include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
 
-#include "rtos/rtos.h"
+#include "synchapi.h"                       // Sleep
 
-#include "synchapi.h"
-
-#define TEST_STACK_SIZE 256
-#define ONE_MILLI_SEC 1000
-
-volatile uint32_t elapsed_time_ms = 0;
-static const int test_timeout = 40;
-
-void update_tick_thread(Mutex* mutex) {
-    int rc;
-
-    while (true) {
-        ThisThread::sleep_for(1);
-        mutex->lock();
-        ++elapsed_time_ms;
-        mutex->unlock();
-
-        rc = RUN_ALL_TESTS();
-    }
-}
-
-
-#if GTEST_OS_ESP8266 || GTEST_OS_ESP32
-#if GTEST_OS_ESP8266
-extern "C" {
-#endif
-void setup() {
-  testing::InitGoogleTest();
-}
-
-void loop() { RUN_ALL_TESTS(); }
-
-#if GTEST_OS_ESP8266
-}
-#endif
-
-#else
 
 GTEST_API_ int main(int argc, char **argv) {
     int rc;
@@ -78,14 +41,7 @@ GTEST_API_ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
 
     freertos_cmsis_rtos2_init();
-    Mutex mutex;
 
-    Thread tick_thread(osPriorityHigh, TEST_STACK_SIZE);
-    tick_thread.start(callback(update_tick_thread, &mutex));
-
-    osKernelInitialize();
-    osKernelStart();
-    Sleep(1000);
-    return (0);
+    rc = RUN_ALL_TESTS();
+    return (rc);
 }
-#endif
