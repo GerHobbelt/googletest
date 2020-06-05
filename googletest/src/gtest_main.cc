@@ -31,16 +31,28 @@
 #include "gtest/gtest.h"
 #include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
 
+#include "mbed_boot.h"
+#include "stm32h7xx.h"
 #include "synchapi.h"                       // Sleep
 
+int _system_pre_init(void) {
+    system_pre_init_reg_setup();
+
+    PWR->D3CR |= PWR_D3CR_VOSRDY;
+
+    freertos_cmsis_rtos2_init();
+    mbed_sdk_init();
+
+    return (1);
+}
+
+static int low_level_inited = _system_pre_init();
 
 GTEST_API_ int main(int argc, char **argv) {
     int rc;
 
     printf("Running main() from %s\n", __FILE__);
     testing::InitGoogleTest(&argc, argv);
-
-    freertos_cmsis_rtos2_init();
 
     rc = RUN_ALL_TESTS();
     return (rc);
