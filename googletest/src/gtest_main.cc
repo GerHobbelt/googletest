@@ -31,9 +31,11 @@
 #include "gtest/gtest.h"
 #include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
 
+#include "synchapi.h"                       // Sleep
+
+#if defined(__MBED_CMSIS_RTOS_CM)
 #include "mbed_boot.h"
 #include "stm32h7xx.h"
-#include "synchapi.h"                       // Sleep
 
 int _system_pre_init(void) {
     system_pre_init_reg_setup();
@@ -45,8 +47,21 @@ int _system_pre_init(void) {
 
     return (1);
 }
+#endif
 
-static int low_level_inited = _system_pre_init();
+#if defined(__FREERTOS_CMSIS_RTOS_CM)
+uint32_t SystemCoreClock;
+
+int _system_pre_init(void) {
+    freertos_cmsis_rtos2_init();
+
+    SystemCoreClock = 12000000UL;
+
+    return (1);
+}
+#endif
+
+int static low_level_inited = _system_pre_init();
 
 GTEST_API_ int main(int argc, char **argv) {
     int rc;
