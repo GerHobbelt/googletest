@@ -14,9 +14,15 @@
     <ClCompile Include="..\googletest\src\gtest-all.cc">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\googlemock\src\gmock-all.cc">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\googletest\include\gtest\gtest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\googlemock\include\gmock\gmock.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
