@@ -50,9 +50,13 @@ int _system_pre_init(void) {
 #endif
 
 #if defined(__FREERTOS_CMSIS_RTOS_CM)
+#include "saml21_reg_stub.h"
+
 uint32_t SystemCoreClock;
 
 int _system_pre_init(void) {
+    system_pre_init_reg_setup();
+
     freertos_cmsis_rtos2_init();
 
     SystemCoreClock = 12000000UL;
