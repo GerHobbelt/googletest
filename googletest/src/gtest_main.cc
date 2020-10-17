@@ -29,9 +29,16 @@
 
 #include <cstdio>
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
+
 #include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
 
 #include "synchapi.h"                       // Sleep
+
+/// Google C++ Testing Framework supports two families of assertions with the same interface :
+/// 
+/// ASSERT : Fails fast, aborting the current function.
+/// EXPECT : Continues after the failure.
 
 #if defined(__MBED_CMSIS_RTOS_CM)
 #include "mbed_boot.h"
@@ -71,7 +78,9 @@ GTEST_API_ int main(int argc, char **argv) {
     int rc;
 
     printf("Running main() from %s\n", __FILE__);
-    testing::InitGoogleTest(&argc, argv);
+    // The following line must be executed to initialize Google Mock
+    // (and Google Test) before running the tests.
+    testing::InitGoogleMock(&argc, argv);
 
     rc = RUN_ALL_TESTS();
     return (rc);
