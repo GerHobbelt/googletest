@@ -950,32 +950,32 @@ class DynamicTest : public DynamicFixture {
 auto dynamic_test = (
     // Register two tests with the same fixture correctly.
     testing::RegisterTest(
-        "DynamicFixture", "DynamicTestPass", nullptr, nullptr, __FILE__,
+        "DynamicFixture", "DynamicTestPass", "", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
     testing::RegisterTest(
-        "DynamicFixture", "DynamicTestFail", nullptr, nullptr, __FILE__,
+        "DynamicFixture", "DynamicTestFail", "", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<false>; }),
 
     // Register the same fixture with another name. That's fine.
     testing::RegisterTest(
-        "DynamicFixtureAnotherName", "DynamicTestPass", nullptr, nullptr,
+        "DynamicFixtureAnotherName", "DynamicTestPass", "", nullptr, nullptr,
         __FILE__, __LINE__,
         []() -> DynamicFixture* { return new DynamicTest<true>; }),
 
     // Register two tests with the same fixture incorrectly.
     testing::RegisterTest(
-        "BadDynamicFixture1", "FixtureBase", nullptr, nullptr, __FILE__,
+        "BadDynamicFixture1", "FixtureBase", "", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
     testing::RegisterTest(
-        "BadDynamicFixture1", "TestBase", nullptr, nullptr, __FILE__, __LINE__,
-        []() -> testing::Test* { return new DynamicTest<true>; }),
+        "BadDynamicFixture1", "TestBase", "", nullptr, nullptr, __FILE__,
+        __LINE__, []() -> testing::Test* { return new DynamicTest<true>; }),
 
     // Register two tests with the same fixture incorrectly by omitting the
     // return type.
     testing::RegisterTest(
-        "BadDynamicFixture2", "FixtureBase", nullptr, nullptr, __FILE__,
+        "BadDynamicFixture2", "FixtureBase", "", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
-    testing::RegisterTest("BadDynamicFixture2", "Derived", nullptr, nullptr,
+    testing::RegisterTest("BadDynamicFixture2", "Derived", "", nullptr, nullptr,
                           __FILE__, __LINE__,
                           []() { return new DynamicTest<true>; }));
 

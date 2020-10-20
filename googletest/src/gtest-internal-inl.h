@@ -150,6 +150,7 @@ class GTestFlagSaver {
     death_test_use_fork_ = GTEST_FLAG_GET(death_test_use_fork);
     fail_fast_ = GTEST_FLAG_GET(fail_fast);
     filter_ = GTEST_FLAG_GET(filter);
+    tag_ = GTEST_FLAG_GET(tag);
     internal_run_death_test_ = GTEST_FLAG_GET(internal_run_death_test);
     list_tests_ = GTEST_FLAG_GET(list_tests);
     output_ = GTEST_FLAG_GET(output);
@@ -175,6 +176,7 @@ class GTestFlagSaver {
     GTEST_FLAG_SET(death_test_style, death_test_style_);
     GTEST_FLAG_SET(death_test_use_fork, death_test_use_fork_);
     GTEST_FLAG_SET(filter, filter_);
+    GTEST_FLAG_SET(tag, tag_);
     GTEST_FLAG_SET(fail_fast, fail_fast_);
     GTEST_FLAG_SET(internal_run_death_test, internal_run_death_test_);
     GTEST_FLAG_SET(list_tests, list_tests_);
@@ -202,6 +204,7 @@ class GTestFlagSaver {
   bool death_test_use_fork_;
   bool fail_fast_;
   std::string filter_;
+  std::string tag_;
   std::string internal_run_death_test_;
   bool list_tests_;
   std::string output_;
@@ -385,6 +388,10 @@ class GTEST_API_ UnitTestOptions {
   static bool FilterMatchesTest(const std::string& test_suite_name,
                                 const std::string& test_name);
 
+  // Returns true if and only if the user-specified tag matches the test
+  // tag.
+  static bool TagMatchesTest(const std::string& test_tag);
+
 #ifdef GTEST_OS_WINDOWS
   // Function for supporting the gtest_catch_exception flag.
 
@@ -397,6 +404,10 @@ class GTEST_API_ UnitTestOptions {
   // Returns true if "name" matches the ':' separated list of glob-style
   // filters in "filter".
   static bool MatchesFilter(const std::string& name, const char* filter);
+
+  // Returns true if "tag" matches the ':' separated list of glob-style
+  // filters in "filter".
+  static bool MatchesTag(const std::string& tag, const char* filter);
 };
 
 #if GTEST_HAS_FILE_SYSTEM
