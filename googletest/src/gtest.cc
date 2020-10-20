@@ -255,6 +255,14 @@ static const char* GetDefaultFilter() {
   }
   return kUniversalFilter;
 }
+static const char* GetDefaultTag() {
+  const char* const testbridge_tag_only =
+      internal::posix::GetEnv("TESTBRIDGE_TAG_ONLY");
+  if (testbridge_tag_only != nullptr) {
+    return testbridge_tag_only;
+  }
+  return kUniversalFilter;
+}
 
 // Bazel passes in the argument to '--test_runner_fail_fast' via the
 // TESTBRIDGE_TEST_RUNNER_FAIL_FAST environment variable.
@@ -306,6 +314,14 @@ GTEST_DEFINE_string_(
     "A colon-separated list of glob (not regex) patterns "
     "for filtering the tests to run, optionally followed by a "
     "'-' and a : separated list of negative patterns (tests to "
+    "exclude).  A test is run if it matches one of the positive "
+    "patterns and does not match any of the negative patterns.");
+
+GTEST_DEFINE_string_(
+    tag, testing::internal::StringFromGTestEnv("tag", testing::GetDefaultTag()),
+    "A colon-separated list of glob (not regex) patterns "
+    "for filtering the tests to run based on tag, optionally followed by "
+    "a '-' and a : separated list of negative patterns (tests to "
     "exclude).  A test is run if it matches one of the positive "
     "patterns and does not match any of the negative patterns.");
 
@@ -584,6 +600,7 @@ void InsertSyntheticTestCase(const std::string& name, CodeLocation location,
   std::string full_name = "UninstantiatedParameterizedTestSuite<" + name + ">";
   RegisterTest(  //
       "GoogleTestVerification", full_name.c_str(),
+      "",       // No tag parameter.
       nullptr,  // No type parameter.
       nullptr,  // No value parameter.
       location.file.c_str(), location.line, [message, location] {
@@ -648,6 +665,7 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
         "UninstantiatedTypeParameterizedTestSuite<" + testcase.first + ">";
     RegisterTest(  //
         "GoogleTestVerification", full_name.c_str(),
+        "",       // No tag parameter.
         nullptr,  // No type parameter.
         nullptr,  // No value parameter.
         testcase.second.code_location.file.c_str(),
@@ -877,6 +895,12 @@ class PositiveAndNegativeUnitTestFilter {
     return MatchesName(test_suite_name + "." + test_name);
   }
 
+  // Returns true if and only if test tag matches the positive filter
+  // and does not match the negative filter.
+  bool MatchesTag(const std::string& test_tag) const {
+    return MatchesName(test_tag);
+  }
+
   // Returns true if and only if name matches the positive filter and does not
   // match the negative filter.
   bool MatchesName(const std::string& name) const {
@@ -896,6 +920,11 @@ bool UnitTestOptions::MatchesFilter(const std::string& name_str,
   return UnitTestFilter(filter).MatchesName(name_str);
 }
 
+bool UnitTestOptions::MatchesTag(const std::string& tag_str,
+                                    const char* filter) {
+  return UnitTestFilter(filter).MatchesName(tag_str);
+}
+
 // Returns true if and only if the user-specified filter matches the test
 // suite name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
@@ -904,6 +933,15 @@ bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
   // positive filter and negative filter portions
   return PositiveAndNegativeUnitTestFilter(GTEST_FLAG_GET(filter))
       .MatchesTest(test_suite_name, test_name);
+}
+
+// Returns true if and only if the user-specified tag matches the test
+// tag
+bool UnitTestOptions::TagMatchesTest(const std::string& test_tag) {
+  // Split --gtest_filter at '-', if there is one, to separate into
+  // positive filter and negative filter portions
+  return PositiveAndNegativeUnitTestFilter(GTEST_FLAG_GET(tag))
+      .MatchesTag(test_tag);
 }
 
 #if GTEST_HAS_SEH
@@ -2841,13 +2879,14 @@ bool Test::IsSkipped() {
 
 // Constructs a TestInfo object. It assumes ownership of the test factory
 // object.
-TestInfo::TestInfo(std::string a_test_suite_name, std::string a_name,
+TestInfo::TestInfo(std::string a_test_suite_name, std::string a_name, std::string a_tag,
                    const char* a_type_param, const char* a_value_param,
                    internal::CodeLocation a_code_location,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
     : test_suite_name_(std::move(a_test_suite_name)),
       name_(std::move(a_name)),
+      tag_(std::move(a_tag)),
       type_param_(a_type_param ? new std::string(a_type_param) : nullptr),
       value_param_(a_value_param ? new std::string(a_value_param) : nullptr),
       location_(std::move(a_code_location)),
@@ -2855,6 +2894,7 @@ TestInfo::TestInfo(std::string a_test_suite_name, std::string a_name,
       should_run_(false),
       is_disabled_(false),
       matches_filter_(false),
+      matches_tag_(false),
       is_in_another_shard_(false),
       factory_(factory),
       result_() {}
@@ -2871,6 +2911,7 @@ namespace internal {
 //
 //   test_suite_name:  name of the test suite
 //   name:             name of the test
+//   tag:              tag of the test
 //   type_param:       the name of the test's type parameter, or NULL if
 //                     this is not a typed or a type-parameterized test.
 //   value_param:      text representation of the test's value parameter,
@@ -2883,12 +2924,12 @@ namespace internal {
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 TestInfo* MakeAndRegisterTestInfo(
-    std::string test_suite_name, const char* name, const char* type_param,
-    const char* value_param, CodeLocation code_location,
+    std::string test_suite_name, const char* name, const char* tag,
+    const char* type_param, const char* value_param, CodeLocation code_location,
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
     TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory) {
   TestInfo* const test_info =
-      new TestInfo(std::move(test_suite_name), name, type_param, value_param,
+      new TestInfo(std::move(test_suite_name), name, tag, type_param, value_param,
                    std::move(code_location), fixture_class_id, factory);
   GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
   return test_info;
@@ -3567,6 +3608,15 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
   if (!String::CStringEquals(filter, kUniversalFilter)) {
     ColoredPrintf(GTestColor::kYellow, "Note: %s filter = %s\n", GTEST_NAME_,
                   filter);
+  }
+
+  std::string t = GTEST_FLAG_GET(tag);
+  const char* const tag = t.c_str();
+
+  // Prints the tag if it's not *.  This reminds the user that some
+  // tests may be skipped.
+  if (!String::CStringEquals(tag, kUniversalFilter)) {
+    ColoredPrintf(GTestColor::kYellow, "Note: %s tag = %s\n", GTEST_NAME_, tag);
   }
 
   if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
@@ -6385,6 +6435,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
 
     for (TestInfo* test_info : test_suite->test_info_list()) {
       const std::string& test_name = test_info->name_;
+      const std::string& test_tag = test_info->tag_;
       // A test is disabled if test suite name or test name matches
       // kDisableTestFilter.
       const bool is_disabled =
@@ -6396,9 +6447,13 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
           gtest_flag_filter.MatchesTest(test_suite_name, test_name);
       test_info->matches_filter_ = matches_filter;
 
+      const bool matches_tag =
+          internal::UnitTestOptions::TagMatchesTest(test_tag);
+      test_info->matches_tag_ = matches_tag;
+
       const bool is_runnable =
-          (GTEST_FLAG_GET(also_run_disabled_tests) || !is_disabled) &&
-          matches_filter;
+          (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
+          matches_filter && matches_tag;
 
       const bool is_in_another_shard =
           shard_tests != IGNORE_SHARDING_PROTOCOL &&
@@ -6448,7 +6503,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
 
     for (size_t j = 0; j < test_suite->test_info_list().size(); j++) {
       const TestInfo* const test_info = test_suite->test_info_list()[j];
-      if (test_info->matches_filter_) {
+      if (test_info->matches_filter_ && test_info->matches_tag_) {
         if (!printed_test_suite_name) {
           printed_test_suite_name = true;
 		  ColoredPrintf(GTestColor::kDefault, "%s.", test_suite->name());
@@ -6774,6 +6829,14 @@ static const char kColorEncodedHelpMessage[] =
     "'*'\n"
     "      matches any substring; ':' separates two patterns.\n"
     "  @G--" GTEST_FLAG_PREFIX_
+    "tag=@YPOSTIVE_PATTERNS"
+    "[@G-@YNEGATIVE_PATTERNS]@D\n"
+    "      Run only the tests whose tag matches one of the positive "
+    "patterns but\n"
+    "      none of the negative patterns. '?' matches any single character; "
+    "'*'\n"
+    "      matches any substring; ':' separates two patterns.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
     "also_run_disabled_tests@D\n"
     "      Run all disabled tests too.\n"
     "\n"
@@ -6869,6 +6932,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(death_test_use_fork);
   GTEST_INTERNAL_PARSE_FLAG(fail_fast);
   GTEST_INTERNAL_PARSE_FLAG(filter);
+  GTEST_INTERNAL_PARSE_FLAG(tag);
   GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
   GTEST_INTERNAL_PARSE_FLAG(list_tests);
   GTEST_INTERNAL_PARSE_FLAG(output);

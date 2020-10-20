@@ -559,6 +559,7 @@ struct SuiteApiResolver : T {
 //
 //   test_suite_name:  name of the test suite
 //   name:             name of the test
+//   tag:              tag of the test
 //   type_param:       the name of the test's type parameter, or NULL if
 //                     this is not a typed or a type-parameterized test.
 //   value_param:      text representation of the test's value parameter,
@@ -571,8 +572,8 @@ struct SuiteApiResolver : T {
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
-    std::string test_suite_name, const char* name, const char* type_param,
-    const char* value_param, CodeLocation code_location,
+    std::string test_suite_name, const char* name, const char* tag,
+    const char* type_param, const char* value_param, CodeLocation code_location,
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
     TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory);
 
@@ -586,6 +587,11 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 
 // State of the definition of a type-parameterized test suite.
 class GTEST_API_ TypedTestSuitePState {
+  struct TypedTestState {
+    CodeLocation codeLocation;
+    const std::string tag;
+  };
+
  public:
   TypedTestSuitePState() : registered_(false) {}
 
@@ -593,7 +599,7 @@ class GTEST_API_ TypedTestSuitePState {
   // if the test suite hasn't been registered; otherwise aborts the
   // program.
   bool AddTestName(const char* file, int line, const char* case_name,
-                   const char* test_name) {
+                   const char* test_name, const char* test_tag) {
     if (registered_) {
       fprintf(stderr,
               "%s Test %s must be defined before "
@@ -602,7 +608,8 @@ class GTEST_API_ TypedTestSuitePState {
       fflush(stderr);
 	  posix::Abort("AddTestName: test suite hasn't been registered");
 	}
-    registered_tests_.emplace(test_name, CodeLocation(file, line));
+    registered_tests_.emplace(::std::make_pair<std::string, TypedTestState>(
+        test_name, {CodeLocation(file, line), test_tag}));
     return true;
   }
 
@@ -613,7 +620,13 @@ class GTEST_API_ TypedTestSuitePState {
   const CodeLocation& GetCodeLocation(const std::string& test_name) const {
     RegisteredTestsMap::const_iterator it = registered_tests_.find(test_name);
     GTEST_CHECK_(it != registered_tests_.end());
-    return it->second;
+    return it->second.codeLocation;
+  }
+
+  const std::string& GetTag(const std::string& test_name) const {
+    RegisteredTestsMap::const_iterator it = registered_tests_.find(test_name);
+    GTEST_CHECK_(it != registered_tests_.end());
+    return it->second.tag;
   }
 
   // Verifies that registered_tests match the test names in
@@ -624,7 +637,8 @@ class GTEST_API_ TypedTestSuitePState {
                                         const char* registered_tests);
 
  private:
-  typedef ::std::map<std::string, CodeLocation, std::less<>> RegisteredTestsMap;
+  typedef ::std::map<std::string, TypedTestState, std::less<>>
+      RegisteredTestsMap;
 
   bool registered_;
   RegisteredTestsMap registered_tests_;
@@ -707,7 +721,8 @@ class TypeParameterizedTest {
   // Types).  Valid values for 'index' are [0, N - 1] where N is the
   // length of Types.
   static bool Register(const char* prefix, CodeLocation code_location,
-                       const char* case_name, const char* test_names, int index,
+                       const char* case_name, const char* test_names,
+                       const char* test_tag, int index,
                        const std::vector<std::string>& type_names =
                            GenerateNames<DefaultNameGenerator, Types>()) {
     typedef typename Types::Head Type;
@@ -719,7 +734,7 @@ class TypeParameterizedTest {
     MakeAndRegisterTestInfo(
         (std::string(prefix) + (prefix[0] == '\0' ? "" : "/") + case_name +
          "/" + type_names[static_cast<size_t>(index)]),
-        StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(),
+        StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(), test_tag,
         GetTypeName<Type>().c_str(),
         nullptr,  // No value parameter.
         code_location, GetTypeId<FixtureClass>(),
@@ -730,9 +745,11 @@ class TypeParameterizedTest {
         new TestFactoryImpl<TestClass>);
 
     // Next, recurses (at compile time) with the tail of the type list.
-    return TypeParameterizedTest<Fixture, TestSel, typename Types::Tail>::
-        Register(prefix, std::move(code_location), case_name, test_names,
-                 index + 1, type_names);
+    return TypeParameterizedTest<
+        Fixture, TestSel, typename Types::Tail>::Register(prefix, std::move(code_location),
+                                                          case_name, test_names,
+                                                          test_tag, index + 1,
+                                                          type_names);
   }
 };
 
@@ -742,7 +759,7 @@ class TypeParameterizedTest<Fixture, TestSel, internal::None> {
  public:
   static bool Register(const char* /*prefix*/, CodeLocation,
                        const char* /*case_name*/, const char* /*test_names*/,
-                       int /*index*/,
+                       const char* /*test_tag*/, int /*index*/,
                        const std::vector<std::string>& =
                            std::vector<std::string>() /*type_names*/) {
     return true;
@@ -778,12 +795,14 @@ class TypeParameterizedTestSuite {
 	  posix::Abort("Register Test: Failed to get code location for test");
 	}
     const CodeLocation& test_location = state->GetCodeLocation(test_name);
+    const std::string& test_tag = state->GetTag(test_name);
 
     typedef typename Tests::Head Head;
 
     // First, register the first test in 'Test' for each type in 'Types'.
     TypeParameterizedTest<Fixture, Head, Types>::Register(
-        prefix, test_location, case_name, test_names, 0, type_names);
+        prefix, test_location, case_name, test_names, test_tag.c_str(), 0,
+        type_names);
 
     // Next, recurses (at compile time) with the tail of the test list.
     return TypeParameterizedTestSuite<Fixture, typename Tests::Tail,
@@ -1485,7 +1504,8 @@ class NeverThrown {
   test_suite_name##_##test_name##_Test
 
 // Helper macro for defining tests.
-#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)       \
+#define GTEST_TEST_(test_suite_name, test_name, test_tag, parent_class,        \
+                    parent_id)                                                 \
   static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                 \
                 "test_suite_name must not be empty");                          \
   static_assert(sizeof(GTEST_STRINGIFY_(test_name)) > 1,                       \
@@ -1515,7 +1535,7 @@ class NeverThrown {
   ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name,           \
                                                     test_name)::test_info_ =   \
       ::testing::internal::MakeAndRegisterTestInfo(                            \
-          #test_suite_name, #test_name, nullptr, nullptr,                      \
+          #test_suite_name, #test_name, #test_tag, nullptr, nullptr,           \
           ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id),  \
           ::testing::internal::SuiteApiResolver<                               \
               parent_class>::GetSetUpCaseOrSuite(__FILE__, __LINE__),          \

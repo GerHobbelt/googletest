@@ -200,9 +200,9 @@ using testing::internal::TypedTestSuitePState;
 class TypedTestSuitePStateTest : public Test {
  protected:
   void SetUp() override {
-    state_.AddTestName("foo.cc", 0, "FooTest", "A");
-    state_.AddTestName("foo.cc", 0, "FooTest", "B");
-    state_.AddTestName("foo.cc", 0, "FooTest", "C");
+    state_.AddTestName("foo.cc", 0, "FooTest", "A", "Tag");
+    state_.AddTestName("foo.cc", 0, "FooTest", "B", "Tag");
+    state_.AddTestName("foo.cc", 0, "FooTest", "C", "Tag");
   }
 
   TypedTestSuitePState state_;
@@ -247,7 +247,7 @@ TEST_F(TypedTestSuitePStateDeathTest, DetectsMissedTest) {
 TEST_F(TypedTestSuitePStateDeathTest, DetectsTestAfterRegistration) {
   state_.VerifyRegisteredTestNames("Suite", "foo.cc", 1, "A, B, C");
   EXPECT_DEATH_IF_SUPPORTED(
-      state_.AddTestName("foo.cc", 2, "FooTest", "D"),
+      state_.AddTestName("foo.cc", 2, "FooTest", "D", "T"),
       "foo\\.cc.2.?: Test D must be defined before REGISTER_TYPED_TEST_SUITE_P"
       "\\(FooTest, \\.\\.\\.\\)\\.");
 }
