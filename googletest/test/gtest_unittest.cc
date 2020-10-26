@@ -42,9 +42,10 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       GTEST_FLAG_GET(break_on_failure) || GTEST_FLAG_GET(catch_exceptions) ||
       GTEST_FLAG_GET(color) != "unknown" || GTEST_FLAG_GET(fail_fast) ||
       GTEST_FLAG_GET(filter) != "unknown" || GTEST_FLAG_GET(tag) != "unknown" ||
-      GTEST_FLAG_GET(list_tests) || GTEST_FLAG_GET(output) != "unknown" ||
-      GTEST_FLAG_GET(brief) || GTEST_FLAG_GET(print_time) ||
-      GTEST_FLAG_GET(random_seed) || GTEST_FLAG_GET(repeat) > 0 ||
+      GTEST_FLAG_GET(size) != "Z" || GTEST_FLAG_GET(list_tests) ||
+      GTEST_FLAG_GET(output) != "unknown" || GTEST_FLAG_GET(brief) ||
+      GTEST_FLAG_GET(print_time) || GTEST_FLAG_GET(random_seed) ||
+      GTEST_FLAG_GET(repeat) > 0 ||
       GTEST_FLAG_GET(recreate_environments_when_repeating) ||
       GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
       GTEST_FLAG_GET(stack_trace_depth) > 0 ||
@@ -1610,6 +1611,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(fail_fast, false);
     GTEST_FLAG_SET(filter, "");
     GTEST_FLAG_SET(tag, "");
+    GTEST_FLAG_SET(size, "");
     GTEST_FLAG_SET(list_tests, false);
     GTEST_FLAG_SET(output, "");
     GTEST_FLAG_SET(brief, false);
@@ -1641,6 +1643,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_FALSE(GTEST_FLAG_GET(fail_fast));
     EXPECT_STREQ("", GTEST_FLAG_GET(filter).c_str());
     EXPECT_STREQ("", GTEST_FLAG_GET(tag).c_str());
+    EXPECT_EQ("", GTEST_FLAG_GET(size));
     EXPECT_FALSE(GTEST_FLAG_GET(list_tests));
     EXPECT_STREQ("", GTEST_FLAG_GET(output).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(brief));
@@ -1661,6 +1664,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(fail_fast, true);
     GTEST_FLAG_SET(filter, "abc");
     GTEST_FLAG_SET(tag, "abc");
+    GTEST_FLAG_SET(size, 'm');
     GTEST_FLAG_SET(list_tests, true);
     GTEST_FLAG_SET(output, "xml:foo.xml");
     GTEST_FLAG_SET(brief, true);
@@ -5483,6 +5487,7 @@ struct Flags {
         fail_fast(false),
         filter(""),
         tag(""),
+        size(""),
         list_tests(false),
         output(""),
         brief(false),
@@ -5550,6 +5555,14 @@ struct Flags {
   static Flags Tag(const char* tag) {
     Flags flags;
     flags.tag = tag;
+    return flags;
+  }
+
+  // Creates a Flags struct where the gtest_size flag has the given
+  // value.
+  static Flags Size(const char* size) {
+    Flags flags;
+    flags.size = size;
     return flags;
   }
 
@@ -5651,6 +5664,7 @@ struct Flags {
   bool fail_fast;
   const char* filter;
   const char* tag;
+  const char* size;
   bool list_tests;
   const char* output;
   bool brief;
@@ -5676,6 +5690,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(fail_fast, false);
     GTEST_FLAG_SET(filter, "");
     GTEST_FLAG_SET(tag, "");
+    GTEST_FLAG_SET(size, "");
     GTEST_FLAG_SET(list_tests, false);
     GTEST_FLAG_SET(output, "");
     GTEST_FLAG_SET(brief, false);
@@ -5711,6 +5726,7 @@ class ParseFlagsTest : public Test {
     EXPECT_EQ(expected.fail_fast, GTEST_FLAG_GET(fail_fast));
     EXPECT_STREQ(expected.filter, GTEST_FLAG_GET(filter).c_str());
     EXPECT_STREQ(expected.tag, GTEST_FLAG_GET(tag).c_str());
+    EXPECT_EQ(expected.size, GTEST_FLAG_GET(size));
     EXPECT_EQ(expected.list_tests, GTEST_FLAG_GET(list_tests));
     EXPECT_STREQ(expected.output, GTEST_FLAG_GET(output).c_str());
     EXPECT_EQ(expected.brief, GTEST_FLAG_GET(brief));
@@ -5842,6 +5858,24 @@ TEST_F(ParseFlagsTest, TagNonEmpty) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Tag("abc"), false);
+}
+
+// Tests parsing an empty --gtest_size flag.
+TEST_F(ParseFlagsTest, SizeEmpty) {
+  const char* argv[] = {"foo.exe", "--gtest_size=", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Size(""), false);
+}
+
+// Tests parsing a non-empty --gtest_size flag.
+TEST_F(ParseFlagsTest, SizeNonEmpty) {
+  const char* argv[] = {"foo.exe", "--gtest_size=m", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Size("m"), false);
 }
 
 // Tests parsing --gtest_break_on_failure.
@@ -6255,6 +6289,25 @@ TEST_F(ParseFlagsTest, TagBad) {
 #endif
 }
 
+// Tests parsing a bad --gtest_size flag.
+TEST_F(ParseFlagsTest, SizeBad) {
+  const char* argv[] = {"foo.exe", "--gtest_size", nullptr};
+
+  const char* argv2[] = {"foo.exe", "--gtest_size", nullptr};
+
+#if GTEST_HAS_ABSL && GTEST_HAS_DEATH_TEST
+  // Invalid flag arguments are a fatal error when using the Abseil Flags.
+  EXPECT_EXIT(GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Size(''), true),
+              testing::ExitedWithCode(1),
+              "ERROR: Missing the value for the flag 'gtest_size'");
+#elif !GTEST_HAS_ABSL
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Size(""), true);
+#else
+  static_cast<void>(argv);
+  static_cast<void>(argv2);
+#endif
+}
+
 // Tests parsing --gtest_output (invalid).
 TEST_F(ParseFlagsTest, OutputEmpty) {
   const char* argv[] = {"foo.exe", "--gtest_output", nullptr};
@@ -6303,6 +6356,7 @@ TEST_F(ParseFlagsTest, WideStrings) {
   const wchar_t* argv[] = {L"foo.exe",
                            L"--gtest_filter=Foo*",
                            L"--gtest_tag=Foo*",
+                           L"--gtest_size=m",
                            L"--gtest_list_tests=1",
                            L"--gtest_break_on_failure",
                            L"--non_gtest_flag",
@@ -6314,6 +6368,7 @@ TEST_F(ParseFlagsTest, WideStrings) {
   expected_flags.break_on_failure = true;
   expected_flags.filter = "Foo*";
   expected_flags.tag = "Foo*";
+  expected_flags.size = "m";
   expected_flags.list_tests = true;
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, expected_flags, false);
@@ -6392,11 +6447,26 @@ TEST_F(FlagfileTest, TagNonEmpty) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Tag("abc"), false);
 }
 
+// Tests passing a non-empty --gtest_size flag via --gtest_flagfile.
+TEST_F(FlagfileTest, SizeNonEmpty) {
+  internal::FilePath flagfile_path(
+      CreateFlagfile("--" GTEST_FLAG_PREFIX_ "size=a"));
+  std::string flagfile_flag =
+      std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
+
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Size("a"), false);
+}
+
 // Tests passing several flags via --gtest_flagfile.
 TEST_F(FlagfileTest, SeveralFlags) {
   internal::FilePath flagfile_path(
       CreateFlagfile("--" GTEST_FLAG_PREFIX_ "filter=abc\n"
                      "--" GTEST_FLAG_PREFIX_ "tag=abc\n"
+                     "--" GTEST_FLAG_PREFIX_ "size=a\n"
                      "--" GTEST_FLAG_PREFIX_ "break_on_failure\n"
                      "--" GTEST_FLAG_PREFIX_ "list_tests"));
   std::string flagfile_flag =
@@ -6410,6 +6480,7 @@ TEST_F(FlagfileTest, SeveralFlags) {
   expected_flags.break_on_failure = true;
   expected_flags.filter = "abc";
   expected_flags.tag = "abc";
+  expected_flags.size = "a";
   expected_flags.list_tests = true;
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, expected_flags, false);
@@ -7792,8 +7863,9 @@ class DynamicTest : public DynamicUnitTestFixture {
 };
 
 auto* dynamic_test = testing::RegisterTest(
-    "DynamicUnitTestFixture", "DynamicTest", "TAG", "TYPE", "VALUE", __FILE__,
-    __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
+    "DynamicUnitTestFixture", "DynamicTest", 'M', "TAG", "TYPE", "VALUE",
+    __FILE__, __LINE__,
+    []() -> DynamicUnitTestFixture* { return new DynamicTest; });
 
 TEST(RegisterTest, WasRegistered) {
   const auto& unittest = testing::UnitTest::GetInstance();
@@ -7874,4 +7946,36 @@ TEST(PatternGlobbingTest, MatchesTagEdgeCases) {
   EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesTag("", "*"));
   EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesTag("a", ""));
   EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesTag("", ""));
+}
+
+// Test that the pattern globbing algorithm is linear. If not, this test should
+// time out.
+TEST(PatternGlobbingTest, MatchesSizeLinearRuntime) {
+  std::string size(100, 'a');  // Construct the string (a^100)b
+  size.push_back('b');
+
+  std::string pattern;  // Construct the string ((a*)^100)b
+  for (int i = 0; i < 100; ++i) {
+    pattern.append("a*");
+  }
+  pattern.push_back('b');
+
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::MatchesSize(size, pattern.c_str()));
+}
+
+TEST(PatternGlobbingTest, MatchesSizeWithMultiplePatterns) {
+  const std::string size = "aaaa";
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesSize(size, "a*"));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesSize(size, "a*:"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesSize(size, "ab"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesSize(size, "ab:"));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesSize(size, "ab:a*"));
+}
+
+TEST(PatternGlobbingTest, MatchesSizeEdgeCases) {
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesSize("", "*a"));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesSize("", "*"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesSize("a", ""));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesSize("", ""));
 }
