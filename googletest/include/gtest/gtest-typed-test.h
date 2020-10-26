@@ -194,7 +194,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type \
   GTEST_NAME_GENERATOR_(CaseName)
 
-#define TYPED_TEST_(CaseName, TestName, TestTag)                              \
+#define TYPED_TEST_(CaseName, TestName, TestSize, TestTag)                    \
   static_assert(sizeof(GTEST_STRINGIFY_(TestName)) > 1,                       \
                 "test-name must not be empty");                               \
   template <typename gtest_TypeParam_>                                        \
@@ -216,7 +216,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
                                    ::testing::internal::CodeLocation(         \
                                        __FILE__, __LINE__),                   \
                                    GTEST_STRINGIFY_(CaseName),                \
-                                   GTEST_STRINGIFY_(TestName),                \
+                                   GTEST_STRINGIFY_(TestName), (TestSize),    \
                                    GTEST_STRINGIFY_(TestTag), 0,              \
                                    ::testing::internal::GenerateNames<        \
                                        GTEST_NAME_GENERATOR_(CaseName),       \
@@ -226,9 +226,10 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
                               TestName)<gtest_TypeParam_>::TestBody()
 
 #if !GTEST_DONT_DEFINE_TEST
-#define TYPED_TEST(CaseName, TestName) TYPED_TEST_(CaseName, TestName, "ALL")
-#define TYPED_TEST_C(CaseName, TestName, TestTag) \
-  TYPED_TEST_(CaseName, TestName, TestTag)
+#define TYPED_TEST(CaseName, TestName) \
+  TYPED_TEST_(CaseName, TestName, 'S', "ALL")
+#define TYPED_TEST_C(CaseName, TestName, TestSize, TestTag) \
+  TYPED_TEST_(CaseName, TestName, TestSize, TestTag)
 #endif
 
 // Legacy API is deprecated but still available
@@ -275,30 +276,30 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#define TYPED_TEST_P_(SuiteName, TestName, TestTag)                   \
-  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                       \
-  template <typename gtest_TypeParam_>                                \
-  class TestName : public SuiteName<gtest_TypeParam_> {               \
-   private:                                                           \
-    typedef SuiteName<gtest_TypeParam_> TestFixture;                  \
-    typedef gtest_TypeParam_ TypeParam;                               \
-    void TestBody() override;                                         \
-  };                                                                  \
-  GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static bool                   \
-      gtest_##TestName##_defined_ =                                   \
-          GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(     \
-              __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),        \
-              GTEST_STRINGIFY_(TestName), GTEST_STRINGIFY_(TestTag)); \
-  }                                                                   \
-  template <typename gtest_TypeParam_>                                \
-  void GTEST_SUITE_NAMESPACE_(                                        \
+#define TYPED_TEST_P_(SuiteName, TestName, TestSize, TestTag)                     \
+  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                                   \
+  template <typename gtest_TypeParam_>                                            \
+  class TestName : public SuiteName<gtest_TypeParam_> {                           \
+   private:                                                                       \
+    typedef SuiteName<gtest_TypeParam_> TestFixture;                              \
+    typedef gtest_TypeParam_ TypeParam;                                           \
+    void TestBody() override;                                                     \
+  };                                                                              \
+  GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static bool                               \
+      gtest_##TestName##_defined_ =                                               \
+          GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(                 \
+              __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),                    \
+              GTEST_STRINGIFY_(TestName), (TestSize), GTEST_STRINGIFY_(TestTag)); \
+  }                                                                               \
+  template <typename gtest_TypeParam_>                                            \
+  void GTEST_SUITE_NAMESPACE_(                                                    \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
 
 #if !GTEST_DONT_DEFINE_TEST
 #define TYPED_TEST_P(SuiteName, TestName) \
-  TYPED_TEST_P_(SuiteName, TestName, "ALL")
-#define TYPED_TEST_P_C(SuiteName, TestName, TestTag) \
-  TYPED_TEST_P_(SuiteName, TestName, TestTag)
+  TYPED_TEST_P_(SuiteName, TestName, 'S', "ALL")
+#define TYPED_TEST_P_C(SuiteName, TestName, TestSize, TestTag) \
+  TYPED_TEST_P_(SuiteName, TestName, TestSize, TestTag)
 #endif
 
 // Note: this won't work correctly if the trailing arguments are macros.

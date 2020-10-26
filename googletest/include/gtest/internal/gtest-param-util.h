@@ -530,11 +530,12 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   // parameter index. For the test SequenceA/FooTest.DoBar/1 FooTest is
   // test suite base name and DoBar is test base name.
   void AddTestPattern(const char* test_suite_name, const char* test_base_name,
-                      const char* test_tag,
+                      char test_size, const char* test_tag,
                       TestMetaFactoryBase<ParamType>* meta_factory,
                       CodeLocation code_location) {
     tests_.emplace_back(
-        new TestInfo(test_base_name, test_tag, meta_factory, std::move(code_location)));
+        new TestInfo(test_base_name, test_size, test_tag,
+                     meta_factory, std::move(code_location)));
   }
   // INSTANTIATE_TEST_SUITE_P macro uses AddGenerator() to record information
   // about a generator.
@@ -599,7 +600,7 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
 
           MakeAndRegisterTestInfo(
               test_suite_name, test_name.c_str(),
-              test_info->test_tag.c_str(),
+              test_info->test_size, test_info->test_tag.c_str(),
               nullptr,  // No type parameter.
               PrintToString(param).c_str(), test_info->code_location,
               GetTestSuiteTypeId(),
@@ -623,18 +624,20 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   // with TEST_P macro.
   struct TestInfo {
     TestInfo(const char* a_test_base_name,
-             const char* a_test_tag,
+             char a_test_size, const char* a_test_tag,
              TestMetaFactoryBase<ParamType>* a_test_meta_factory,
              CodeLocation a_code_location)
         : test_base_name(a_test_base_name),
           test_tag(a_test_tag),
           test_meta_factory(a_test_meta_factory),
-          code_location(std::move(a_code_location)) {}
+          code_location(std::move(a_code_location)),
+          test_size(a_test_size) {}
 
     const std::string test_base_name;
     const std::string test_tag;
     const std::unique_ptr<TestMetaFactoryBase<ParamType>> test_meta_factory;
     const CodeLocation code_location;
+    const char test_size;
   };
   using TestInfoContainer = ::std::vector<std::shared_ptr<TestInfo>>;
   // Records data received from INSTANTIATE_TEST_SUITE_P macros:
