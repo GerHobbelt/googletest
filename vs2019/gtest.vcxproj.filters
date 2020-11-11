@@ -22,5 +22,8 @@
     <ClInclude Include="..\googletest\include\gtest\gtest.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\googlemock\include\gmock\gmock.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
