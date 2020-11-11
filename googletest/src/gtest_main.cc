@@ -31,7 +31,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#if defined(__MBED_CMSIS_RTOS_CM) || defined(__FREERTOS_CMSIS_RTOS_CM)
 #include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
+#endif
 
 #include "synchapi.h"                       // Sleep
 
@@ -72,7 +74,9 @@ int _system_pre_init(void) {
 }
 #endif
 
+#if defined(__MBED_CMSIS_RTOS_CM) || defined(__FREERTOS_CMSIS_RTOS_CM)
 int static low_level_inited = _system_pre_init();
+#endif
 
 GTEST_API_ int main(int argc, char **argv) {
     int rc;
