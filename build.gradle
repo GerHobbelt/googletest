@@ -1,0 +1,21 @@
+plugins {
+    id 'cpp-library'
+}
+
+group = 'com.github.chrisjhh'
+
+library {
+    targetMachines = [
+        machines.windows.x86_64,
+        machines.windows.x86,
+        machines.linux.x86_64,
+        machines.macOS.x86_64
+    ]
+    source.from file('googletest/src/gtest-all.cc')
+    publicHeaders.from file('googletest/include')
+    privateHeaders.from file('googletest')
+}
+
+tasks.withType(CppCompile) {
+    macros.put("GTEST_CREATE_SHARED_LIBRARY", '1')
+}
