@@ -531,12 +531,12 @@ partially-destructed state! You almost certainly want to `abort` or use
 
 Related to the assertions `SUCCEED()` and `FAIL()`, you can prevent further test
 execution at runtime with the `GTEST_SKIP()` macro. This is useful when you need
-to check for preconditions of the system under test during runtime and skip tests
-in a meaningful way.
+to check for preconditions of the system under test during runtime and skip
+tests in a meaningful way.
 
-`GTEST_SKIP()` can be used in individual test cases or in the `SetUp()` methods of
-classes derived from either `::testing::Environment` or `::testing::Test`. For
-example:
+`GTEST_SKIP()` can be used in individual test cases or in the `SetUp()` methods
+of classes derived from either `::testing::Environment` or `::testing::Test`.
+For example:
 
 ```c++
 TEST(SkipTest, DoesSkip) {
