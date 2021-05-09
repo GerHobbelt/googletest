@@ -84,7 +84,7 @@ THOUSAND_TESTS_(T)
 #define main(cnt, arr)	gtest_macro_stack_footprint_test_main(cnt, arr)
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
   // We don't actually need to run the dummy tests - the purpose is to

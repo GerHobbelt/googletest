@@ -47,7 +47,7 @@ INSTANTIATE_TEST_SUITE_P(InvalidTestName,
 #define main(cnt, arr)	gtest_param_inv_name1_test_main(cnt, arr)
 #endif
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

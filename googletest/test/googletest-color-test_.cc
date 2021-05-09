@@ -50,7 +50,7 @@ TEST(GTestColorTest, Dummy) {
 #define main(cnt, arr)	gtest_color_test_main(cnt, arr)
 #endif
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   if (ShouldUseColor(true)) {

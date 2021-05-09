@@ -271,7 +271,7 @@ void VerifyResults(const std::vector<std::string>& data,
 #define main(cnt, arr)	gtest_listener_test_main(cnt, arr)
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   std::vector<std::string> events;
   g_events = &events;
   InitGoogleTest(&argc, argv);

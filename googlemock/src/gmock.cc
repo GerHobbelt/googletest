@@ -141,7 +141,7 @@ static bool ParseGoogleMockIntFlag(const char* str, const char* flag,
 // The type parameter CharType can be instantiated to either char or
 // wchar_t.
 template <typename CharType>
-void InitGoogleMockImpl(int* argc, CharType** argv) {
+void InitGoogleMockImpl(int* argc, const CharType** argv) {
   // Makes sure Google Test is initialized.  InitGoogleTest() is
   // idempotent, so it's fine if the user has already called it.
   InitGoogleTest(argc, argv);
@@ -188,13 +188,13 @@ void InitGoogleMockImpl(int* argc, CharType** argv) {
 // Since Google Test is needed for Google Mock to work, this function
 // also initializes Google Test and parses its flags, if that hasn't
 // been done.
-GMOCK_API_ void InitGoogleMock(int* argc, char** argv) {
+GMOCK_API_ void InitGoogleMock(int* argc, const char** argv) {
   internal::InitGoogleMockImpl(argc, argv);
 }
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-GMOCK_API_ void InitGoogleMock(int* argc, wchar_t** argv) {
+GMOCK_API_ void InitGoogleMock(int* argc, const wchar_t** argv) {
   internal::InitGoogleMockImpl(argc, argv);
 }
 
@@ -204,8 +204,8 @@ GMOCK_API_ void InitGoogleMock() {
   // Since Arduino doesn't have a command line, fake out the argc/argv arguments
   int argc = 1;
   const auto arg0 = "dummy";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
+  const char* argv0 = const_cast<char*>(arg0);
+  const char** argv = &argv0;
 
   internal::InitGoogleMockImpl(&argc, argv);
 }

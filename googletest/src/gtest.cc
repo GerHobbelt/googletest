@@ -6554,7 +6554,7 @@ static void LoadFlagsFromFile(const std::string& path) {
 // other parts of Google Test.  The type parameter CharType can be
 // instantiated to either char or wchar_t.
 template <typename CharType>
-void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
+void ParseGoogleTestFlagsOnlyImpl(int* argc, const CharType** argv) {
   for (int i = 1; i < *argc; i++) {
     const std::string arg_string = StreamableToString(argv[i]);
     const char* const arg = arg_string.c_str();
@@ -6607,7 +6607,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
-void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
+void ParseGoogleTestFlagsOnly(int* argc, const char** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 
   // Fix the value of *_NSGetArgc() on macOS, but if and only if
@@ -6621,7 +6621,7 @@ void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
 #endif
 #endif
 }
-void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
+void ParseGoogleTestFlagsOnly(int* argc, const wchar_t** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 }
 
@@ -6630,7 +6630,7 @@ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
 // The type parameter CharType can be instantiated to either char or
 // wchar_t.
 template <typename CharType>
-void InitGoogleTestImpl(int* argc, CharType** argv) {
+void InitGoogleTestImpl(int* argc, const CharType** argv) {
   // We don't want to run the initialization code twice.
   if (GTestIsInitialized()) return;
 
@@ -6660,7 +6660,7 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 // updated.
 //
 // Calling the function for the second time has no user-visible effect.
-void InitGoogleTest(int* argc, char** argv) {
+void InitGoogleTest(int* argc, const char** argv) {
 #if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(argc, argv);
 #else  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
@@ -6670,7 +6670,7 @@ void InitGoogleTest(int* argc, char** argv) {
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-void InitGoogleTest(int* argc, wchar_t** argv) {
+void InitGoogleTest(int* argc, const wchar_t** argv) {
 #if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(argc, argv);
 #else  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
@@ -6684,8 +6684,8 @@ void InitGoogleTest() {
   // Since Arduino doesn't have a command line, fake out the argc/argv arguments
   int argc = 1;
   const auto arg0 = "dummy";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
+  const char* argv0 = const_cast<char*>(arg0);
+  const char** argv = &argv0;
 
 #if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(&argc, argv);

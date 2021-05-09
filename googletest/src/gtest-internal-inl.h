@@ -994,8 +994,8 @@ GTEST_API_ bool MatchRegexAnywhere(const char* regex, const char* str);
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
-GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, char** argv);
-GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
+GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, const char** argv);
+GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, const wchar_t** argv);
 
 #if GTEST_HAS_DEATH_TEST
 

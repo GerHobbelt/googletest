@@ -123,7 +123,7 @@ void PrintFlag(const char* flag) {
 #define main(cnt, arr)	gtest_env_var_test_main(cnt, arr)
 #endif
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   if (argc != 2) {

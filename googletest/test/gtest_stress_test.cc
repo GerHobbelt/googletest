@@ -230,7 +230,7 @@ TEST(NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads) {
 #define main(cnt, arr)	gtest_stress_test_main(cnt, arr)
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
   const int result = RUN_ALL_TESTS();  // Expected to fail.
@@ -249,7 +249,7 @@ TEST(StressTest,
 #define main(cnt, arr)	gtest_stress_test_main(cnt, arr)
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

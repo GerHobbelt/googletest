@@ -166,13 +166,13 @@ TEST(LoggingTest, InterleavingLoggingAndAssertions) {
 // Tests the SCOPED_TRACE macro.
 
 // A helper function for testing SCOPED_TRACE.
-void SubWithoutTrace(int n) {
+static void SubWithoutTrace(int n) {
   EXPECT_EQ(1, n);
   ASSERT_EQ(2, n);
 }
 
 // Another helper function for testing SCOPED_TRACE.
-void SubWithTrace(int n) {
+static void SubWithTrace(int n) {
   SCOPED_TRACE(testing::Message() << "n = " << n);
 
   SubWithoutTrace(n);
@@ -352,14 +352,14 @@ TEST(DisabledTestsWarningTest,
 // Tests using assertions outside of TEST and TEST_F.
 //
 // This function creates two failures intentionally.
-void AdHocTest() {
+static void AdHocTest() {
   printf("The non-test part of the code is expected to have 2 failures.\n\n");
   EXPECT_TRUE(false);
   EXPECT_EQ(2, 3);
 }
 
 // Runs all TESTs, all TEST_Fs, and the ad hoc test.
-int RunAllTests() {
+static int RunAllTests() {
   AdHocTest();
   return RUN_ALL_TESTS();
 }
@@ -663,7 +663,7 @@ TEST(ExpectFatalFailureTest, FailsWhenThereIsNoFatalFailure) {
 }
 
 // A helper for generating a fatal failure.
-void FatalFailure() {
+static void FatalFailure() {
   FAIL() << "Expected fatal failure.";
 }
 
@@ -1069,7 +1069,7 @@ class BarEnvironment : public testing::Environment {
 // The idea is to use Google Test to run all the tests we have defined (some
 // of them are intended to fail), and then compare the test results
 // with the "golden" file.
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   testing::GTEST_FLAG(print_time) = false;
 
   // We just run the tests, knowing some of them are intended to fail.

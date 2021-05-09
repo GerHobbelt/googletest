@@ -2769,9 +2769,9 @@ TEST(ParameterlessExpectationsTest,
 # define GMOCK_RENAME_MAIN 0
 #endif
 #if defined(GMOCK_RENAME_MAIN)
-int gmock_main(int argc, char **argv) {
+int gmock_main(int argc, const char **argv) {
 #else
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
 #endif  // GMOCK_RENAME_MAIN
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of

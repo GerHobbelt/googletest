@@ -1105,7 +1105,7 @@ REGISTER_TYPED_TEST_SUITE_P(NotInstantiatedTypeTest, Used);
 #define main(cnt, arr)	gtest_param_test_main(cnt, arr)
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   // Used in TestGenerationTest test suite.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());
   // Used in GeneratorEvaluationTest test suite. Tests that the updated value

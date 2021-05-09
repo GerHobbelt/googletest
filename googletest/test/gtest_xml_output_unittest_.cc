@@ -139,11 +139,11 @@ TEST(NoFixtureTest, RecordProperty) {
   RecordProperty("key", "1");
 }
 
-void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
+static void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
   testing::Test::RecordProperty(key, value);
 }
 
-void ExternalUtilityThatCallsRecordProperty(const std::string& key,
+static void ExternalUtilityThatCallsRecordProperty(const std::string& key,
                                             const std::string& value) {
   testing::Test::RecordProperty(key, value);
 }
@@ -185,7 +185,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
 #define main(cnt, arr)	gtest_xml_output_test_main(cnt, arr)
 #endif
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
 
   if (argc > 1 && strcmp(argv[1], "--shut_down_xml") == 0) {

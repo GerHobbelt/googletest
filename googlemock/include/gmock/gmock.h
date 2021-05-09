@@ -83,11 +83,11 @@ GMOCK_DECLARE_int32_(default_mock_behavior);
 // Since Google Test is needed for Google Mock to work, this function
 // also initializes Google Test and parses its flags, if that hasn't
 // been done.
-GMOCK_API_ void InitGoogleMock(int* argc, char** argv);
+GMOCK_API_ void InitGoogleMock(int* argc, const char** argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-GMOCK_API_ void InitGoogleMock(int* argc, wchar_t** argv);
+GMOCK_API_ void InitGoogleMock(int* argc, const wchar_t** argv);
 
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.

@@ -134,7 +134,7 @@ INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, testing::Values(5, 6));
 #define main(cnt, arr)	gtest_filter_test_main(cnt, arr)
 #endif
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();

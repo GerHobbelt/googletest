@@ -49,7 +49,7 @@ class ThrowListener : public testing::EmptyTestEventListener {
 // non-zero.  We use this instead of a Google Test assertion to
 // indicate a failure, as the latter is been tested and cannot be
 // relied on.
-void Fail(const char* msg) {
+static void Fail(const char* msg) {
   printf("FAILURE: %s\n", msg);
   fflush(stdout);
   exit(1);
@@ -93,7 +93,7 @@ TEST(Test, Test) {
   Fail("A failed assertion should've thrown but didn't.");
 }
 
-int kTestForContinuingTest = 0;
+static int kTestForContinuingTest = 0;
 
 TEST(Test, Test2) {
   kTestForContinuingTest = 1;
@@ -103,7 +103,7 @@ TEST(Test, Test2) {
 #define main(cnt, arr)	gtest_assert_ex_test_main(cnt, arr)
 #endif
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
   testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
 

@@ -1503,11 +1503,11 @@ inline Environment* AddGlobalTestEnvironment(Environment* env) {
 // updated.
 //
 // Calling the function for the second time has no user-visible effect.
-GTEST_API_ void InitGoogleTest(int* argc, char** argv);
+GTEST_API_ void InitGoogleTest(int* argc, const char** argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
+GTEST_API_ void InitGoogleTest(int* argc, const wchar_t** argv);
 
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.
@@ -2471,7 +2471,7 @@ GTEST_API_ std::string TempDir();
 //   }
 // }
 // ...
-// int main(int argc, char** argv) {
+// int main(int argc, const char** argv) {
 //   std::vector<int> values_to_test = LoadValuesFromConfig();
 //   RegisterMyTests(values_to_test);
 //   ...
