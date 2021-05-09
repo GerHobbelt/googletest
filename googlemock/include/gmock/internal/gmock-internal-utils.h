@@ -208,6 +208,11 @@ class FailureReporterInterface {
 // Returns the failure reporter used by Google Mock.
 GTEST_API_ FailureReporterInterface* GetFailureReporter();
 
+// Sets the failure reporter.
+// Enables overriding of the default failure reporter with 
+// a custom one that implements the interface.
+GTEST_API_ void SetFailureReporter(FailureReporterInterface* const in_failure_reporter);
+
 // Asserts that condition is true; aborts the process with the given
 // message if condition is false.  We cannot use LOG(FATAL) or CHECK()
 // as Google Mock might be used to mock the log sink itself.  We
