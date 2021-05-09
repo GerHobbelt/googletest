@@ -32,6 +32,10 @@
 
 #include "gtest/gtest.h"
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_no_test_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
 

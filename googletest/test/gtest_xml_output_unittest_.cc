@@ -181,6 +181,10 @@ typedef testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_xml_output_test_main(cnt, arr)
+#endif
+
 int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);
 

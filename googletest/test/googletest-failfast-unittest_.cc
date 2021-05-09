@@ -160,6 +160,10 @@ TEST(HasSkipTest, Test4) { FAIL() << "Expected failure."; }
 
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_failfast_test_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::UnitTest::GetInstance()->listeners().Append(new MyTestListener());

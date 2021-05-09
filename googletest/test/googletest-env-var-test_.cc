@@ -119,6 +119,10 @@ void PrintFlag(const char* flag) {
 
 }  // namespace testing
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_env_var_test_main(cnt, arr)
+#endif
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

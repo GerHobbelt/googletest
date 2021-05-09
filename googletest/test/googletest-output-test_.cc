@@ -1060,6 +1060,10 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_output_test_main(cnt, arr)
+#endif
+
 // The main function.
 //
 // The idea is to use Google Test to run all the tests we have defined (some

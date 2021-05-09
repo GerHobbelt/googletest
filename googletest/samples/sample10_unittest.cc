@@ -104,6 +104,10 @@ TEST(ListenersTest, LeaksWater) {
 }
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_sample10_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   InitGoogleTest(&argc, argv);
 

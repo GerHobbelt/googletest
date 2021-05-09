@@ -267,6 +267,10 @@ void VerifyResults(const std::vector<std::string>& data,
   }
 }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_listener_test_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   std::vector<std::string> events;
   g_events = &events;

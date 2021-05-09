@@ -76,6 +76,10 @@ void TestFailureThrowsRuntimeError() {
   Fail("A failed assertion should've thrown but didn't.");
 }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_throw_on_fail_ex_test_main(cnt, arr)
+#endif
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

@@ -2757,10 +2757,15 @@ TEST(ParameterlessExpectationsTest,
 
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)			gmock_spec_builders_test_main(cnt, arr)
+#define gmock_main(cnt, arr)	gmock_spec_builders_test_main(cnt, arr)
+#endif
+
 // Allows the user to define their own main and then invoke gmock_main
 // from it. This might be necessary on some platforms which require
 // specific setup and teardown.
-#if GMOCK_RENAME_MAIN
+#if defined(GMOCK_RENAME_MAIN)
 int gmock_main(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {

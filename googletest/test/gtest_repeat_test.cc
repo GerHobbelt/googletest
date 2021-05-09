@@ -205,6 +205,10 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_repeat_test_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
 

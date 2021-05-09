@@ -99,6 +99,10 @@ TEST(Test, Test2) {
   kTestForContinuingTest = 1;
 }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_assert_ex_test_main(cnt, arr)
+#endif
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);

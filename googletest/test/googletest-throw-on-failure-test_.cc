@@ -49,6 +49,10 @@ void TerminateHandler() {
   exit(1);
 }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_throw_on_fail_test_main(cnt, arr)
+#endif
+
 int main(int argc, char** argv) {
 #if GTEST_HAS_EXCEPTIONS
   std::set_terminate(&TerminateHandler);

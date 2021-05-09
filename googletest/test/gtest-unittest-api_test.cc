@@ -319,6 +319,10 @@ class FinalSuccessChecker : public Environment {
 }  // namespace internal
 }  // namespace testing
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_api_test_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   InitGoogleTest(&argc, argv);
 

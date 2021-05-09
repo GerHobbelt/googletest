@@ -49,6 +49,11 @@ void loop() { RUN_ALL_TESTS(); }
 
 #else
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gmock_test_main(cnt, arr)
+#define _tmain(cnt, arr)	gmock_test_tmain(cnt, arr)
+#endif
+
 // MS C++ compiler/linker has a bug on Windows (not on Windows CE), which
 // causes a link error when _tmain is defined in a static library and UNICODE
 // is enabled. For this reason instead of _tmain, main function is used on

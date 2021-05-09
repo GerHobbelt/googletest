@@ -47,6 +47,10 @@ INSTANTIATE_TEST_SUITE_P(DuplicateTestNames,
                          StringParamTestSuffix);
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_param_inv_name2_test_main(cnt, arr)
+#endif
+
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

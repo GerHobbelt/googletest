@@ -149,6 +149,10 @@ REGISTER_TYPED_TEST_SUITE_P(TypeParamTest, TestA, TestB);
 
 INSTANTIATE_TYPED_TEST_SUITE_P(My, TypeParamTest, MyTypes);
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_list_test_main(cnt, arr)
+#endif
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
