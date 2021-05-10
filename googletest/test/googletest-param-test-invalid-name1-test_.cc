@@ -31,13 +31,13 @@
 #include "gtest/gtest.h"
 
 namespace {
-class DummyTest : public ::testing::TestWithParam<const char *> {};
+class DummyInvalidName1Test : public ::testing::TestWithParam<const char *> {};
 
-TEST_P(DummyTest, Dummy) {
+TEST_P(DummyInvalidName1Test, Dummy) {
 }
 
 INSTANTIATE_TEST_SUITE_P(InvalidTestName,
-                         DummyTest,
+                         DummyInvalidName1Test,
                          ::testing::Values("InvalidWithQuotes"),
                          ::testing::PrintToStringParamName());
 

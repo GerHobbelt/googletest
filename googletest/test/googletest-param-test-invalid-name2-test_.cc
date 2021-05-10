@@ -31,18 +31,18 @@
 #include "gtest/gtest.h"
 
 namespace {
-class DummyTest : public ::testing::TestWithParam<const char *> {};
+class DummyInvalidName2Test : public ::testing::TestWithParam<const char *> {};
 
 std::string StringParamTestSuffix(
     const testing::TestParamInfo<const char*>& info) {
   return std::string(info.param);
 }
 
-TEST_P(DummyTest, Dummy) {
+TEST_P(DummyInvalidName2Test, Dummy) {
 }
 
 INSTANTIATE_TEST_SUITE_P(DuplicateTestNames,
-                         DummyTest,
+                         DummyInvalidName2Test,
                          ::testing::Values("a", "b", "a", "c"),
                          StringParamTestSuffix);
 }  // namespace
