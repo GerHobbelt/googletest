@@ -8,8 +8,6 @@
 Make*			makefile
 *.mk			makefile
 *.make			makefile
-*.[chm]			tabs
-*.java			tabs
 *.xml			tabs
 *.props			spaces
 *.targets		spaces
@@ -39,8 +37,11 @@ source/html/css-properties.h	spaces
 *.cpp           text eol=lf
 *.csproj        text eol=lf
 *.css           text eol=lf
+*.cxx           text eol=lf
 *.ejs           text eol=lf
 *.h             text eol=lf
+*.hh            text eol=lf
+*.hpp           text eol=lf
 *.html          text eol=lf
 *.inc           text eol=lf
 *.ini           text eol=lf
