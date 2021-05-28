@@ -80,10 +80,6 @@
 # include <zircon/syscalls.h>
 #endif  // GTEST_OS_FUCHSIA
 
-#if GTEST_OS_IOS
-#import <Foundation/Foundation.h>
-#endif  // GTEST_OS_IOS
-
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-internal.h"
@@ -692,8 +688,8 @@ class ThreadLocalRegistryImpl {
   static Mutex thread_map_mutex_;
 };
 
-Mutex ThreadLocalRegistryImpl::mutex_(Mutex::kStaticMutex);
-Mutex ThreadLocalRegistryImpl::thread_map_mutex_(Mutex::kStaticMutex);
+Mutex ThreadLocalRegistryImpl::mutex_(Mutex::kStaticMutex);  // NOLINT
+Mutex ThreadLocalRegistryImpl::thread_map_mutex_(Mutex::kStaticMutex);  // NOLINT
 
 ThreadLocalValueHolderBase* ThreadLocalRegistry::GetValueOnCurrentThread(
       const ThreadLocalBase* thread_local_instance) {
