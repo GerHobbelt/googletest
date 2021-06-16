@@ -1263,15 +1263,15 @@ class AllOfMatcherImpl : public MatcherInterface<const T&> {
     *os << ")";
   }
 
-  bool MatchAndExplain(const T& x,
+  bool MatchAndExplain(const T& xx,
                        MatchResultListener* listener) const override {
-    // If either matcher1_ or matcher2_ doesn't match x, we only need
+    // If either matcher1_ or matcher2_ doesn't match xx, we only need
     // to explain why one of them fails.
     std::string all_match_result;
 
     for (size_t i = 0; i < matchers_.size(); ++i) {
       StringMatchResultListener slistener;
-      if (matchers_[i].MatchAndExplain(x, &slistener)) {
+      if (matchers_[i].MatchAndExplain(xx, &slistener)) {
         if (all_match_result.empty()) {
           all_match_result = slistener.str();
         } else {
