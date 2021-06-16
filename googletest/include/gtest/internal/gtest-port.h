@@ -449,8 +449,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // checks for C++ exceptions starting at clang r206352, but which checked for
 // cleanups prior to that. To reliably check for C++ exception availability with
 // clang, check for both __EXCEPTIONS and __has_feature(cxx_exceptions).
-#  if defined(__EXCEPTIONS) && __EXCEPTIONS
-#   define GTEST_HAS_EXCEPTIONS __has_feature(cxx_exceptions)
+#  if defined(__EXCEPTIONS) && __EXCEPTIONS && __has_feature(cxx_exceptions)
+#   define GTEST_HAS_EXCEPTIONS 1
 #  else
 #   define GTEST_HAS_EXCEPTIONS 0
 #  endif
