@@ -96,11 +96,11 @@ HasNewFatalFailureHelper::~HasNewFatalFailureHelper() {
       original_reporter_);
 }
 
-void HasNewFatalFailureHelper::ReportTestPartResult(
+TestPartResult HasNewFatalFailureHelper::ReportTestPartResult(
     const TestPartResult& result) {
   if (result.fatally_failed())
     has_new_fatal_failure_ = true;
-  original_reporter_->ReportTestPartResult(result);
+  return original_reporter_->ReportTestPartResult(result);
 }
 
 }  // namespace internal

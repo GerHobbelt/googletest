@@ -38,10 +38,11 @@
 #include <stdexcept>
 
 class ThrowListener : public testing::EmptyTestEventListener {
-  void OnTestPartResult(const testing::TestPartResult& result) override {
+  testing::TestPartResult OnTestPartResult(const testing::TestPartResult& result) override {
     if (result.type() == testing::TestPartResult::kFatalFailure) {
       throw testing::AssertionException(result);
     }
+	return result;
   }
 };
 

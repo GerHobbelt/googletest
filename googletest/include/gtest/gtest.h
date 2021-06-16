@@ -1123,7 +1123,7 @@ class TestEventListener {
   // Fired after a failed assertion or a SUCCEED() invocation.
   // If you want to throw an exception from this function to skip to the next
   // TEST, it must be AssertionException defined above, or inherited from it.
-  virtual void OnTestPartResult(const TestPartResult& test_part_result) = 0;
+  virtual TestPartResult OnTestPartResult(const TestPartResult& test_part_result) = 0;
 
   // Fired after the test ends.
   virtual void OnTestEnd(const TestInfo& test_info) = 0;
@@ -1169,7 +1169,9 @@ class EmptyTestEventListener : public TestEventListener {
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnTestStart(const TestInfo& /*test_info*/) override {}
-  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {}
+  TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
+	  return test_part_result; 
+  }
   void OnTestEnd(const TestInfo& /*test_info*/) override {}
   void OnTestSuiteEnd(const TestSuite& /*test_suite*/) override {}
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -1780,6 +1782,10 @@ class GTEST_API_ AssertHelper {
   // streaming; see the GTEST_MESSAGE_ macro below.
   void operator=(const Message& message) const;
 
+  TestPartResult::Type type() const {
+	  return data_->type;
+  }
+
  private:
   // We put our data in a struct so that the size of the AssertHelper class can
   // be as small as possible.  This is important because gcc is incapable of
@@ -1792,7 +1798,7 @@ class GTEST_API_ AssertHelper {
                      const char* msg)
         : type(t), file(srcfile), line(line_num), message(msg) { }
 
-    TestPartResult::Type const type;
+    TestPartResult::Type type;
     const char* const file;
     int const line;
     std::string const message;
@@ -1801,7 +1807,7 @@ class GTEST_API_ AssertHelper {
     GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelperData);
   };
 
-  AssertHelperData* const data_;
+  AssertHelperData* data_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelper);
 };

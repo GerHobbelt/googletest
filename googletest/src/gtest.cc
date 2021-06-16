@@ -828,9 +828,10 @@ ScopedFakeTestPartResultReporter::~ScopedFakeTestPartResultReporter() {
 
 // Increments the test part result count and remembers the result.
 // This method is from the TestPartResultReporterInterface interface.
-void ScopedFakeTestPartResultReporter::ReportTestPartResult(
+TestPartResult ScopedFakeTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
   result_->Append(result);
+  return result;
 }
 
 namespace internal {
@@ -910,18 +911,19 @@ SingleFailureChecker::~SingleFailureChecker() {
 DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
     UnitTestImpl* unit_test) : unit_test_(unit_test) {}
 
-void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
+TestPartResult DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
-  unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->listeners()->repeater()->OnTestPartResult(result);
+	TestPartResult r = unit_test_->listeners()->repeater()->OnTestPartResult(result);
+	unit_test_->current_test_result()->AddTestPartResult(r);
+	return result;
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
     UnitTestImpl* unit_test) : unit_test_(unit_test) {}
 
-void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
+TestPartResult DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
-  unit_test_->GetGlobalTestPartResultReporter()->ReportTestPartResult(result);
+  return unit_test_->GetGlobalTestPartResultReporter()->ReportTestPartResult(result);
 }
 
 // Returns the global test part result reporter.
@@ -2456,7 +2458,7 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message) {
   // This function is a friend of UnitTest and as such has access to
   // AddTestPartResult.
-  UnitTest::GetInstance()->AddTestPartResult(
+  return UnitTest::GetInstance()->AddTestPartResult(
       result_type,
       nullptr,  // No info about the source file where the exception occurred.
       -1,       // We have no info on which line caused the exception.
@@ -2890,9 +2892,9 @@ void TestInfo::Skip() {
   // Notifies the unit test event listeners that a test is about to start.
   repeater->OnTestStart(*this);
 
-  const TestPartResult test_part_result =
+  TestPartResult test_part_result =
       TestPartResult(TestPartResult::kSkip, this->file(), this->line(), "");
-  impl->GetTestPartResultReporterForCurrentThread()->ReportTestPartResult(
+  test_part_result = impl->GetTestPartResultReporterForCurrentThread()->ReportTestPartResult(
       test_part_result);
 
   // Notifies the unit test event listener that a test has just finished.
@@ -3365,7 +3367,7 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
 
   void OnTestStart(const TestInfo& test_info) override;
 
-  void OnTestPartResult(const TestPartResult& result) override;
+  TestPartResult OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& test_case) override;
@@ -3463,17 +3465,18 @@ void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
 }
 
 // Called after an assertion failure.
-void PrettyUnitTestResultPrinter::OnTestPartResult(
+TestPartResult PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   switch (result.type()) {
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
-      return;
+      return result;
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
       fflush(stdout);
+	  return result;
   }
 }
 
@@ -3665,7 +3668,7 @@ class BriefUnitTestResultPrinter : public TestEventListener {
 
   void OnTestStart(const TestInfo& /*test_info*/) override {}
 
-  void OnTestPartResult(const TestPartResult& result) override;
+  TestPartResult OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& /*test_case*/) override {}
@@ -3680,17 +3683,18 @@ class BriefUnitTestResultPrinter : public TestEventListener {
 };
 
 // Called after an assertion failure.
-void BriefUnitTestResultPrinter::OnTestPartResult(
+TestPartResult BriefUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   switch (result.type()) {
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
-      return;
+      return result;
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
       fflush(stdout);
+	  return result;
   }
 }
 
@@ -3770,7 +3774,7 @@ class TestEventRepeater : public TestEventListener {
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestSuiteStart(const TestSuite& parameter) override;
   void OnTestStart(const TestInfo& test_info) override;
-  void OnTestPartResult(const TestPartResult& result) override;
+  TestPartResult OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -3821,6 +3825,16 @@ void TestEventRepeater::Name(const Type& parameter) { \
     } \
   } \
 }
+#define GTEST_REPEATER_METHOD_RETURN_(Name, Type) \
+Type TestEventRepeater::Name(const Type& parameter) { \
+  Type arg = parameter; \
+  if (forwarding_enabled_) { \
+    for (size_t i = 0; i < listeners_.size(); i++) { \
+      arg = listeners_[i]->Name(arg); \
+    } \
+  } \
+  return arg; \
+}
 // This defines a member that forwards the call to all listeners in reverse
 // order.
 #define GTEST_REVERSE_REPEATER_METHOD_(Name, Type)      \
@@ -3840,7 +3854,7 @@ GTEST_REPEATER_METHOD_(OnTestCaseStart, TestSuite)
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 GTEST_REPEATER_METHOD_(OnTestSuiteStart, TestSuite)
 GTEST_REPEATER_METHOD_(OnTestStart, TestInfo)
-GTEST_REPEATER_METHOD_(OnTestPartResult, TestPartResult)
+GTEST_REPEATER_METHOD_RETURN_(OnTestPartResult, TestPartResult)
 GTEST_REPEATER_METHOD_(OnEnvironmentsTearDownStart, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsSetUpEnd, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsTearDownEnd, UnitTest)
@@ -3853,6 +3867,7 @@ GTEST_REVERSE_REPEATER_METHOD_(OnTestSuiteEnd, TestSuite)
 GTEST_REVERSE_REPEATER_METHOD_(OnTestProgramEnd, UnitTest)
 
 #undef GTEST_REPEATER_METHOD_
+#undef GTEST_REPEATER_METHOD_RETURN_
 #undef GTEST_REVERSE_REPEATER_METHOD_
 
 void TestEventRepeater::OnTestIterationStart(const UnitTest& unit_test,
@@ -5304,11 +5319,12 @@ void UnitTest::AddTestPartResult(
     msg << internal::kStackTraceMarker << os_stack_trace;
   }
 
-  const TestPartResult result = TestPartResult(
+  TestPartResult result = TestPartResult(
       result_type, file_name, line_number, msg.GetString().c_str());
-  impl_->GetTestPartResultReporterForCurrentThread()->
+  result = impl_->GetTestPartResultReporterForCurrentThread()->
       ReportTestPartResult(result);
 
+  result_type = result.type();
   if (result_type != TestPartResult::kSuccess &&
       result_type != TestPartResult::kSkip) {
     // gtest_break_on_failure takes precedence over

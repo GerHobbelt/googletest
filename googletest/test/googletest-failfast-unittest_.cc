@@ -132,10 +132,11 @@ class MyTestListener : public ::testing::EmptyTestEventListener {
            test_info.name());
   }
 
-  void OnTestPartResult(
+  ::testing::TestPartResult OnTestPartResult(
       const ::testing::TestPartResult& test_part_result) override {
     printf("We are in OnTestPartResult %s:%d.\n", test_part_result.file_name(),
            test_part_result.line_number());
+	return test_part_result;
   }
 
   void OnTestEnd(const ::testing::TestInfo& test_info) override {

@@ -87,8 +87,9 @@ class EventRecordingListener : public TestEventListener {
     g_events->push_back(GetFullMethodName("OnTestStart"));
   }
 
-  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {
+  TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
     g_events->push_back(GetFullMethodName("OnTestPartResult"));
+	return test_part_result;
   }
 
   void OnTestEnd(const TestInfo& /*test_info*/) override {
@@ -163,8 +164,9 @@ class EventRecordingListener2 : public TestEventListener {
     g_events->push_back(GetFullMethodName("OnTestStart"));
   }
 
-  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {
+  TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
     g_events->push_back(GetFullMethodName("OnTestPartResult"));
+	return test_part_result;
   }
 
   void OnTestEnd(const TestInfo& /*test_info*/) override {

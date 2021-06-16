@@ -67,7 +67,7 @@ class TersePrinter : public EmptyTestEventListener {
   }
 
   // Called after a failed assertion or a SUCCEED() invocation.
-  void OnTestPartResult(const TestPartResult& test_part_result) override {
+  TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
     fprintf(stdout,
             "%s in %s:%d\n%s\n",
             test_part_result.failed() ? "*** Failure" : "Success",
@@ -75,6 +75,7 @@ class TersePrinter : public EmptyTestEventListener {
             test_part_result.line_number(),
             test_part_result.summary());
     fflush(stdout);
+	return test_part_result;
   }
 
   // Called after a test ends.

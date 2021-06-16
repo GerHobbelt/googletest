@@ -71,6 +71,10 @@ class GTEST_API_ TestPartResult {
   // Gets the outcome of the test part.
   Type type() const { return type_; }
 
+  void change_type(Type a_type) {
+	  type_ = a_type;
+  }
+
   // Gets the name of the source file where the test part took place, or
   // NULL if it's unknown.
   const char* file_name() const {
@@ -150,7 +154,7 @@ class GTEST_API_ TestPartResultReporterInterface {
  public:
   virtual ~TestPartResultReporterInterface() {}
 
-  virtual void ReportTestPartResult(const TestPartResult& result) = 0;
+  virtual TestPartResult ReportTestPartResult(const TestPartResult& result) = 0;
 };
 
 namespace internal {
@@ -166,7 +170,7 @@ class GTEST_API_ HasNewFatalFailureHelper
  public:
   HasNewFatalFailureHelper();
   ~HasNewFatalFailureHelper() override;
-  void ReportTestPartResult(const TestPartResult& result) override;
+  TestPartResult ReportTestPartResult(const TestPartResult& result) override;
   bool has_new_fatal_failure() const { return has_new_fatal_failure_; }
  private:
   bool has_new_fatal_failure_;

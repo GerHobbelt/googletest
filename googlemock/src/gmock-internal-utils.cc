@@ -95,13 +95,15 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
  public:
   void ReportFailure(FailureType type, const char* file, int line,
                      const std::string& message) override {
-    AssertHelper(type == kFatal ?
+	AssertHelper a(type == kFatal ?
                  TestPartResult::kFatalFailure :
                  TestPartResult::kNonFatalFailure,
                  file,
                  line,
-                 message.c_str()) = Message();
-    if (type == kFatal) {
+	             message.c_str());
+	a = Message();
+	// when no userland callback overrode the test result, we abort as planned:
+    if (type == kFatal && a.type() == TestPartResult::kFatalFailure) {
       posix::Abort();
     }
   }

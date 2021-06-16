@@ -246,15 +246,15 @@ class MatcherBase : private MatcherDescriberInterface {
  public:
   // Returns true if and only if the matcher matches x; also explains the
   // match result to 'listener'.
-  bool MatchAndExplain(const T& x, MatchResultListener* listener) const {
+  bool MatchAndExplain(const T& xx, MatchResultListener* listener) const {
     GTEST_CHECK_(vtable_ != nullptr);
-    return vtable_->match_and_explain(*this, x, listener);
+    return vtable_->match_and_explain(*this, xx, listener);
   }
 
   // Returns true if and only if this matcher matches x.
-  bool Matches(const T& x) const {
+  bool Matches(const T& xx) const {
     DummyMatchResultListener dummy;
-    return MatchAndExplain(x, &dummy);
+    return MatchAndExplain(xx, &dummy);
   }
 
   // Describes this matcher to an ostream.
@@ -659,8 +659,8 @@ class PolymorphicMatcher {
       impl_.DescribeNegationTo(os);
     }
 
-    bool MatchAndExplain(T x, MatchResultListener* listener) const override {
-      return impl_.MatchAndExplain(x, listener);
+    bool MatchAndExplain(T xx, MatchResultListener* listener) const override {
+      return impl_.MatchAndExplain(xx, listener);
     }
 
    private:
