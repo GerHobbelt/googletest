@@ -1063,7 +1063,11 @@ GTestLog::~GTestLog() {
   GetStream() << ::std::endl;
   if (severity_ == GTEST_FATAL) {
     fflush(stderr);
-    posix::Abort();
+#if 0
+	posix::Abort();
+#else
+	throw std::runtime_error("logging FATAL level: aborting the application");
+#endif
   }
 }
 

@@ -609,8 +609,12 @@ class GTEST_API_ TypedTestSuitePState {
               "REGISTER_TYPED_TEST_SUITE_P(%s, ...).\n",
               FormatFileLocation(file, line).c_str(), test_name, case_name);
       fflush(stderr);
-      posix::Abort();
-    }
+#if 0
+	  posix::Abort();
+#else
+	  throw std::runtime_error("AddTestName: test suite hasn't been registered");
+#endif
+	}
     registered_tests_.insert(
         ::std::make_pair(test_name, CodeLocation(file, line)));
     return true;
@@ -789,8 +793,12 @@ class TypeParameterizedTestSuite {
               FormatFileLocation(code_location.file.c_str(),
                                  code_location.line).c_str());
       fflush(stderr);
-      posix::Abort();
-    }
+#if 0
+	  posix::Abort();
+#else
+	  throw std::runtime_error("Register Test: Failed to get code location for test");
+#endif
+	}
     const CodeLocation& test_location = state->GetCodeLocation(test_name);
 
     typedef typename Tests::Head Head;

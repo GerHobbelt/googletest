@@ -294,11 +294,19 @@ static void DeathTestAbort(const std::string& message) {
     fputc(kDeathTestInternalError, parent);
     fprintf(parent, "%s", message.c_str());
     fflush(parent);
-    _exit(1);
+#if 0
+	_exit(1);
+#else
+	throw std::runtime_error("DeathTestAbort: aborting death test child process");
+#endif
   } else {
     fprintf(stderr, "%s", message.c_str());
     fflush(stderr);
-    posix::Abort();
+#if 0
+	posix::Abort();
+#else
+	throw std::runtime_error("DeathTestAbort: aborting death test child process");
+#endif
   }
 }
 

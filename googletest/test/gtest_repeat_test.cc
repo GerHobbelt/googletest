@@ -60,7 +60,8 @@ namespace {
                   << "  Actual: " << actual_val << "\n"\
                   << "Expected: " #expected "\n"\
                   << "Which is: " << expected_val << "\n";\
-      ::testing::internal::posix::Abort();\
+      throw std::runtime_error("GTEST_CHECK: internal test failed");\
+      /* ::testing::internal::posix::Abort(); */ \
     }\
   } while (::testing::internal::AlwaysFalse())
 
@@ -105,9 +106,11 @@ TEST(BarDeathTest, ThreadSafeAndFast) {
 
   GTEST_FLAG(death_test_style) = "threadsafe";
   EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(), "");
+  EXPECT_DEATH_IF_SUPPORTED(throw std::runtime_error("BarDeathTest"), "");
 
   GTEST_FLAG(death_test_style) = "fast";
   EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(), "");
+  EXPECT_DEATH_IF_SUPPORTED(throw std::runtime_error("BarDeathTest"), "");
 }
 
 int g_param_test_count = 0;

@@ -65,7 +65,7 @@ class Water {
   static int allocated_;
 };
 
-static int Water::allocated_ = 0;
+int Water::allocated_ = 0;
 
 // This event listener monitors how many Water objects are created and
 // destroyed by each test, and reports a failure if a test leaks some Water

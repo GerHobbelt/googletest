@@ -600,7 +600,7 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
     }  // for test_it
 
     if (!generated_instantiations) {
-      // There are no generaotrs, or they all generate nothing ...
+      // There are no generators, or they all generate nothing ...
       InsertSyntheticTestCase(GetTestSuiteName(), code_location_,
                               !tests_.empty());
     }
@@ -700,10 +700,14 @@ class ParameterizedTestSuiteRegistry {
       if (test_suite_info->GetTestSuiteName() == test_suite_name) {
         if (test_suite_info->GetTestSuiteTypeId() != GetTypeId<TestSuite>()) {
           // Complain about incorrect usage of Google Test facilities
-          // and terminate the program since we cannot guaranty correct
+          // and terminate the program since we cannot guarantee correct
           // test suite setup and tear-down in this case.
           ReportInvalidTestSuiteType(test_suite_name, code_location);
-          posix::Abort();
+#if 0
+		  posix::Abort();
+#else
+		  throw std::runtime_error("Incorrect usage of Google Test facilities");
+#endif
         } else {
           // At this point we are sure that the object we found is of the same
           // type we are looking for, so we downcast it to that type

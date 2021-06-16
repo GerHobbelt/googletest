@@ -111,8 +111,13 @@ TEST(FooTest, Bar) {
 // Prints the message and aborts the program if condition is false.
 static void Check(bool condition, const char* msg) {
   if (!condition) {
-    printf("FAILED: %s\n", msg);
-    testing::internal::posix::Abort();
+    fprintf(stderr, "FAILED: %s\n", msg);
+	fflush(stderr);
+#if 0
+	testing::internal::posix::Abort();
+#else
+	throw std::runtime_error("Check: failed");
+#endif
   }
 }
 
