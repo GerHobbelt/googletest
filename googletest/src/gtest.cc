@@ -2597,6 +2597,35 @@ GoogleTestFailureException::GoogleTestFailureException(
 // We put these helper functions in the internal namespace as IBM's xlC
 // compiler rejects the code if they were declared static.
 
+// Runs the given method and handles SEH exceptions it throws, when
+// SEH is supported; returns the 0-value for type Result in case of an
+// SEH exception.  (Microsoft compilers cannot handle SEH and C++
+// exceptions in the same function.  Therefore, we provide a separate
+// wrapper function for handling SEH exceptions.)
+template <class T, typename Result>
+Result HandleSehExceptionsInMethodIfSupported(
+    T* object, Result (T::*method)(), const char* location) {
+#if GTEST_HAS_SEH
+  __try {
+    return (object->*method)();
+  } __except (internal::UnitTestOptions::GTestShouldProcessSEH(  // NOLINT
+      GetExceptionCode())) {
+    // We create the exception message on the heap because VC++ prohibits
+    // creation of objects with destructors on stack in functions using __try
+    // (see error C2712).
+    std::string* exception_message = FormatSehExceptionMessage(
+        GetExceptionCode(), location);
+    internal::ReportFailureInUnknownLocation(TestPartResult::kFatalFailure,
+                                             *exception_message);
+    delete exception_message;
+    return static_cast<Result>(0);
+  }
+#else
+  (void)location;
+  return (object->*method)();
+#endif  // GTEST_HAS_SEH
+}
+
 // Runs the given method and catches and reports C++ and/or SEH-style
 // exceptions, if they are supported; returns the 0-value for type
 // Result in case of an SEH exception.
@@ -2629,7 +2658,7 @@ Result HandleExceptionsInMethodIfSupported(
   if (internal::GetUnitTestImpl()->catch_exceptions()) {
 #if GTEST_HAS_EXCEPTIONS
     try {
-	  return (object->*method)();
+      return HandleSehExceptionsInMethodIfSupported(object, method, location);
     } catch (const AssertionException&) {  // NOLINT
       // This failure was reported already.
     } catch (const internal::GoogleTestFailureException&) {  // NOLINT
@@ -2655,39 +2684,10 @@ Result HandleExceptionsInMethodIfSupported(
     return static_cast<Result>(0);
 #else
     return HandleSehExceptionsInMethodIfSupported(object, method, location);
-	return (object->*method)();
 #endif  // GTEST_HAS_EXCEPTIONS
   } else {
     return (object->*method)();
   }
-}
-
-// Runs the given method and handles SEH exceptions it throws, when
-// SEH is supported; returns the 0-value for type Result in case of an
-// SEH exception.  (Microsoft compilers cannot handle SEH and C++
-// exceptions in the same function.  Therefore, we provide a separate
-// wrapper function for handling SEH exceptions.)
-template <class T, typename Result>
-Result HandleSehExceptionsInMethodIfSupported(
-    T* object, Result (T::*method)(), const char* location) {
-#if GTEST_HAS_SEH
-  __try {
-    return HandleExceptionsInMethodIfSupported(object, method, location);
-  } __except (internal::UnitTestOptions::GTestShouldProcessSEH(  // NOLINT
-      GetExceptionCode())) {
-    // We create the exception message on the heap because VC++ prohibits
-    // creation of objects with destructors on stack in functions using __try
-    // (see error C2712).
-    std::string* exception_message = FormatSehExceptionMessage(
-        GetExceptionCode(), location);
-    internal::ReportFailureInUnknownLocation(TestPartResult::kFatalFailure,
-                                             *exception_message);
-    delete exception_message;
-    return static_cast<Result>(0);
-  }
-#else
-  return HandleExceptionsInMethodIfSupported(object, method, location);
-#endif  // GTEST_HAS_SEH
 }
 
 // Runs the given method and handles all exceptions it throws, when
@@ -2697,8 +2697,9 @@ template <class T, typename Result>
 Result HandleAllExceptionsInMethodIfSupported(
 	T* object, Result(T::* method)(), const char* location) {
   // Outer handler must be the SEH handler to catch them all.
-  return HandleSehExceptionsInMethodIfSupported(object, method, location);
+  return HandleExceptionsInMethodIfSupported(object, method, location);
 }
+
 }  // namespace internal
 
 // Runs the test and updates the test result.
