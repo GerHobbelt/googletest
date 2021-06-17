@@ -2151,35 +2151,14 @@ inline const char* GetEnv(const char* name) {
 #endif
 }
 
+[[noreturn]] void ExitThread(int retval);
+
 GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
-#if GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
-[[noreturn]] void Abort();
-#else
-[[noreturn]] inline void Abort() {
-#if 0
-	abort();
-#else
-	//fprintf(stderr, "Abort on Fatal Failure...\n");
-	//fflush(stderr);
-	static int attempts = 0;
-	if (!attempts)
-	{
-		attempts++;
-		//fprintf(stderr, "Throwing C++ exception\n");
-		throw std::exception("");
-	}
-	attempts++;
-	//fprintf(stderr, "Triggering SEH exception\n");
-	//fflush(stderr);
-	volatile int* pInt = 0x00000000;
-	*pInt = 20;
-#endif
-}
-#endif  // GTEST_OS_WINDOWS_MOBILE
+[[noreturn]] void Abort(const char* msg);
 
 }  // namespace posix
 

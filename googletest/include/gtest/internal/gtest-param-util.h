@@ -703,11 +703,7 @@ class ParameterizedTestSuiteRegistry {
           // and terminate the program since we cannot guarantee correct
           // test suite setup and tear-down in this case.
           ReportInvalidTestSuiteType(test_suite_name, code_location);
-#if 0
-		  posix::Abort();
-#else
-		  throw std::runtime_error("Incorrect usage of Google Test facilities");
-#endif
+		  posix::Abort("Incorrect usage of Google Test facilities");
         } else {
           // At this point we are sure that the object we found is of the same
           // type we are looking for, so we downcast it to that type

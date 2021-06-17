@@ -302,11 +302,7 @@ static void DeathTestAbort(const std::string& message) {
   } else {
     fprintf(stderr, "%s", message.c_str());
     fflush(stderr);
-#if 0
-	posix::Abort();
-#else
-	throw std::runtime_error("DeathTestAbort: aborting death test child process");
-#endif
+	posix::Abort("DeathTestAbort: aborting death test child process");
   }
 }
 
@@ -533,7 +529,13 @@ void DeathTestImpl::Abort(AbortReason reason) {
   // may assert. As there are no in-process buffers to flush here, we are
   // relying on the OS to close the descriptor after the process terminates
   // when the destructors are not run.
-  _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
+  //
+  // [EDIT GerHobbelt] I disagree. We can simply close the descriptor here
+  // and then assign it an invalid one. No double close that way.
+  posix::Close(write_fd());
+  set_write_fd(-1);
+
+  posix::ExitThread(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 
 // Returns an indented copy of stderr output for a death test.

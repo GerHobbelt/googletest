@@ -70,12 +70,8 @@ void TestPartResultArray::Append(const TestPartResult& result) {
 // Returns the TestPartResult at the given index (0-based).
 const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
   if (index < 0 || index >= size()) {
-    printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
-#if 0
-	internal::posix::Abort();
-#else
-	throw std::runtime_error("GetTestPartResult: index out of range");
-#endif
+    fprintf(stderr, "\nInvalid index (%d) into TestPartResultArray.\n", index);
+	internal::posix::Abort("GetTestPartResult: index out of range");
   }
 
   return array_[static_cast<size_t>(index)];

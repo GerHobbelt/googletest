@@ -104,13 +104,10 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
 	a = Message();
 	// when no userland callback overrode the test result, we abort as planned:
     if (type == kFatal && a.type() == TestPartResult::kFatalFailure) {
-#if 0
-		posix::Abort();
-#else
-		char failmsg[1024];
+		char failmsg[256];
 		snprintf(failmsg, sizeof(failmsg), "FAIL: (%s:%d) %s", (file ? file : "???"), (line > 0 ? line : 0), message.c_str());
-		throw std::runtime_error(failmsg);
-#endif
+		failmsg[sizeof(failmsg) - 1] = 0;
+		posix::Abort(failmsg);
 	}
   }
 };

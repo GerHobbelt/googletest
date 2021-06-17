@@ -1517,6 +1517,10 @@ GTEST_API_ void InitGoogleTest();
 
 namespace internal {
 
+// g_help_flag is true if and only if the --help flag or an equivalent form
+// is specified on the command line.
+GTEST_API_ extern bool g_help_flag;
+
 // Separate the error generating code from the code path to reduce the stack
 // frame size of CmpHelperEQ. This helps reduce the overhead of some sanitizers
 // when calling EXPECT_* in a tight loop.
@@ -1985,6 +1989,19 @@ class TestWithParam : public Test, public WithParamInterface<T> {
                       GTEST_FATAL_FAILURE_)
 #define GTEST_ASSERT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
+                      GTEST_FATAL_FAILURE_)
+
+#define GTEST_EXPECT_TRUE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(condition, ::testing::Message() << #condition << " :: " << message, false, true, \
+                      GTEST_NONFATAL_FAILURE_)
+#define GTEST_EXPECT_FALSE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(!(condition), #condition << " :: " << message, true, false, \
+                      GTEST_NONFATAL_FAILURE_)
+#define GTEST_ASSERT_TRUE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(condition, #condition << " :: " << message, false, true, \
+                      GTEST_FATAL_FAILURE_)
+#define GTEST_ASSERT_FALSE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(!(condition), #condition << " :: " << message, true, false, \
                       GTEST_FATAL_FAILURE_)
 
 // Define these macros to 1 to omit the definition of the corresponding

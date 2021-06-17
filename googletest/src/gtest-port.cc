@@ -1063,11 +1063,7 @@ GTestLog::~GTestLog() {
   GetStream() << ::std::endl;
   if (severity_ == GTEST_FATAL) {
     fflush(stderr);
-#if 0
-	posix::Abort();
-#else
-	throw std::runtime_error("logging FATAL level: aborting the application");
-#endif
+	posix::Abort("logging FATAL level: aborting the application");
   }
 }
 
@@ -1258,14 +1254,50 @@ void ClearInjectableArgvs() {
 }
 #endif  // GTEST_HAS_DEATH_TEST
 
-#if GTEST_OS_WINDOWS_MOBILE
 namespace posix {
-void Abort() {
+
+#if GTEST_OS_WINDOWS_MOBILE
+[[noreturn]] void Abort(const char* msg) {
   DebugBreak();
   TerminateProcess(GetCurrentProcess(), 1);
 }
-}  // namespace posix
+#else
+[[noreturn]] void Abort(const char* msg) {
+	fprintf(stderr, "Abort on Fatal Failure...\n");
+	fputs(msg, stderr);
+	fputs("\n", stderr);
+	fflush(stderr);
+	DebugBreak();
+	static int attempts = 0;
+	if (!attempts)
+	{
+		attempts++;
+		//fprintf(stderr, "Throwing C++ exception\n");
+		throw std::exception(msg);
+	}
+	attempts++;
+	fprintf(stderr, "Triggering SEH exception\n");
+	fflush(stderr);
+	volatile int* pInt = 0x00000000;
+	*pInt = 20;
+#if 0
+	abort();
+#endif
+}
 #endif  // GTEST_OS_WINDOWS_MOBILE
+
+[[noreturn]] void ExitThread(int retval) {
+	fprintf(stderr, "Exiting thread (exit code: %d)...\n", retval);
+	fflush(stderr);
+#if defined(_WIN32) || defined(WIN32)
+	DebugBreak();
+#elif defined(SIGTRAP)
+	raise(SIGTRAP);
+#endif
+	_exit(retval);
+}
+
+}  // namespace posix
 
 // Returns the name of the environment variable corresponding to the
 // given flag.  For example, FlagToEnvVar("foo") will return

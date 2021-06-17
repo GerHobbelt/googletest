@@ -113,11 +113,7 @@ static void Check(bool condition, const char* msg) {
   if (!condition) {
     fprintf(stderr, "FAILED: %s\n", msg);
 	fflush(stderr);
-#if 0
-	testing::internal::posix::Abort();
-#else
-	throw std::runtime_error("Check: failed");
-#endif
+	testing::internal::posix::Abort("Check: failed");
   }
 }
 
