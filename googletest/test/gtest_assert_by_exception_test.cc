@@ -38,10 +38,11 @@
 #include <stdexcept>
 
 class ThrowListener : public testing::EmptyTestEventListener {
-  void OnTestPartResult(const testing::TestPartResult& result) override {
+  testing::TestPartResult OnTestPartResult(const testing::TestPartResult& result) override {
     if (result.type() == testing::TestPartResult::kFatalFailure) {
       throw testing::AssertionException(result);
     }
+	return result;
   }
 };
 
@@ -49,7 +50,7 @@ class ThrowListener : public testing::EmptyTestEventListener {
 // non-zero.  We use this instead of a Google Test assertion to
 // indicate a failure, as the latter is been tested and cannot be
 // relied on.
-void Fail(const char* msg) {
+static void Fail(const char* msg) {
   printf("FAILURE: %s\n", msg);
   fflush(stdout);
   exit(1);
@@ -93,11 +94,15 @@ TEST(Test, Test) {
   Fail("A failed assertion should've thrown but didn't.");
 }
 
-int kTestForContinuingTest = 0;
+static int kTestForContinuingTest = 0;
 
 TEST(Test, Test2) {
   kTestForContinuingTest = 1;
 }
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_assert_ex_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);

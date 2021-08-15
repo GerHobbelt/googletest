@@ -188,24 +188,24 @@ void InitGoogleMockImpl(int* argc, const CharType** argv) {
 // Since Google Test is needed for Google Mock to work, this function
 // also initializes Google Test and parses its flags, if that hasn't
 // been done.
-GTEST_API_ void InitGoogleMock(int* argc, const char** argv) {
+GMOCK_API_ void InitGoogleMock(int* argc, const char** argv) {
   internal::InitGoogleMockImpl(argc, argv);
 }
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-GTEST_API_ void InitGoogleMock(int* argc, const wchar_t** argv) {
+GMOCK_API_ void InitGoogleMock(int* argc, const wchar_t** argv) {
   internal::InitGoogleMockImpl(argc, argv);
 }
 
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.
-GTEST_API_ void InitGoogleMock() {
+GMOCK_API_ void InitGoogleMock() {
   // Since Arduino doesn't have a command line, fake out the argc/argv arguments
   int argc = 1;
   const auto arg0 = "dummy";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
+  const char* argv0 = const_cast<char*>(arg0);
+  const char** argv = &argv0;
 
   internal::InitGoogleMockImpl(&argc, argv);
 }

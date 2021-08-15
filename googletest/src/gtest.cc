@@ -853,9 +853,10 @@ ScopedFakeTestPartResultReporter::~ScopedFakeTestPartResultReporter() {
 
 // Increments the test part result count and remembers the result.
 // This method is from the TestPartResultReporterInterface interface.
-void ScopedFakeTestPartResultReporter::ReportTestPartResult(
+TestPartResult ScopedFakeTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
   result_->Append(result);
+  return result;
 }
 
 namespace internal {
@@ -935,18 +936,19 @@ SingleFailureChecker::~SingleFailureChecker() {
 DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
     UnitTestImpl* unit_test) : unit_test_(unit_test) {}
 
-void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
+TestPartResult DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
-  unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->listeners()->repeater()->OnTestPartResult(result);
+	TestPartResult r = unit_test_->listeners()->repeater()->OnTestPartResult(result);
+	unit_test_->current_test_result()->AddTestPartResult(r);
+	return result;
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
     UnitTestImpl* unit_test) : unit_test_(unit_test) {}
 
-void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
+TestPartResult DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
-  unit_test_->GetGlobalTestPartResultReporter()->ReportTestPartResult(result);
+  return unit_test_->GetGlobalTestPartResultReporter()->ReportTestPartResult(result);
 }
 
 // Returns the global test part result reporter.
@@ -1567,10 +1569,22 @@ AssertionResult EqFailure(const char* lhs_expression,
   return AssertionFailure() << msg;
 }
 
+std::string GetBoolAssertionFailureMessage(
+	const AssertionResult& assertion_result,
+	const char* expression_text,
+	const char* actual_predicate_value,
+	const char* expected_predicate_value) {
+	return GetBoolAssertionFailureMessage(
+		assertion_result,
+		Message() << expression_text,
+		actual_predicate_value,
+		expected_predicate_value);
+}
+
 // Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
 std::string GetBoolAssertionFailureMessage(
     const AssertionResult& assertion_result,
-    const char* expression_text,
+    const Message expression_text,
     const char* actual_predicate_value,
     const char* expected_predicate_value) {
   const char* actual_message = assertion_result.message();
@@ -2234,7 +2248,9 @@ TestResult::~TestResult() {
 // aborts the program.
 const TestPartResult& TestResult::GetTestPartResult(int i) const {
   if (i < 0 || i >= total_part_count())
-    internal::posix::Abort("TestResult::GetTestPartResult");
+  {
+	  internal::posix::Abort("GetTestPartResult: index out of range");
+  }
   return test_part_results_.at(static_cast<size_t>(i));
 }
 
@@ -2243,7 +2259,9 @@ const TestPartResult& TestResult::GetTestPartResult(int i) const {
 // program.
 const TestProperty& TestResult::GetTestProperty(int i) const {
   if (i < 0 || i >= test_property_count())
-    internal::posix::Abort("TestResult::GetTestProperty");
+  {
+	  internal::posix::Abort("GetTestProperty: index out of range");
+  }
   return test_properties_.at(static_cast<size_t>(i));
 }
 
@@ -2480,7 +2498,7 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message) {
   // This function is a friend of UnitTest and as such has access to
   // AddTestPartResult.
-  UnitTest::GetInstance()->AddTestPartResult(
+  return UnitTest::GetInstance()->AddTestPartResult(
       result_type,
       nullptr,  // No info about the source file where the exception occurred.
       -1,       // We have no info on which line caused the exception.
@@ -2676,6 +2694,12 @@ Result HandleExceptionsInMethodIfSupported(
       internal::ReportFailureInUnknownLocation(
           TestPartResult::kFatalFailure,
           FormatCxxExceptionMessage(e.what(), location));
+    } catch (const std::exception* e) {  // NOLINT
+	  // https://stackoverflow.com/questions/30560422/exception-not-caught-in-try-catch-block/48578928#48578928
+      internal::ReportFailureInUnknownLocation(
+          TestPartResult::kFatalFailure,
+          FormatCxxExceptionMessage(e->what(), location));
+	  delete e;
     } catch (...) {  // NOLINT
       internal::ReportFailureInUnknownLocation(
           TestPartResult::kFatalFailure,
@@ -2690,6 +2714,16 @@ Result HandleExceptionsInMethodIfSupported(
   }
 }
 
+// Runs the given method and handles all exceptions it throws, when
+// SEH and C++ exception handling are supported;
+// returns the 0-value for type Result in case of an exception.
+template <class T, typename Result>
+Result HandleAllExceptionsInMethodIfSupported(
+	T* object, Result(T::* method)(), const char* location) {
+  // Outer handler must be the SEH handler to catch them all.
+  return HandleExceptionsInMethodIfSupported(object, method, location);
+}
+
 }  // namespace internal
 
 // Runs the test and updates the test result.
@@ -2698,12 +2732,12 @@ void Test::Run() {
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  internal::HandleExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
+  internal::HandleAllExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
   // We will run the test only if SetUp() was successful and didn't call
   // GTEST_SKIP().
   if (!HasFatalFailure() && !IsSkipped()) {
     impl->os_stack_trace_getter()->UponLeavingGTest();
-    internal::HandleExceptionsInMethodIfSupported(
+    internal::HandleAllExceptionsInMethodIfSupported(
         this, &Test::TestBody, "the test body");
   }
 
@@ -2711,7 +2745,7 @@ void Test::Run() {
   // always call TearDown(), even if SetUp() or the test body has
   // failed.
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  internal::HandleExceptionsInMethodIfSupported(
+  internal::HandleAllExceptionsInMethodIfSupported(
       this, &Test::TearDown, "TearDown()");
 }
 
@@ -2872,7 +2906,7 @@ void TestInfo::Run() {
   impl->os_stack_trace_getter()->UponLeavingGTest();
 
   // Creates the test object.
-  Test* const test = internal::HandleExceptionsInMethodIfSupported(
+  Test* const test = internal::HandleAllExceptionsInMethodIfSupported(
       factory_, &internal::TestFactoryBase::CreateTest,
       "the test fixture's constructor");
 
@@ -2888,7 +2922,7 @@ void TestInfo::Run() {
   if (test != nullptr) {
     // Deletes the test object.
     impl->os_stack_trace_getter()->UponLeavingGTest();
-    internal::HandleExceptionsInMethodIfSupported(
+    internal::HandleAllExceptionsInMethodIfSupported(
         test, &Test::DeleteSelf_, "the test fixture's destructor");
   }
 
@@ -2914,9 +2948,9 @@ void TestInfo::Skip() {
   // Notifies the unit test event listeners that a test is about to start.
   repeater->OnTestStart(*this);
 
-  const TestPartResult test_part_result =
+  TestPartResult test_part_result =
       TestPartResult(TestPartResult::kSkip, this->file(), this->line(), "");
-  impl->GetTestPartResultReporterForCurrentThread()->ReportTestPartResult(
+  test_part_result = impl->GetTestPartResultReporterForCurrentThread()->ReportTestPartResult(
       test_part_result);
 
   // Notifies the unit test event listener that a test has just finished.
@@ -3030,7 +3064,7 @@ void TestSuite::Run() {
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  internal::HandleExceptionsInMethodIfSupported(
+  internal::HandleAllExceptionsInMethodIfSupported(
       this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
   start_timestamp_ = internal::GetTimeInMillis();
@@ -3048,7 +3082,7 @@ void TestSuite::Run() {
   elapsed_time_ = timer.Elapsed();
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
-  internal::HandleExceptionsInMethodIfSupported(
+  internal::HandleAllExceptionsInMethodIfSupported(
       this, &TestSuite::RunTearDownTestSuite, "TearDownTestSuite()");
 
   // Call both legacy and the new API
@@ -3391,7 +3425,7 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
 
   void OnTestStart(const TestInfo& test_info) override;
 
-  void OnTestPartResult(const TestPartResult& result) override;
+  TestPartResult OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& test_case) override;
@@ -3490,17 +3524,18 @@ void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
 }
 
 // Called after an assertion failure.
-void PrettyUnitTestResultPrinter::OnTestPartResult(
+TestPartResult PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   switch (result.type()) {
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
-      return;
+      return result;
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
       fflush(stdout);
+	  return result;
   }
 }
 
@@ -3692,7 +3727,7 @@ class BriefUnitTestResultPrinter : public TestEventListener {
 
   void OnTestStart(const TestInfo& /*test_info*/) override {}
 
-  void OnTestPartResult(const TestPartResult& result) override;
+  TestPartResult OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& /*test_case*/) override {}
@@ -3707,17 +3742,18 @@ class BriefUnitTestResultPrinter : public TestEventListener {
 };
 
 // Called after an assertion failure.
-void BriefUnitTestResultPrinter::OnTestPartResult(
+TestPartResult BriefUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   switch (result.type()) {
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
-      return;
+      return result;
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
       fflush(stdout);
+	  return result;
   }
 }
 
@@ -3797,7 +3833,7 @@ class TestEventRepeater : public TestEventListener {
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestSuiteStart(const TestSuite& parameter) override;
   void OnTestStart(const TestInfo& test_info) override;
-  void OnTestPartResult(const TestPartResult& result) override;
+  TestPartResult OnTestPartResult(const TestPartResult& result) override;
   void OnTestEnd(const TestInfo& test_info) override;
 //  Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -3848,6 +3884,16 @@ void TestEventRepeater::Name(const Type& parameter) { \
     } \
   } \
 }
+#define GTEST_REPEATER_METHOD_RETURN_(Name, Type) \
+Type TestEventRepeater::Name(const Type& parameter) { \
+  Type arg = parameter; \
+  if (forwarding_enabled_) { \
+    for (size_t i = 0; i < listeners_.size(); i++) { \
+      arg = listeners_[i]->Name(arg); \
+    } \
+  } \
+  return arg; \
+}
 // This defines a member that forwards the call to all listeners in reverse
 // order.
 #define GTEST_REVERSE_REPEATER_METHOD_(Name, Type)      \
@@ -3867,7 +3913,7 @@ GTEST_REPEATER_METHOD_(OnTestCaseStart, TestSuite)
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 GTEST_REPEATER_METHOD_(OnTestSuiteStart, TestSuite)
 GTEST_REPEATER_METHOD_(OnTestStart, TestInfo)
-GTEST_REPEATER_METHOD_(OnTestPartResult, TestPartResult)
+GTEST_REPEATER_METHOD_RETURN_(OnTestPartResult, TestPartResult)
 GTEST_REPEATER_METHOD_(OnEnvironmentsTearDownStart, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsSetUpEnd, UnitTest)
 GTEST_REVERSE_REPEATER_METHOD_(OnEnvironmentsTearDownEnd, UnitTest)
@@ -3880,6 +3926,7 @@ GTEST_REVERSE_REPEATER_METHOD_(OnTestSuiteEnd, TestSuite)
 GTEST_REVERSE_REPEATER_METHOD_(OnTestProgramEnd, UnitTest)
 
 #undef GTEST_REPEATER_METHOD_
+#undef GTEST_REPEATER_METHOD_RETURN_
 #undef GTEST_REVERSE_REPEATER_METHOD_
 
 void TestEventRepeater::OnTestIterationStart(const UnitTest& unit_test,
@@ -4353,6 +4400,8 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   const std::string kTestsuites = "testsuites";
 
   *stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  *stream << "<?xml-stylesheet type=\"text/xsl\" href=\"gtest-result.xsl\" ?>\n";
+  *stream << "<!DOCTYPE testsuites SYSTEM \"gtest-result.dtd\">\n";
   *stream << "<" << kTestsuites;
 
   OutputXmlAttribute(stream, kTestsuites, "tests",
@@ -5328,11 +5377,12 @@ void UnitTest::AddTestPartResult(
     msg << internal::kStackTraceMarker << os_stack_trace;
   }
 
-  const TestPartResult result = TestPartResult(
+  TestPartResult result = TestPartResult(
       result_type, file_name, line_number, msg.GetString().c_str());
-  impl_->GetTestPartResultReporterForCurrentThread()->
+  result = impl_->GetTestPartResultReporterForCurrentThread()->
       ReportTestPartResult(result);
 
+  result_type = result.type();
   if (result_type != TestPartResult::kSuccess &&
       result_type != TestPartResult::kSkip) {
     // gtest_break_on_failure takes precedence over
@@ -5461,7 +5511,7 @@ int UnitTest::Run() {
   }
 #endif  // GTEST_OS_WINDOWS
 
-  return internal::HandleExceptionsInMethodIfSupported(
+  return internal::HandleAllExceptionsInMethodIfSupported(
       impl(),
       &internal::UnitTestImpl::RunAllTests,
       "auxiliary test code (environments or event listeners)") ? 0 : 1;
@@ -5958,6 +6008,9 @@ bool UnitTestImpl::RunAllTests() {
         "() before calling RUN_ALL_TESTS(). This is INVALID. Soon " GTEST_NAME_
         " will start to enforce the valid usage. "
         "Please fix it ASAP, or IT WILL START TO FAIL.\n");  // NOLINT
+#ifndef GTEST_FOR_GOOGLE_
+# define GTEST_FOR_GOOGLE_ 0
+#endif
 #if GTEST_FOR_GOOGLE_
     ColoredPrintf(GTestColor::kRed,
                   "For more details, see http://wiki/Main/ValidGUnitMain.\n");
@@ -6605,7 +6658,7 @@ static void LoadFlagsFromFile(const std::string& path) {
 // other parts of Google Test.  The type parameter CharType can be
 // instantiated to either char or wchar_t.
 template <typename CharType>
-void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
+void ParseGoogleTestFlagsOnlyImpl(int* argc, const CharType** argv) {
   std::string flagfile_value;
   for (int i = 1; i < *argc; i++) {
     const std::string arg_string = StreamableToString(argv[i]);
@@ -6658,7 +6711,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
-void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
+void ParseGoogleTestFlagsOnly(int* argc, const char** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 
   // Fix the value of *_NSGetArgc() on macOS, but if and only if
@@ -6672,7 +6725,7 @@ void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
 #endif
 #endif
 }
-void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
+void ParseGoogleTestFlagsOnly(int* argc, const wchar_t** argv) {
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 }
 
@@ -6681,7 +6734,7 @@ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
 // The type parameter CharType can be instantiated to either char or
 // wchar_t.
 template <typename CharType>
-void InitGoogleTestImpl(int* argc, CharType** argv) {
+void InitGoogleTestImpl(int* argc, const CharType** argv) {
   // We don't want to run the initialization code twice.
   if (GTestIsInitialized()) return;
 
@@ -6711,7 +6764,7 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 // updated.
 //
 // Calling the function for the second time has no user-visible effect.
-void InitGoogleTest(int* argc, char** argv) {
+void InitGoogleTest(int* argc, const char** argv) {
 #if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(argc, argv);
 #else  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
@@ -6721,7 +6774,7 @@ void InitGoogleTest(int* argc, char** argv) {
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-void InitGoogleTest(int* argc, wchar_t** argv) {
+void InitGoogleTest(int* argc, const wchar_t** argv) {
 #if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(argc, argv);
 #else  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
@@ -6735,8 +6788,8 @@ void InitGoogleTest() {
   // Since Arduino doesn't have a command line, fake out the argc/argv arguments
   int argc = 1;
   const auto arg0 = "dummy";
-  char* argv0 = const_cast<char*>(arg0);
-  char** argv = &argv0;
+  const char* argv0 = const_cast<char*>(arg0);
+  const char** argv = &argv0;
 
 #if defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_(&argc, argv);
@@ -6745,37 +6798,85 @@ void InitGoogleTest() {
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 }
 
+#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+namespace {
+
+// The temporary directory read from the OS canonical environment variable.
+//
+// Returns an empty string if the environment variable is not set. The returned
+// string may or may not end with the OS-specific path separator. The path is
+// not guaranteed to point to an existing directory. The directory it points to
+// is not guaranteed to be writable by the application.
+std::string GetEnvTempDir() {
+#if GTEST_OS_WINDOWS_MOBILE
+  const char* env_result = internal::posix::GetEnv("TEMP");
+#elif GTEST_OS_WINDOWS
+  char temp_dir_path[MAX_PATH + 1] = {'\0'};  // NOLINT
+  if (::GetTempPathA(sizeof(temp_dir_path), temp_dir_path) != 0)
+    return temp_dir_path;
+  const char* env_result = internal::posix::GetEnv("TEMP");
+#else
+  const char* env_result = internal::posix::GetEnv("TMPDIR");
+#endif  // GETST_OS_WINDOWS
+
+  if (env_result == nullptr) return std::string();
+  return env_result;
+}
+
+}  // namespace
+#endif  // !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+
+// A directory suitable for storing temporary files.
+//
+// The returned string will not end with the OS-specific path separator. The
+// path is not guaranteed to point to an existing directory. The directory it
+// points to is not guaranteed to be writable by the application.
+//
+// The built-in implementation attempts to read from an OS-specific environment
+// variable, then falls back to a hard-coded default.
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
-#elif GTEST_OS_WINDOWS_MOBILE
-  return "\\temp\\";
-#elif GTEST_OS_WINDOWS
-  const char* temp_dir = internal::posix::GetEnv("TEMP");
-  if (temp_dir == nullptr || temp_dir[0] == '\0') {
-    return "\\temp\\";
-  } else if (temp_dir[strlen(temp_dir) - 1] == '\\') {
-    return temp_dir;
-  } else {
-    return std::string(temp_dir) + "\\";
-  }
-#elif GTEST_OS_LINUX_ANDROID
-  const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
-  if (temp_dir == nullptr || temp_dir[0] == '\0') {
-    return "/data/local/tmp/";
-  } else {
-    return temp_dir;
-  }
-#elif GTEST_OS_LINUX
-  const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
-  if (temp_dir == nullptr || temp_dir[0] == '\0') {
-    return "/tmp/";
-  } else {
-    return temp_dir;
-  }
 #else
-  return "/tmp/";
+
+  std::string temp_dir = GetEnvTempDir();
+  if (!temp_dir.empty()) {
+    if (temp_dir.back() == GTEST_PATH_SEP_[0])
+      temp_dir.pop_back();
+    return temp_dir;
+  }
+
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS
+  return "\\temp";
+#elif GTEST_OS_LINUX_ANDROID
+  // Android applications are expected to call the framework's
+  // Context.getExternalStorageDirectory() method through JNI to get the
+  // location of the world-writable SD Card directory. However, this requires a
+  // Context handle, which cannot be retrieved globally from native code. Doing
+  // so also precludes running the code as part of a regular standalone
+  // executable, which doesn't run in a Dalvik process (e.g. when running it
+  // through 'adb shell').
+  //
+  // Starting from Android O, the recommended generic temporary directory is
+  // '/data/local/tmp'. The recommended fallback is the current directory,
+  // which is usually accessible in app context.
+  if (::access("/data/local/tmp", R_OK | W_OK | X_OK) == 0)
+    return "/data/local/tmp";
+  const char* current_dir = ::getcwd(nullptr, 0);
+  if (current_dir != nullptr &&
+      ::access(current_dir, R_OK | W_OK | X_OK) == 0) {
+    temp_dir = current_dir;
+    return temp_dir;
+  }
+  // Before Android O, /sdcard is usually available.
+  if (::access("/sdcard", R_OK | W_OK | X_OK) == 0) return "/sdcard";
+  // Generic POSIX fallback.
+  return "/tmp";
+#else
+  return "/tmp";
 #endif  // GTEST_OS_WINDOWS_MOBILE
+
+#endif  // defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
 }
 
 // Class ScopedTrace

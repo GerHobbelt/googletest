@@ -116,19 +116,23 @@ TEST(DISABLED_FoobarbazTest, TestA) {
   FAIL() << "Expected failure.";
 }
 
-class ParamTest : public testing::TestWithParam<int> {
+class ParamFilterTest : public testing::TestWithParam<int> {
 };
 
-TEST_P(ParamTest, TestX) {
+TEST_P(ParamFilterTest, TestX) {
 }
 
-TEST_P(ParamTest, TestY) {
+TEST_P(ParamFilterTest, TestY) {
 }
 
-INSTANTIATE_TEST_SUITE_P(SeqP, ParamTest, testing::Values(1, 2));
-INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, testing::Values(5, 6));
+INSTANTIATE_TEST_SUITE_P(SeqP, ParamFilterTest, testing::Values(1, 2));
+INSTANTIATE_TEST_SUITE_P(SeqQ, ParamFilterTest, testing::Values(5, 6));
 
 }  // namespace
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_filter_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

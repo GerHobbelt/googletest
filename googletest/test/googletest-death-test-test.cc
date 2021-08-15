@@ -117,7 +117,9 @@ void DieWithMessage(const ::std::string& message) {
   // 'unreachable code' warning for code following this function, unless
   // fooled by a fake condition.
   if (AlwaysTrue())
-    _exit(1);
+  {
+	  _exit(1);
+  }
 }
 
 void DieInside(const ::std::string& function) {

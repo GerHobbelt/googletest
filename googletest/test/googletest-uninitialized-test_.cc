@@ -37,6 +37,10 @@ TEST(DummyTest, Dummy) {
   // testing::InitGoogleTest() being called first.
 }
 
-int main() {
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_uninitialized_test_main(cnt, arr)
+#endif
+
+int main(int argc, const char **argv) {
   return RUN_ALL_TESTS();
 }

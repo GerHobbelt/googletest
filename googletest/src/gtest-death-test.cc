@@ -297,11 +297,15 @@ static void DeathTestAbort(const std::string& message) {
     fputc(kDeathTestInternalError, parent);
     fprintf(parent, "%s", message.c_str());
     fflush(parent);
-    _exit(1);
+#if 0
+	_exit(1);
+#else
+	throw std::runtime_error("DeathTestAbort: aborting death test child process");
+#endif
   } else {
     fprintf(stderr, "%s", message.c_str());
     fflush(stderr);
-    posix::Abort(message.c_str());
+	posix::Abort("DeathTestAbort: aborting death test child process");
   }
 }
 
@@ -528,7 +532,13 @@ void DeathTestImpl::Abort(AbortReason reason) {
   // may assert. As there are no in-process buffers to flush here, we are
   // relying on the OS to close the descriptor after the process terminates
   // when the destructors are not run.
-  _exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
+  //
+  // [EDIT GerHobbelt] I disagree. We can simply close the descriptor here
+  // and then assign it an invalid one. No double close that way.
+  posix::Close(write_fd());
+  set_write_fd(-1);
+
+  posix::ExitThread(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
 }
 
 // Returns an indented copy of stderr output for a death test.
@@ -1223,7 +1233,7 @@ class Arguments {
 // A struct that encompasses the arguments to the child process of a
 // threadsafe-style death test process.
 struct ExecDeathTestArgs {
-  char* const* argv;  // Command-line arguments for the child's call to exec
+  const char* const* argv;  // Command-line arguments for the child's call to exec
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 

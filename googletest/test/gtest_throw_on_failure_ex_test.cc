@@ -41,7 +41,7 @@
 // non-zero.  We use this instead of a Google Test assertion to
 // indicate a failure, as the latter is been tested and cannot be
 // relied on.
-void Fail(const char* msg) {
+static void Fail(const char* msg) {
   printf("FAILURE: %s\n", msg);
   fflush(stdout);
   exit(1);
@@ -49,7 +49,7 @@ void Fail(const char* msg) {
 
 // Tests that an assertion failure throws a subclass of
 // std::runtime_error.
-void TestFailureThrowsRuntimeError() {
+static void TestFailureThrowsRuntimeError() {
   GTEST_FLAG_SET(throw_on_failure, true);
 
   // A successful assertion shouldn't throw.
@@ -75,6 +75,10 @@ void TestFailureThrowsRuntimeError() {
   }
   Fail("A failed assertion should've thrown but didn't.");
 }
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_throw_on_fail_ex_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);

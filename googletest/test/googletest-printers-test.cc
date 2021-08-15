@@ -812,6 +812,7 @@ TEST(PrintArrayTest, Char8ArrayWithTerminatingNul) {
 }
 #endif
 
+#if 0
 // const char16_t array without terminating NUL.
 TEST(PrintArrayTest, Char16ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
@@ -819,6 +820,7 @@ TEST(PrintArrayTest, Char16ArrayWithNoTerminatingNul) {
   EXPECT_EQ("u\"\\x3053\\0\\x3093\\x306B\\x3061\\x306F\" (no terminating NUL)",
             PrintArrayHelper(a));
 }
+#endif
 
 // char16_t array with terminating NUL.
 TEST(PrintArrayTest, Char16ArrayWithTerminatingNul) {
@@ -826,6 +828,7 @@ TEST(PrintArrayTest, Char16ArrayWithTerminatingNul) {
   EXPECT_EQ("u\"\\0\\x3053\\x3093\\x306B\\x3061\\x306F\"", PrintArrayHelper(a));
 }
 
+#if 0
 // char32_t array without terminating NUL.
 TEST(PrintArrayTest, Char32ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
@@ -833,6 +836,7 @@ TEST(PrintArrayTest, Char32ArrayWithNoTerminatingNul) {
   EXPECT_EQ("U\"\\x1F44B\\0\\x1F30C\" (no terminating NUL)",
             PrintArrayHelper(a));
 }
+#endif
 
 // char32_t array with terminating NUL.
 TEST(PrintArrayTest, Char32ArrayWithTerminatingNul) {
@@ -1772,7 +1776,7 @@ TEST(UniversalPrintTest, SmartPointers) {
   std::shared_ptr<int> p3(new int(1979));
   EXPECT_EQ("(ptr = " + PrintPointer(p3.get()) + ", value = 1979)",
             PrintToString(p3));
-#if __cpp_lib_shared_ptr_arrays >= 201611L
+#if defined(__cpp_lib_shared_ptr_arrays) && __cpp_lib_shared_ptr_arrays >= 201611L
   std::shared_ptr<int[]> p4(new int[2]);
   EXPECT_EQ("(" + PrintPointer(p4.get()) + ")", PrintToString(p4));
 #endif
@@ -1791,7 +1795,7 @@ TEST(UniversalPrintTest, SmartPointers) {
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<const int>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile int>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile const int>()));
-#if __cpp_lib_shared_ptr_arrays >= 201611L
+#if defined(__cpp_lib_shared_ptr_arrays) && __cpp_lib_shared_ptr_arrays >= 201611L
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<int[]>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<const int[]>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile int[]>()));

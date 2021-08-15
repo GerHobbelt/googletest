@@ -226,6 +226,10 @@ TEST(NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads) {
 }  // namespace
 }  // namespace testing
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_stress_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
@@ -241,7 +245,11 @@ TEST(StressTest,
      DISABLED_ThreadSafetyTestsAreSkippedWhenGoogleTestIsNotThreadSafe) {
 }
 
-int main(int argc, char **argv) {
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_stress_test_main(cnt, arr)
+#endif
+
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -139,11 +139,11 @@ TEST(NoFixtureTest, RecordProperty) {
   RecordProperty("key", "1");
 }
 
-void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
+static void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
   testing::Test::RecordProperty(key, value);
 }
 
-void ExternalUtilityThatCallsRecordProperty(const std::string& key,
+static void ExternalUtilityThatCallsRecordProperty(const std::string& key,
                                             const std::string& value) {
   testing::Test::RecordProperty(key, value);
 }
@@ -180,6 +180,10 @@ REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, HasTypeParamAttribute);
 typedef testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_xml_output_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);

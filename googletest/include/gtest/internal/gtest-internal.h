@@ -214,6 +214,11 @@ GTEST_API_ std::string GetBoolAssertionFailureMessage(
     const char* expression_text,
     const char* actual_predicate_value,
     const char* expected_predicate_value);
+GTEST_API_ std::string GetBoolAssertionFailureMessage(
+	const AssertionResult& assertion_result,
+	const Message expression_text,
+	const char* actual_predicate_value,
+	const char* expected_predicate_value);
 
 // This template class represents an IEEE floating-point number
 // (either single-precision or double-precision, depending on the
@@ -607,8 +612,8 @@ class GTEST_API_ TypedTestSuitePState {
               "REGISTER_TYPED_TEST_SUITE_P(%s, ...).\n",
               FormatFileLocation(file, line).c_str(), test_name, case_name);
       fflush(stderr);
-      posix::Abort();
-    }
+	  posix::Abort("AddTestName: test suite hasn't been registered");
+	}
     registered_tests_.insert(
         ::std::make_pair(test_name, CodeLocation(file, line)));
     return true;
@@ -787,8 +792,8 @@ class TypeParameterizedTestSuite {
               FormatFileLocation(code_location.file.c_str(),
                                  code_location.line).c_str());
       fflush(stderr);
-      posix::Abort();
-    }
+	  posix::Abort("Register Test: Failed to get code location for test");
+	}
     const CodeLocation& test_location = state->GetCodeLocation(test_name);
 
     typedef typename Tests::Head Head;

@@ -1126,7 +1126,7 @@ class TestEventListener {
   // Fired after a failed assertion or a SUCCEED() invocation.
   // If you want to throw an exception from this function to skip to the next
   // TEST, it must be AssertionException defined above, or inherited from it.
-  virtual void OnTestPartResult(const TestPartResult& test_part_result) = 0;
+  virtual TestPartResult OnTestPartResult(const TestPartResult& test_part_result) = 0;
 
   // Fired after the test ends.
   virtual void OnTestEnd(const TestInfo& test_info) = 0;
@@ -1172,7 +1172,9 @@ class EmptyTestEventListener : public TestEventListener {
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnTestStart(const TestInfo& /*test_info*/) override {}
-  void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {}
+  TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
+	  return test_part_result; 
+  }
   void OnTestEnd(const TestInfo& /*test_info*/) override {}
   void OnTestSuiteEnd(const TestSuite& /*test_suite*/) override {}
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -1506,17 +1508,21 @@ inline Environment* AddGlobalTestEnvironment(Environment* env) {
 // updated.
 //
 // Calling the function for the second time has no user-visible effect.
-GTEST_API_ void InitGoogleTest(int* argc, char** argv);
+GTEST_API_ void InitGoogleTest(int* argc, const char** argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
+GTEST_API_ void InitGoogleTest(int* argc, const wchar_t** argv);
 
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.
 GTEST_API_ void InitGoogleTest();
 
 namespace internal {
+
+// g_help_flag is true if and only if the --help flag or an equivalent form
+// is specified on the command line.
+GTEST_API_ extern bool g_help_flag;
 
 // Separate the error generating code from the code path to reduce the stack
 // frame size of CmpHelperEQ. This helps reduce the overhead of some sanitizers
@@ -1783,6 +1789,10 @@ class GTEST_API_ AssertHelper {
   // streaming; see the GTEST_MESSAGE_ macro below.
   void operator=(const Message& message) const;
 
+  TestPartResult::Type type() const {
+	  return data_->type;
+  }
+
  private:
   // We put our data in a struct so that the size of the AssertHelper class can
   // be as small as possible.  This is important because gcc is incapable of
@@ -1795,7 +1805,7 @@ class GTEST_API_ AssertHelper {
                      const char* msg)
         : type(t), file(srcfile), line(line_num), message(msg) { }
 
-    TestPartResult::Type const type;
+    TestPartResult::Type type;
     const char* const file;
     int const line;
     std::string const message;
@@ -1804,7 +1814,7 @@ class GTEST_API_ AssertHelper {
     GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelperData);
   };
 
-  AssertHelperData* const data_;
+  AssertHelperData* data_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AssertHelper);
 };
@@ -1927,6 +1937,9 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of FAIL(), which is a
 // generic name and clashes with some other libraries.
+#ifndef GTEST_DONT_DEFINE_FAIL
+# define GTEST_DONT_DEFINE_FAIL 0
+#endif
 #if !GTEST_DONT_DEFINE_FAIL
 # define FAIL() GTEST_FAIL()
 #endif
@@ -1936,6 +1949,9 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of SUCCEED(), which
 // is a generic name and clashes with some other libraries.
+#ifndef GTEST_DONT_DEFINE_SUCCEED
+# define GTEST_DONT_DEFINE_SUCCEED 0
+#endif
 #if !GTEST_DONT_DEFINE_SUCCEED
 # define SUCCEED() GTEST_SUCCEED()
 #endif
@@ -1976,6 +1992,19 @@ class TestWithParam : public Test, public WithParamInterface<T> {
                       GTEST_FATAL_FAILURE_)
 #define GTEST_ASSERT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
+                      GTEST_FATAL_FAILURE_)
+
+#define GTEST_EXPECT_TRUE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(condition, ::testing::Message() << #condition << " :: " << message, false, true, \
+                      GTEST_NONFATAL_FAILURE_)
+#define GTEST_EXPECT_FALSE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(!(condition), #condition << " :: " << message, true, false, \
+                      GTEST_NONFATAL_FAILURE_)
+#define GTEST_ASSERT_TRUE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(condition, #condition << " :: " << message, false, true, \
+                      GTEST_FATAL_FAILURE_)
+#define GTEST_ASSERT_FALSE_W_MSG(condition, message) \
+  GTEST_TEST_BOOLEAN_(!(condition), #condition << " :: " << message, true, false, \
                       GTEST_FATAL_FAILURE_)
 
 // Define these macros to 1 to omit the definition of the corresponding
@@ -2072,26 +2101,44 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
 // ASSERT_XY(), which clashes with some users' own code.
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_EQ
+# define GTEST_DONT_DEFINE_ASSERT_EQ 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_EQ
 # define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_NE
+# define GTEST_DONT_DEFINE_ASSERT_NE 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_NE
 # define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_LE
+# define GTEST_DONT_DEFINE_ASSERT_LE 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_LE
 # define ASSERT_LE(val1, val2) GTEST_ASSERT_LE(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_LT
+# define GTEST_DONT_DEFINE_ASSERT_LT 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_LT
 # define ASSERT_LT(val1, val2) GTEST_ASSERT_LT(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_GE
+# define GTEST_DONT_DEFINE_ASSERT_GE 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_GE
 # define ASSERT_GE(val1, val2) GTEST_ASSERT_GE(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_GT
+# define GTEST_DONT_DEFINE_ASSERT_GT 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_GT
 # define ASSERT_GT(val1, val2) GTEST_ASSERT_GT(val1, val2)
 #endif
@@ -2352,6 +2399,9 @@ constexpr bool StaticAssertTypeEq() noexcept {
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
+#ifndef GTEST_DONT_DEFINE_TEST
+# define GTEST_DONT_DEFINE_TEST 0
+#endif
 #if !GTEST_DONT_DEFINE_TEST
 #define TEST(test_suite_name, test_name) GTEST_TEST(test_suite_name, test_name)
 #endif
@@ -2446,7 +2496,7 @@ GTEST_API_ std::string TempDir();
 //   }
 // }
 // ...
-// int main(int argc, char** argv) {
+// int main(int argc, const char** argv) {
 //   std::vector<int> values_to_test = LoadValuesFromConfig();
 //   RegisterMyTests(values_to_test);
 //   ...

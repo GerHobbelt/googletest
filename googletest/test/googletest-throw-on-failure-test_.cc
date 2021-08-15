@@ -43,11 +43,15 @@
 // This terminate handler aborts the program using exit() rather than abort().
 // This avoids showing pop-ups on Windows systems and core dumps on Unix-like
 // ones.
-void TerminateHandler() {
+static void TerminateHandler() {
   fprintf(stderr, "%s\n", "Unhandled C++ exception terminating the program.");
   fflush(nullptr);
   exit(1);
 }
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_throw_on_fail_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char** argv) {
 #if GTEST_HAS_EXCEPTIONS

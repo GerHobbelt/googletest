@@ -97,7 +97,7 @@ const char* TypedTestSuitePState::VerifyRegisteredTestNames(
     fprintf(stderr, "%s %s", FormatFileLocation(file, line).c_str(),
             errors_str.c_str());
     fflush(stderr);
-    posix::Abort(errors_str.c_str());
+	posix::Abort("VerifyRegisteredTestNames: verification failed");
   }
 
   return registered_tests;

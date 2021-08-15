@@ -46,6 +46,10 @@ void loop() { RUN_ALL_TESTS(); }
 
 #else
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_main(cnt, arr)
+#endif
+
 GTEST_API_ int main(int argc, const char **argv) {
   printf("Running main() from %s\n", __FILE__);
   testing::InitGoogleTest(&argc, argv);

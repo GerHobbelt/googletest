@@ -31,19 +31,23 @@
 #include "gtest/gtest.h"
 
 namespace {
-class DummyTest : public ::testing::TestWithParam<const char *> {};
+class DummyInvalidName1Test : public ::testing::TestWithParam<const char *> {};
 
-TEST_P(DummyTest, Dummy) {
+TEST_P(DummyInvalidName1Test, Dummy) {
 }
 
 INSTANTIATE_TEST_SUITE_P(InvalidTestName,
-                         DummyTest,
+                         DummyInvalidName1Test,
                          ::testing::Values("InvalidWithQuotes"),
                          ::testing::PrintToStringParamName());
 
 }  // namespace
 
-int main(int argc, const char *argv[]) {
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_param_inv_name1_test_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

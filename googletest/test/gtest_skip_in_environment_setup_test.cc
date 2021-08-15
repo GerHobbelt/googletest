@@ -40,6 +40,10 @@ class SetupEnvironment : public testing::Environment {
 
 TEST(Test, AlwaysFails) { EXPECT_EQ(true, false); }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_skip_env_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
 

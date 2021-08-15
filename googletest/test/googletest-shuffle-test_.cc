@@ -88,6 +88,10 @@ class TestNamePrinter : public EmptyTestEventListener {
 
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_shuffle_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char **argv) {
   InitGoogleTest(&argc, argv);
 

@@ -464,7 +464,7 @@ class DefaultGlobalTestPartResultReporter
   explicit DefaultGlobalTestPartResultReporter(UnitTestImpl* unit_test);
   // Implements the TestPartResultReporterInterface. Reports the test part
   // result in the current test.
-  void ReportTestPartResult(const TestPartResult& result) override;
+  TestPartResult ReportTestPartResult(const TestPartResult& result) override;
 
  private:
   UnitTestImpl* const unit_test_;
@@ -480,7 +480,7 @@ class DefaultPerThreadTestPartResultReporter
   explicit DefaultPerThreadTestPartResultReporter(UnitTestImpl* unit_test);
   // Implements the TestPartResultReporterInterface. The implementation just
   // delegates to the current global test part result reporter of *unit_test_.
-  void ReportTestPartResult(const TestPartResult& result) override;
+  TestPartResult ReportTestPartResult(const TestPartResult& result) override;
 
  private:
   UnitTestImpl* const unit_test_;
@@ -977,8 +977,8 @@ GTEST_API_ bool MatchRegexAnywhere(const char* regex, const char* str);
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
-GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, char** argv);
-GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv);
+GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, const char** argv);
+GTEST_API_ void ParseGoogleTestFlagsOnly(int* argc, const wchar_t** argv);
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -1171,12 +1171,13 @@ class StreamingListener : public EmptyTestEventListener {
            StreamableToString((test_info.result())->elapsed_time()) + "ms");
   }
 
-  void OnTestPartResult(const TestPartResult& test_part_result) override {
+  TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
     const char* file_name = test_part_result.file_name();
     if (file_name == nullptr) file_name = "";
     SendLn("event=TestPartResult&file=" + UrlEncode(file_name) +
            "&line=" + StreamableToString(test_part_result.line_number()) +
            "&message=" + UrlEncode(test_part_result.message()));
+	return test_part_result;
   }
 
  private:

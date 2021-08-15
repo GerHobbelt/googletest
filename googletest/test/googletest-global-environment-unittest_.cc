@@ -51,6 +51,10 @@ TEST(SomeTest, DoesFoo) { FAIL() << "Unexpected call"; }
 
 }  // namespace
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_global_env_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 

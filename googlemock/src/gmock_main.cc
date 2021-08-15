@@ -49,6 +49,11 @@ void loop() { RUN_ALL_TESTS(); }
 
 #else
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      gmock_test_main(cnt, arr)
+#define _tmain(cnt, arr)    gmock_test_tmain(cnt, arr)
+#endif
+
 // MS C++ compiler/linker has a bug on Windows (not on Windows CE), which
 // causes a link error when _tmain is defined in a static library and UNICODE
 // is enabled. For this reason instead of _tmain, main function is used on
@@ -58,9 +63,9 @@ void loop() { RUN_ALL_TESTS(); }
 #if GTEST_OS_WINDOWS_MOBILE
 # include <tchar.h>  // NOLINT
 
-GTEST_API_ int _tmain(int argc, const TCHAR** argv) {
+GMOCK_API_ int _tmain(int argc, const TCHAR** argv) {
 #else
-GTEST_API_ int main(int argc, const char** argv) {
+GMOCK_API_ int main(int argc, const char** argv) {
 #endif  // GTEST_OS_WINDOWS_MOBILE
   std::cout << "Running main() from gmock_main.cc\n";
   // Since Google Mock depends on Google Test, InitGoogleMock() is

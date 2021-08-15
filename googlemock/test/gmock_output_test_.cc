@@ -293,6 +293,10 @@ void TestCatchesLeakedMocksInAdHocTests() {
   // foo is deliberately leaked.
 }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gmock_output_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char **argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of

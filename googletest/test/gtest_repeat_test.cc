@@ -48,7 +48,7 @@ namespace {
                   << "  Actual: " << actual_val << "\n"\
                   << "Expected: " #expected "\n"\
                   << "Which is: " << expected_val << "\n";\
-      ::testing::internal::posix::Abort(__FUNCTION__);\
+      ::testing::internal::posix::Abort("GTEST_CHECK: internal test failed: " __FUNCTION__);\
     }\
   } while (::testing::internal::AlwaysFalse())
 
@@ -92,10 +92,10 @@ TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
   GTEST_FLAG_SET(death_test_style, "threadsafe");
-  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(__FUNCTION__), "");
+  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort("BarDeathTest"), "");
 
   GTEST_FLAG_SET(death_test_style, "fast");
-  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(__FUNCTION__), "");
+  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort("BarDeathTest"), "");
 }
 
 int g_param_test_count = 0;
@@ -192,6 +192,10 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 }
 
 }  // namespace
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_repeat_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);

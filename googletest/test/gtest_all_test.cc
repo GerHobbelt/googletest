@@ -32,6 +32,7 @@
 //
 // Sometimes it's desirable to build most of Google Test's own tests
 // by compiling a single file.  This file serves this purpose.
+#if !defined(BUILD_MONOLITHIC)
 #include "test/googletest-filepath-test.cc"
 #include "test/googletest-message-test.cc"
 #include "test/googletest-options-test.cc"
@@ -44,3 +45,4 @@
 #include "test/gtest_skip_test.cc"
 #include "test/gtest_unittest.cc"
 #include "test/production.cc"
+#endif

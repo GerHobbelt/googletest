@@ -39,7 +39,7 @@
 
 #include <stdlib.h>
 
-#if _MSC_VER
+#ifdef _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER
 
@@ -166,13 +166,13 @@ TEST(LoggingTest, InterleavingLoggingAndAssertions) {
 // Tests the SCOPED_TRACE macro.
 
 // A helper function for testing SCOPED_TRACE.
-void SubWithoutTrace(int n) {
+static void SubWithoutTrace(int n) {
   EXPECT_EQ(1, n);
   ASSERT_EQ(2, n);
 }
 
 // Another helper function for testing SCOPED_TRACE.
-void SubWithTrace(int n) {
+static void SubWithTrace(int n) {
   SCOPED_TRACE(testing::Message() << "n = " << n);
 
   SubWithoutTrace(n);
@@ -352,14 +352,14 @@ TEST(DisabledTestsWarningTest,
 // Tests using assertions outside of TEST and TEST_F.
 //
 // This function creates two failures intentionally.
-void AdHocTest() {
+static void AdHocTest() {
   printf("The non-test part of the code is expected to have 2 failures.\n\n");
   EXPECT_TRUE(false);
   EXPECT_EQ(2, 3);
 }
 
 // Runs all TESTs, all TEST_Fs, and the ad hoc test.
-int RunAllTests() {
+static int RunAllTests() {
   AdHocTest();
   return RUN_ALL_TESTS();
 }
@@ -663,7 +663,7 @@ TEST(ExpectFatalFailureTest, FailsWhenThereIsNoFatalFailure) {
 }
 
 // A helper for generating a fatal failure.
-void FatalFailure() {
+static void FatalFailure() {
   FAIL() << "Expected fatal failure.";
 }
 
@@ -1060,6 +1060,10 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_output_test_main(cnt, arr)
+#endif
+
 // The main function.
 //
 // The idea is to use Google Test to run all the tests we have defined (some
@@ -1101,7 +1105,7 @@ int main(int argc, const char **argv) {
   // are registered, and torn down in the reverse order.
   testing::AddGlobalTestEnvironment(new FooEnvironment);
   testing::AddGlobalTestEnvironment(new BarEnvironment);
-#if _MSC_VER
+#ifdef _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
 #endif  //  _MSC_VER
   return RunAllTests();

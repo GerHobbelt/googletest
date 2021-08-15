@@ -70,8 +70,8 @@ void TestPartResultArray::Append(const TestPartResult& result) {
 // Returns the TestPartResult at the given index (0-based).
 const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
   if (index < 0 || index >= size()) {
-    printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
-    internal::posix::Abort("Invalid index into TestPartResultArray.");
+    fprintf(stderr, "\nInvalid index (%d) into TestPartResultArray.\n", index);
+	internal::posix::Abort("GetTestPartResult: index out of range");
   }
 
   return array_[static_cast<size_t>(index)];
@@ -96,11 +96,11 @@ HasNewFatalFailureHelper::~HasNewFatalFailureHelper() {
       original_reporter_);
 }
 
-void HasNewFatalFailureHelper::ReportTestPartResult(
+TestPartResult HasNewFatalFailureHelper::ReportTestPartResult(
     const TestPartResult& result) {
   if (result.fatally_failed())
     has_new_fatal_failure_ = true;
-  original_reporter_->ReportTestPartResult(result);
+  return original_reporter_->ReportTestPartResult(result);
 }
 
 }  // namespace internal

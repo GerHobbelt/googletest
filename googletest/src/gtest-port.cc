@@ -1016,7 +1016,7 @@ void RE::Init(const char* regex) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-const char kUnknownFile[] = "unknown file";
+static const char kUnknownFile[] = "unknown file";
 
 // Formats a source file path and a line number as they would appear
 // in an error message from the compiler used to compile this code.
@@ -1063,7 +1063,7 @@ GTestLog::~GTestLog() {
   GetStream() << ::std::endl;
   if (severity_ == GTEST_FATAL) {
     fflush(stderr);
-    posix::Abort("GoogleTest Log");
+	posix::Abort("GoogleTest Logging FATAL level: aborting the application");
   }
 }
 
@@ -1078,64 +1078,27 @@ class CapturedStream {
  public:
   // The ctor redirects the stream to a temporary file.
   explicit CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)) {
-# if GTEST_OS_WINDOWS
-    char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
-    char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
+  std::string temp_dir = ::testing::TempDir();
 
-    ::GetTempPathA(sizeof(temp_dir_path), temp_dir_path);
-    const UINT success = ::GetTempFileNameA(temp_dir_path,
-                                            "gtest_redir",
+  // testing::TempDir() should return a directory without a path separator.
+  // However, this rule was documented fairly recently, so we normalize across
+  // implementations with and without a trailing path separator.
+  if (temp_dir.back() != GTEST_PATH_SEP_[0])
+    temp_dir.push_back(GTEST_PATH_SEP_[0]);
+
+# if GTEST_OS_WINDOWS
+    char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
+    const UINT success = ::GetTempFileNameA(temp_dir.c_str(), "gtest_redir",
                                             0,  // Generate unique file name.
                                             temp_file_path);
     GTEST_CHECK_(success != 0)
-        << "Unable to create a temporary file in " << temp_dir_path;
+        << "Unable to create a temporary file in " << temp_dir;
     const int captured_fd = creat(temp_file_path, _S_IREAD | _S_IWRITE);
     GTEST_CHECK_(captured_fd != -1) << "Unable to open temporary file "
                                     << temp_file_path;
     filename_ = temp_file_path;
 # else
-    // There's no guarantee that a test has write access to the current
-    // directory, so we create the temporary file in a temporary directory.
-    std::string name_template;
-
-#  if GTEST_OS_LINUX_ANDROID
-    // Note: Android applications are expected to call the framework's
-    // Context.getExternalStorageDirectory() method through JNI to get
-    // the location of the world-writable SD Card directory. However,
-    // this requires a Context handle, which cannot be retrieved
-    // globally from native code. Doing so also precludes running the
-    // code as part of a regular standalone executable, which doesn't
-    // run in a Dalvik process (e.g. when running it through 'adb shell').
-    //
-    // The location /data/local/tmp is directly accessible from native code.
-    // '/sdcard' and other variants cannot be relied on, as they are not
-    // guaranteed to be mounted, or may have a delay in mounting.
-    name_template = "/data/local/tmp/";
-#  elif GTEST_OS_IOS
-    char user_temp_dir[PATH_MAX + 1];
-
-    // Documented alternative to NSTemporaryDirectory() (for obtaining creating
-    // a temporary directory) at
-    // https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/RaceConditions.html#//apple_ref/doc/uid/TP40002585-SW10
-    //
-    // _CS_DARWIN_USER_TEMP_DIR (as well as _CS_DARWIN_USER_CACHE_DIR) is not
-    // documented in the confstr() man page at
-    // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/confstr.3.html#//apple_ref/doc/man/3/confstr
-    // but are still available, according to the WebKit patches at
-    // https://trac.webkit.org/changeset/262004/webkit
-    // https://trac.webkit.org/changeset/263705/webkit
-    //
-    // The confstr() implementation falls back to getenv("TMPDIR"). See
-    // https://opensource.apple.com/source/Libc/Libc-1439.100.3/gen/confstr.c.auto.html
-    ::confstr(_CS_DARWIN_USER_TEMP_DIR, user_temp_dir, sizeof(user_temp_dir));
-
-    name_template = user_temp_dir;
-    if (name_template.back() != GTEST_PATH_SEP_[0])
-      name_template.push_back(GTEST_PATH_SEP_[0]);
-#  else
-    name_template = "/tmp/";
-#  endif
-    name_template.append("gtest_captured_stream.XXXXXX");
+    std::string name_template = temp_dir + "gtest_captured_stream.XXXXXX";
 
     // mkstemp() modifies the string bytes in place, and does not go beyond the
     // string's length. This results in well-defined behavior in C++17.
@@ -1144,11 +1107,9 @@ class CapturedStream {
     // implementations in C++11 and above make assumption behind the const_cast
     // fairly safe.
     const int captured_fd = ::mkstemp(const_cast<char*>(name_template.data()));
-    if (captured_fd == -1) {
-      GTEST_LOG_(WARNING)
-          << "Failed to create tmp file " << name_template
-          << " for test; does the test have access to the /tmp directory?";
-    }
+    GTEST_CHECK_(captured_fd != -1)
+        << "Failed to create tmp file " << name_template
+        << " for test; does the test have write access to the directory?";
     filename_ = std::move(name_template);
 # endif  // GTEST_OS_WINDOWS
     fflush(nullptr);
@@ -1293,14 +1254,50 @@ void ClearInjectableArgvs() {
 }
 #endif  // GTEST_HAS_DEATH_TEST
 
-#if GTEST_OS_WINDOWS_MOBILE
 namespace posix {
-void Abort() {
+
+#if GTEST_OS_WINDOWS_MOBILE
+[[noreturn]] void Abort(const char* msg) {
   DebugBreak();
   TerminateProcess(GetCurrentProcess(), 1);
 }
-}  // namespace posix
+#else
+[[noreturn]] void Abort(const char* msg) {
+	fprintf(stderr, "Abort on Fatal Failure...\n");
+	fputs(msg, stderr);
+	fputs("\n", stderr);
+	fflush(stderr);
+	DebugBreak();
+	static int attempts = 0;
+	if (!attempts)
+	{
+		attempts++;
+		//fprintf(stderr, "Throwing C++ exception\n");
+		throw std::exception(msg);
+	}
+	attempts++;
+	fprintf(stderr, "Triggering SEH exception\n");
+	fflush(stderr);
+	volatile int* pInt = 0x00000000;
+	*pInt = 20;
+#if 0
+	abort();
+#endif
+}
 #endif  // GTEST_OS_WINDOWS_MOBILE
+
+[[noreturn]] void ExitThread(int retval) {
+	fprintf(stderr, "Exiting thread (exit code: %d)...\n", retval);
+	fflush(stderr);
+#if defined(_WIN32) || defined(WIN32)
+	DebugBreak();
+#elif defined(SIGTRAP)
+	raise(SIGTRAP);
+#endif
+	_exit(retval);
+}
+
+}  // namespace posix
 
 // Returns the name of the environment variable corresponding to the
 // given flag.  For example, FlagToEnvVar("foo") will return

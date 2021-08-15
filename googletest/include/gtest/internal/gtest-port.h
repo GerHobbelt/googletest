@@ -382,6 +382,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # else
 #define GTEST_HAS_POSIX_RE (!GTEST_OS_WINDOWS && !GTEST_OS_XTENSA)
 # endif
+#else
+# define GTEST_HAS_POSIX_RE 0
+#endif
+
+#ifndef GTEST_USES_PCRE
+# define GTEST_USES_PCRE 0
 #endif
 
 #if GTEST_USES_PCRE
@@ -411,6 +417,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_USES_PCRE
 
+#ifndef GTEST_USES_POSIX_RE
+# define GTEST_USES_POSIX_RE 0
+#endif
+#ifndef GTEST_USES_SIMPLE_RE
+# define GTEST_USES_SIMPLE_RE 0
+#endif
+
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
 // to figure it out.
@@ -432,10 +445,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // C++ exceptions are disabled. clang has __has_feature(cxx_exceptions) which
 // checks for C++ exceptions starting at clang r206352, but which checked for
 // cleanups prior to that. To reliably check for C++ exception availability with
-// clang, check for
-// __EXCEPTIONS && __has_feature(cxx_exceptions).
-#  define GTEST_HAS_EXCEPTIONS (__EXCEPTIONS && __has_feature(cxx_exceptions))
-# elif defined(__GNUC__) && __EXCEPTIONS
+// clang, check for both __EXCEPTIONS and __has_feature(cxx_exceptions).
+#  if defined(__EXCEPTIONS) && __EXCEPTIONS && __has_feature(cxx_exceptions)
+#   define GTEST_HAS_EXCEPTIONS 1
+#  else
+#   define GTEST_HAS_EXCEPTIONS 0
+#  endif
+# elif defined(__GNUC__) && defined(__EXCEPTIONS)
 // gcc defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__SUNPRO_CC)
@@ -443,7 +459,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // detecting whether they are enabled or not.  Therefore, we assume that
 // they are enabled unless the user tells us otherwise.
 #  define GTEST_HAS_EXCEPTIONS 1
-# elif defined(__IBMCPP__) && __EXCEPTIONS
+# elif defined(__IBMCPP__) && defined(__EXCEPTIONS)
 // xlC defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #  define GTEST_HAS_EXCEPTIONS 1
 # elif defined(__HP_aCC)
@@ -607,6 +623,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
      GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_HAIKU ||     \
      GTEST_OS_GNU_HURD)
 # define GTEST_HAS_DEATH_TEST 1
+#else
+# define GTEST_HAS_DEATH_TEST 0
 #endif
 
 // Determines whether to support type-driven tests.
@@ -617,6 +635,9 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
     defined(__IBMCPP__) || defined(__HP_aCC)
 # define GTEST_HAS_TYPED_TEST 1
 # define GTEST_HAS_TYPED_TEST_P 1
+#else
+# define GTEST_HAS_TYPED_TEST 0
+# define GTEST_HAS_TYPED_TEST_P 0
 #endif
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
@@ -628,6 +649,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
     GTEST_OS_FREEBSD || GTEST_OS_NETBSD || GTEST_OS_OPENBSD ||       \
     GTEST_OS_GNU_HURD
 # define GTEST_CAN_STREAM_RESULTS_ 1
+#else
+# define GTEST_CAN_STREAM_RESULTS_ 0
 #endif
 
 // Defines some utility macros.
@@ -747,6 +770,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif
 
 #endif  // GTEST_HAS_SEH
+
+#ifndef GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+# define GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ 0
+#endif
 
 #ifndef GTEST_IS_THREADSAFE
 
@@ -1117,6 +1144,10 @@ Derived* CheckedDowncastToActualType(Base* base) {
   GTEST_CHECK_(typeid(*base) == typeid(Derived));
 #endif
 
+#ifndef GTEST_HAS_DOWNCAST_
+# define GTEST_HAS_DOWNCAST_ 0
+#endif
+
 #if GTEST_HAS_DOWNCAST_
   return ::down_cast<Derived*>(base);
 #elif GTEST_HAS_RTTI
@@ -1158,6 +1189,10 @@ void SetInjectableArgvs(const std::vector<std::string>& new_argvs);
 void ClearInjectableArgvs();
 
 #endif  // GTEST_HAS_DEATH_TEST
+
+#ifndef GTEST_HAS_NOTIFICATION_
+# define GTEST_HAS_NOTIFICATION_ 0
+#endif
 
 // Defines synchronization primitives.
 #if GTEST_IS_THREADSAFE
@@ -2115,16 +2150,14 @@ inline const char* GetEnv(const char* name) {
 #endif
 }
 
+[[noreturn]] void ExitThread(int retval);
+
 GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
-#if GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
-[[noreturn]] void Abort();
-#else
-[[noreturn]] inline void Abort() { abort(); }
-#endif  // GTEST_OS_WINDOWS_MOBILE
+[[noreturn]] void Abort(const char* msg);
 
 }  // namespace posix
 
@@ -2133,7 +2166,7 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 // MSVC-based platforms.  We map the GTEST_SNPRINTF_ macro to the appropriate
 // function in order to achieve that.  We use macro definition here because
 // snprintf is a variadic function.
-#if _MSC_VER && !GTEST_OS_WINDOWS_MOBILE
+#if defined(_MSC_VER) && !GTEST_OS_WINDOWS_MOBILE
 // MSVC 2005 and above support variadic macros.
 # define GTEST_SNPRINTF_(buffer, size, format, ...) \
      _snprintf_s(buffer, size, size, format, __VA_ARGS__)
@@ -2288,6 +2321,10 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 #endif  // !defined(GTEST_INTERNAL_DEPRECATED)
 
+#ifndef GTEST_HAS_ABSL
+# define GTEST_HAS_ABSL 0
+#endif
+
 #if GTEST_HAS_ABSL
 // Always use absl::any for UniversalPrinter<> specializations if googletest
 // is built with absl support.
@@ -2299,11 +2336,20 @@ using Any = ::absl::any;
 }  // namespace internal
 }  // namespace testing
 #else
+#if !defined(GTEST_INTERNAL_HAS_ANY)
 #ifdef __has_include
 #if __has_include(<any>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::any for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_ANY 1
+#else
+#define GTEST_INTERNAL_HAS_ANY 0
+#endif  // __has_include(<any>) && __cplusplus >= 201703L
+#else
+#define GTEST_INTERNAL_HAS_ANY 0
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_ANY)
+#if GTEST_INTERNAL_HAS_ANY
 #include <any>
 namespace testing {
 namespace internal {
@@ -2312,8 +2358,7 @@ using Any = ::std::any;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::any is not
 // supported.
-#endif  // __has_include(<any>) && __cplusplus >= 201703L
-#endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_ANY
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
@@ -2328,11 +2373,20 @@ using Optional = ::absl::optional<T>;
 }  // namespace internal
 }  // namespace testing
 #else
+#if !defined(GTEST_INTERNAL_HAS_OPTIONAL)
 #ifdef __has_include
 #if __has_include(<optional>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::optional for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_OPTIONAL 1
+#else
+#define GTEST_INTERNAL_HAS_OPTIONAL 0
+#endif  // __has_include(<optional>) && __cplusplus >= 201703L
+#else
+#define GTEST_INTERNAL_HAS_OPTIONAL 0
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_OPTIONAL)
+#if GTEST_INTERNAL_HAS_OPTIONAL
 #include <optional>
 namespace testing {
 namespace internal {
@@ -2342,8 +2396,7 @@ using Optional = ::std::optional<T>;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::optional is not
 // supported.
-#endif  // __has_include(<optional>) && __cplusplus >= 201703L
-#endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_OPTIONAL
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
@@ -2357,11 +2410,20 @@ using StringView = ::absl::string_view;
 }  // namespace internal
 }  // namespace testing
 #else
-# ifdef __has_include
-#   if __has_include(<string_view>) && __cplusplus >= 201703L
+#if !defined(GTEST_INTERNAL_HAS_STRING_VIEW)
+#ifdef __has_include
+#if __has_include(<string_view>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::string_view for Matcher<>
 // specializations.
-#   define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#   else
+#   define GTEST_INTERNAL_HAS_STRING_VIEW 0
+#  endif  // __has_include(<string_view>) && __cplusplus >= 201703L
+# else
+#  define GTEST_INTERNAL_HAS_STRING_VIEW 0
+# endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_STRING_VIEW)
+#if GTEST_INTERNAL_HAS_STRING_VIEW
 #include <string_view>
 namespace testing {
 namespace internal {
@@ -2370,8 +2432,7 @@ using StringView = ::std::string_view;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::string_view is not
 // supported.
-#  endif  // __has_include(<string_view>) && __cplusplus >= 201703L
-# endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
@@ -2386,11 +2447,20 @@ using Variant = ::absl::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 #else
+#if !defined(GTEST_INTERNAL_HAS_VARIANT)
 #ifdef __has_include
 #if __has_include(<variant>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::variant for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_VARIANT 1
+#else
+#define GTEST_INTERNAL_HAS_VARIANT 0
+#endif  // __has_include(<variant>) && __cplusplus >= 201703L
+#else
+#define GTEST_INTERNAL_HAS_VARIANT 0
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_VARIANT)
+#if GTEST_INTERNAL_HAS_VARIANT
 #include <variant>
 namespace testing {
 namespace internal {
@@ -2399,8 +2469,7 @@ using Variant = ::std::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 // The case where absl is configured NOT to alias std::variant is not supported.
-#endif  // __has_include(<variant>) && __cplusplus >= 201703L
-#endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_VARIANT
 #endif  // GTEST_HAS_ABSL
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_

@@ -46,6 +46,10 @@ using testing::internal::ShouldUseColor;
 TEST(GTestColorTest, Dummy) {
 }
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_color_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

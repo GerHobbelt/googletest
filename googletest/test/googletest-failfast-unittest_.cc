@@ -132,10 +132,11 @@ class MyTestListener : public ::testing::EmptyTestEventListener {
            test_info.name());
   }
 
-  void OnTestPartResult(
+  ::testing::TestPartResult OnTestPartResult(
       const ::testing::TestPartResult& test_part_result) override {
     printf("We are in OnTestPartResult %s:%d.\n", test_part_result.file_name(),
            test_part_result.line_number());
+	return test_part_result;
   }
 
   void OnTestEnd(const ::testing::TestInfo& test_info) override {
@@ -159,6 +160,10 @@ TEST(HasSkipTest, Test3) { FAIL() << "Expected failure."; }
 TEST(HasSkipTest, Test4) { FAIL() << "Expected failure."; }
 
 }  // namespace
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_failfast_test_main(cnt, arr)
+#endif
 
 int main(int argc, const char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

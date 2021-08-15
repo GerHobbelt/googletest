@@ -1101,6 +1101,10 @@ TYPED_TEST_P(NotInstantiatedTypeTest, Used) { }
 REGISTER_TYPED_TEST_SUITE_P(NotInstantiatedTypeTest, Used);
 }  // namespace works_here
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gtest_param_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char **argv) {
   // Used in TestGenerationTest test suite.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());

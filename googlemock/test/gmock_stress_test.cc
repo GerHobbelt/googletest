@@ -229,6 +229,10 @@ TEST(StressTest, CanUseGMockWithThreads) {
 }  // namespace
 }  // namespace testing
 
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)	gmock_stress_test_main(cnt, arr)
+#endif
+
 int main(int argc, const char **argv) {
   testing::InitGoogleMock(&argc, argv);
 
