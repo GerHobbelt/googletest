@@ -108,7 +108,7 @@ TEST(FooTest, Bar) {
 void Check(bool condition, const char* msg) {
   if (!condition) {
     printf("FAILED: %s\n", msg);
-    testing::internal::posix::Abort();
+    testing::internal::posix::Abort("Failed Env Check");
   }
 }
 
@@ -126,7 +126,7 @@ int RunAllTests(MyEnvironment* env, FailureType failure) {
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
   // Registers a global test environment, and verifies that the

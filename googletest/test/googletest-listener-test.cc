@@ -267,7 +267,7 @@ void VerifyResults(const std::vector<std::string>& data,
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   std::vector<std::string> events;
   g_events = &events;
   InitGoogleTest(&argc, argv);

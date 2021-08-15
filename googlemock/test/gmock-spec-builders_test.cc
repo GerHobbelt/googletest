@@ -2761,9 +2761,9 @@ TEST(ParameterlessExpectationsTest,
 // from it. This might be necessary on some platforms which require
 // specific setup and teardown.
 #if GMOCK_RENAME_MAIN
-int gmock_main(int argc, char **argv) {
+int gmock_main(int argc, const char **argv) {
 #else
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
 #endif  // GMOCK_RENAME_MAIN
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of

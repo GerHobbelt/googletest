@@ -2234,7 +2234,7 @@ TestResult::~TestResult() {
 // aborts the program.
 const TestPartResult& TestResult::GetTestPartResult(int i) const {
   if (i < 0 || i >= total_part_count())
-    internal::posix::Abort();
+    internal::posix::Abort("TestResult::GetTestPartResult");
   return test_part_results_.at(static_cast<size_t>(i));
 }
 
@@ -2243,7 +2243,7 @@ const TestPartResult& TestResult::GetTestPartResult(int i) const {
 // program.
 const TestProperty& TestResult::GetTestProperty(int i) const {
   if (i < 0 || i >= test_property_count())
-    internal::posix::Abort();
+    internal::posix::Abort("TestResult::GetTestProperty");
   return test_properties_.at(static_cast<size_t>(i));
 }
 

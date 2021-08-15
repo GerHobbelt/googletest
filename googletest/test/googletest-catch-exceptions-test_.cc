@@ -284,7 +284,7 @@ void TerminateHandler() {
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
 #if GTEST_HAS_EXCEPTIONS
   std::set_terminate(&TerminateHandler);
 #endif

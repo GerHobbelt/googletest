@@ -48,7 +48,7 @@ namespace {
                   << "  Actual: " << actual_val << "\n"\
                   << "Expected: " #expected "\n"\
                   << "Which is: " << expected_val << "\n";\
-      ::testing::internal::posix::Abort();\
+      ::testing::internal::posix::Abort(__FUNCTION__);\
     }\
   } while (::testing::internal::AlwaysFalse())
 
@@ -92,10 +92,10 @@ TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
   GTEST_FLAG_SET(death_test_style, "threadsafe");
-  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(), "");
+  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(__FUNCTION__), "");
 
   GTEST_FLAG_SET(death_test_style, "fast");
-  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(), "");
+  EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(__FUNCTION__), "");
 }
 
 int g_param_test_count = 0;
@@ -193,7 +193,7 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
   testing::AddGlobalTestEnvironment(new MyEnvironment);

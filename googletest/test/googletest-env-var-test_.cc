@@ -119,7 +119,7 @@ void PrintFlag(const char* flag) {
 
 }  // namespace testing
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   if (argc != 2) {

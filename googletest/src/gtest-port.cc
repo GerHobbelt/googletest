@@ -1063,7 +1063,7 @@ GTestLog::~GTestLog() {
   GetStream() << ::std::endl;
   if (severity_ == GTEST_FATAL) {
     fflush(stderr);
-    posix::Abort();
+    posix::Abort("GoogleTest Log");
   }
 }
 

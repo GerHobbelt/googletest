@@ -1101,7 +1101,7 @@ TYPED_TEST_P(NotInstantiatedTypeTest, Used) { }
 REGISTER_TYPED_TEST_SUITE_P(NotInstantiatedTypeTest, Used);
 }  // namespace works_here
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   // Used in TestGenerationTest test suite.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());
   // Used in GeneratorEvaluationTest test suite. Tests that the updated value

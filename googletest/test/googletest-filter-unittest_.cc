@@ -130,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, testing::Values(5, 6));
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();

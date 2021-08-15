@@ -815,7 +815,7 @@ TEST(PrintArrayTest, Char8ArrayWithTerminatingNul) {
 // const char16_t array without terminating NUL.
 TEST(PrintArrayTest, Char16ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
-  const char16_t a[] = {u'こ', u'\0', u'ん', u'に', u'ち', u'は'};
+  const char16_t a[] = {L'こ', u'\0', L'ん', L'に', L'ち', L'は'};
   EXPECT_EQ("u\"\\x3053\\0\\x3093\\x306B\\x3061\\x306F\" (no terminating NUL)",
             PrintArrayHelper(a));
 }
@@ -829,7 +829,7 @@ TEST(PrintArrayTest, Char16ArrayWithTerminatingNul) {
 // char32_t array without terminating NUL.
 TEST(PrintArrayTest, Char32ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
-  const char32_t a[] = {U'👋', U'\0', U'🌌'};
+  const char32_t a[] = {L'👋', L'\0', L'🌌'};
   EXPECT_EQ("U\"\\x1F44B\\0\\x1F30C\" (no terminating NUL)",
             PrintArrayHelper(a));
 }

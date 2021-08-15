@@ -104,7 +104,7 @@ TEST(ListenersTest, LeaksWater) {
 }
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   InitGoogleTest(&argc, argv);
 
   bool check_for_leaks = false;

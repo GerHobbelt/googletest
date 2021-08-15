@@ -76,7 +76,7 @@ void TestFailureThrowsRuntimeError() {
   Fail("A failed assertion should've thrown but didn't.");
 }
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   // We want to ensure that people can use Google Test assertions in

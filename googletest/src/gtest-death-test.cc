@@ -301,7 +301,7 @@ static void DeathTestAbort(const std::string& message) {
   } else {
     fprintf(stderr, "%s", message.c_str());
     fflush(stderr);
-    posix::Abort();
+    posix::Abort(message.c_str());
   }
 }
 

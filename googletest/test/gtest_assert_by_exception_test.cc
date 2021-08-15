@@ -99,7 +99,7 @@ TEST(Test, Test2) {
   kTestForContinuingTest = 1;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
   testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
 

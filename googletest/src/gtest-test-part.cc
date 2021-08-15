@@ -71,7 +71,7 @@ void TestPartResultArray::Append(const TestPartResult& result) {
 const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
   if (index < 0 || index >= size()) {
     printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
-    internal::posix::Abort();
+    internal::posix::Abort("Invalid index into TestPartResultArray.");
   }
 
   return array_[static_cast<size_t>(index)];

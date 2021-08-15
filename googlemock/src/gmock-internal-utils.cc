@@ -108,7 +108,7 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
                  line,
                  message.c_str()) = Message();
     if (type == kFatal) {
-      posix::Abort();
+      posix::Abort(message.c_str());
     }
   }
 };

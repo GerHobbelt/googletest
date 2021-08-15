@@ -5802,7 +5802,7 @@ class ParseFlagsTest : public Test {
 # endif
 
     // Parses the command line.
-    internal::ParseGoogleTestFlagsOnly(&argc1, const_cast<CharType**>(argv1));
+    internal::ParseGoogleTestFlagsOnly(&argc1, argv1);
 
 # if GTEST_HAS_STREAM_REDIRECTION
     const std::string captured_stdout = GetCapturedStdout();

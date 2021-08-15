@@ -52,7 +52,7 @@ void TestInitGoogleMock(const Char* (&argv)[M], const Char* (&new_argv)[N],
   const ::std::string old_verbose = GMOCK_FLAG(verbose);
 
   int argc = M - 1;
-  InitGoogleMock(&argc, const_cast<Char**>(argv));
+  InitGoogleMock(&argc, argv);
   ASSERT_EQ(N - 1, argc) << "The new argv has wrong number of elements.";
 
   for (int i = 0; i < N; i++) {

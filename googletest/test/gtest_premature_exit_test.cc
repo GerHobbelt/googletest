@@ -106,7 +106,7 @@ TEST_F(PrematureExitTest, PrematureExitFileExistsDuringTestExecution) {
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   InitGoogleTest(&argc, argv);
   const int exit_code = RUN_ALL_TESTS();
 
