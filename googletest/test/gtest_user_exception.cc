@@ -29,7 +29,12 @@ TEST(Counter, Increment) {
 
 }  // namespace
 
-int main(int argc, char **argv) {
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr) gtest_user_exception_test_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   testing::UnitTest::GetInstance()->UserExceptionHandler = [](std::exception_ptr eptr){
