@@ -44,7 +44,7 @@ TEST(Test, AlwaysFails) { EXPECT_EQ(true, false); }
 #define main(cnt, arr)	gtest_skip_env_test_main(cnt, arr)
 #endif
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
   testing::AddGlobalTestEnvironment(new SetupEnvironment());

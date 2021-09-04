@@ -108,7 +108,7 @@ TEST(ListenersTest, LeaksWater) {
 #define main(cnt, arr)	gtest_sample10_main(cnt, arr)
 #endif
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
 
   bool check_for_leaks = false;

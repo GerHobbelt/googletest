@@ -1069,7 +1069,7 @@ class BarEnvironment : public testing::Environment {
 // The idea is to use Google Test to run all the tests we have defined (some
 // of them are intended to fail), and then compare the test results
 // with the "golden" file.
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
   GTEST_FLAG_SET(print_time, false);
 
   // We just run the tests, knowing some of them are intended to fail.

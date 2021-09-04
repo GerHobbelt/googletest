@@ -323,7 +323,7 @@ class FinalSuccessChecker : public Environment {
 #define main(cnt, arr)	gtest_api_test_main(cnt, arr)
 #endif
 
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
 
   AddGlobalTestEnvironment(new testing::internal::FinalSuccessChecker());
