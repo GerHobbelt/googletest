@@ -800,7 +800,7 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
   if (!GTEST_FLAG_GET(catch_exceptions))
     should_handle = false;
   else if (exception_code == EXCEPTION_BREAKPOINT)
-    should_handle = false;
+    should_handle = !IsDebuggerPresent();
   else if (exception_code == kCxxExceptionCode)
     should_handle = false;
 
@@ -5064,7 +5064,7 @@ std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
 #else  // !GTEST_HAS_ABSL
   static_cast<void>(max_depth);
   static_cast<void>(skip_count);
-  return "";
+  return {};
 #endif  // GTEST_HAS_ABSL
 }
 
@@ -5406,12 +5406,12 @@ void UnitTest::AddTestPartResult(
      (defined(__x86_64__) || defined(__i386__)))
       // with clang/gcc we can achieve the same effect on x86 by invoking int3
       asm("int3");
-#else
-      // Dereference nullptr through a volatile pointer to prevent the compiler
+#endif  // GTEST_OS_WINDOWS
+
+	  // Dereference nullptr through a volatile pointer to prevent the compiler
       // from removing. We use this rather than abort() or __builtin_trap() for
       // portability: some debuggers don't correctly trap abort().
       *static_cast<volatile int*>(nullptr) = 1;
-#endif  // GTEST_OS_WINDOWS
     } else if (GTEST_FLAG_GET(throw_on_failure)) {
 #if GTEST_HAS_EXCEPTIONS
       throw internal::GoogleTestFailureException(result);

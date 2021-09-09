@@ -1258,8 +1258,9 @@ namespace posix {
 
 #if GTEST_OS_WINDOWS_MOBILE
 [[noreturn]] void Abort(const char* msg) {
-  DebugBreak();
-  TerminateProcess(GetCurrentProcess(), 1);
+	if (IsDebuggerPresent())
+		DebugBreak();
+	TerminateProcess(GetCurrentProcess(), 1);
 }
 #else
 [[noreturn]] void Abort(const char* msg) {
@@ -1267,16 +1268,18 @@ namespace posix {
 	fputs(msg, stderr);
 	fputs("\n", stderr);
 	fflush(stderr);
-	DebugBreak();
+	if (IsDebuggerPresent())
+		DebugBreak();
 	static int attempts = 0;
 	if (!attempts)
 	{
 		attempts++;
-		//fprintf(stderr, "Throwing C++ exception\n");
+		fprintf(stderr, "Throwing C++ exception (abort)\n");
+		fflush(stderr);
 		throw std::exception(msg);
 	}
 	attempts++;
-	fprintf(stderr, "Triggering SEH exception\n");
+	fprintf(stderr, "Triggering SEH exception (abort)\n");
 	fflush(stderr);
 	volatile int* pInt = 0x00000000;
 	*pInt = 20;
@@ -1290,7 +1293,8 @@ namespace posix {
 	fprintf(stderr, "Exiting thread (exit code: %d)...\n", retval);
 	fflush(stderr);
 #if defined(_WIN32) || defined(WIN32)
-	DebugBreak();
+	if (IsDebuggerPresent())
+		DebugBreak();
 #elif defined(SIGTRAP)
 	raise(SIGTRAP);
 #endif
