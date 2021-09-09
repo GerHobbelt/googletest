@@ -387,8 +387,11 @@ DeathTest::DeathTest() {
 bool DeathTest::Create(const char* statement,
                        Matcher<const std::string&> matcher, const char* file,
                        int line, DeathTest** test) {
-  return GetUnitTestImpl()->death_test_factory()->Create(
-      statement, std::move(matcher), file, line, test);
+	auto u = GetUnitTestImpl();
+	auto f = u->death_test_factory();
+	return f->Create(statement, std::move(matcher), file, line, test);
+	//return GetUnitTestImpl()->death_test_factory()->Create(
+    //  statement, std::move(matcher), file, line, test);
 }
 
 const char* DeathTest::LastMessage() {

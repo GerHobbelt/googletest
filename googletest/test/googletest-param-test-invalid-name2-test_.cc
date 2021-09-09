@@ -30,6 +30,11 @@
 
 #include "gtest/gtest.h"
 
+#if defined(_MSC_VER)
+#include <eh.h>
+#include <windows.h>
+#endif
+
 namespace {
 class DummyInvalidName2Test : public ::testing::TestWithParam<const char *> {};
 
@@ -47,13 +52,35 @@ INSTANTIATE_TEST_SUITE_P(DuplicateTestNames,
                          StringParamTestSuffix);
 }  // namespace
 
+static void seh_trans_func(unsigned int u, EXCEPTION_POINTERS* pExp)
+{
+	fprintf(stderr, "In seh_trans_func.\n");
+	throw 1;
+}
+
+static void my_crt_terminate_handler()
+{
+	fprintf(stderr, "In my_crt_terminate_handler.\n");
+	exit(EXIT_FAILURE);
+}
+
+
 #if defined(BUILD_MONOLITHIC)
 #define main(cnt, arr)	gtest_param_inv_name2_test_main(cnt, arr)
 #endif
 
 int main(int argc, const char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+	try
+	{
+		_set_se_translator(seh_trans_func);
+		set_terminate(my_crt_terminate_handler);
+
+		testing::InitGoogleTest(&argc, argv);
+		return RUN_ALL_TESTS();
+	}
+	catch (...)
+	{
+		fprintf(stderr, "Exception thrown...\n");
+		return EXIT_FAILURE;
+	}
 }
-
-

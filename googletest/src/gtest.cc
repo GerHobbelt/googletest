@@ -5400,7 +5400,8 @@ void UnitTest::AddTestPartResult(
       // Using DebugBreak on Windows allows gtest to still break into a debugger
       // when a failure happens and both the --gtest_break_on_failure and
       // the --gtest_catch_exceptions flags are specified.
-      DebugBreak();
+	  if (IsDebuggerPresent())
+	    DebugBreak();
 #elif (!defined(__native_client__)) &&            \
     ((defined(__clang__) || defined(__GNUC__)) && \
      (defined(__x86_64__) || defined(__i386__)))

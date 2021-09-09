@@ -43,12 +43,28 @@ INSTANTIATE_TEST_SUITE_P(InvalidTestName,
 
 }  // namespace
 
+static void my_crt_terminate_handler()
+{
+	fprintf(stderr, "In my_crt_terminate_handler.\n");
+	exit(EXIT_FAILURE);
+}
+
+
 #if defined(BUILD_MONOLITHIC)
 #define main(cnt, arr)	gtest_param_inv_name1_test_main(cnt, arr)
 #endif
 
 int main(int argc, const char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+	try
+	{
+		set_terminate(my_crt_terminate_handler);
+		testing::InitGoogleTest(&argc, argv);
+		return RUN_ALL_TESTS();
+	}
+	catch (...)
+	{
+		fprintf(stderr, "Exception thrown...\n");
+		return EXIT_FAILURE;
+	}
 }
 
