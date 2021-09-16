@@ -54,7 +54,7 @@ namespace internal {
 
 // Joins a vector of strings as if they are fields of a tuple; returns
 // the joined string.
-GMOCK_API_ std::string JoinAsTuple(const Strings& fields) {
+GTEST_API_ std::string JoinAsTuple(const Strings& fields) {
   switch (fields.size()) {
     case 0:
       return "";
@@ -75,7 +75,7 @@ GMOCK_API_ std::string JoinAsTuple(const Strings& fields) {
 // words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
 // treated as one word.  For example, both "FooBar123" and
 // "foo_bar_123" are converted to "foo bar 123".
-GMOCK_API_ std::string ConvertIdentifierNameToWords(const char* id_name) {
+GTEST_API_ std::string ConvertIdentifierNameToWords(const char* id_name) {
   std::string result;
   char prev_char = '\0';
   for (const char* p = id_name; *p != '\0'; prev_char = *(p++)) {
@@ -123,13 +123,13 @@ static FailureReporterInterface* failure_reporter = nullptr;
 // Sets the failure reporter.
 // Enables overriding of the default failure reporter with 
 // a custom one that implements the interface.
-GMOCK_API_ void SetFailureReporter(FailureReporterInterface* const in_failure_reporter) {  
+GTEST_API_ void SetFailureReporter(FailureReporterInterface* const in_failure_reporter) {  
   failure_reporter = in_failure_reporter;  
 }
 
 // Returns the global failure reporter.  Will create a
 // GoogleTestFailureReporter and return it the first time called.
-GMOCK_API_ FailureReporterInterface* GetFailureReporter() {
+GTEST_API_ FailureReporterInterface* GetFailureReporter() {
   // Points to the global failure reporter used by Google Mock.  gcc
   // guarantees that the following use of failure_reporter is
   // thread-safe.  We may need to add additional synchronization to
@@ -146,11 +146,11 @@ static GTEST_DEFINE_STATIC_MUTEX_(g_log_mutex);
 
 // Returns true if and only if a log with the given severity is visible
 // according to the --gmock_verbose flag.
-GMOCK_API_ bool LogIsVisible(LogSeverity severity) {
-  if (GMOCK_FLAG(verbose) == kInfoVerbosity) {
+GTEST_API_ bool LogIsVisible(LogSeverity severity) {
+  if (GMOCK_FLAG_GET(verbose) == kInfoVerbosity) {
     // Always show the log if --gmock_verbose=info.
     return true;
-  } else if (GMOCK_FLAG(verbose) == kErrorVerbosity) {
+  } else if (GMOCK_FLAG_GET(verbose) == kErrorVerbosity) {
     // Always hide it if --gmock_verbose=error.
     return false;
   } else {
@@ -167,7 +167,7 @@ GMOCK_API_ bool LogIsVisible(LogSeverity severity) {
 // stack_frames_to_skip is treated as 0, since we don't know which
 // function calls will be inlined by the compiler and need to be
 // conservative.
-GMOCK_API_ void Log(LogSeverity severity, const std::string& message,
+GTEST_API_ void Log(LogSeverity severity, const std::string& message,
                     int stack_frames_to_skip) {
   if (!LogIsVisible(severity))
     return;
@@ -205,9 +205,9 @@ GMOCK_API_ void Log(LogSeverity severity, const std::string& message,
   std::cout << ::std::flush;
 }
 
-GMOCK_API_ WithoutMatchers GetWithoutMatchers() { return WithoutMatchers(); }
+GTEST_API_ WithoutMatchers GetWithoutMatchers() { return WithoutMatchers(); }
 
-GMOCK_API_ void IllegalDoDefault(const char* file, int line) {
+GTEST_API_ void IllegalDoDefault(const char* file, int line) {
   internal::Assert(
       false, file, line,
       "You are using DoDefault() inside a composite action like "
@@ -226,7 +226,7 @@ constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
 template <size_t... I>
 constexpr std::array<char, 256> UnBase64Impl(IndexSequence<I...>,
                                              const char* const base64) {
-  return {{UnBase64Impl(I, base64, 0)...}};
+  return {{UnBase64Impl(static_cast<char>(I), base64, 0)...}};
 }
 
 constexpr std::array<char, 256> UnBase64(const char* const base64) {
@@ -247,7 +247,7 @@ bool Base64Unescape(const std::string& encoded, std::string* decoded) {
     if (std::isspace(src) || src == '=') {
       continue;
     }
-    char src_bin = kUnBase64[src];
+    char src_bin = kUnBase64[static_cast<size_t>(src)];
     if (src_bin >= 64) {
       decoded->clear();
       return false;
