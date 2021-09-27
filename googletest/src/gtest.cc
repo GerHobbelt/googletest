@@ -161,6 +161,18 @@
 #define GTEST_HAS_BUILTIN(x) 0
 #endif  // defined(__has_builtin)
 
+#if defined(GTEST_OS_WINDOWS_WINELIB) && !defined(GTEST_OS_WINDOWS)
+// non-windows winelib still has windows.h,
+// and we need some parts for the HRESULT support functions
+// but as little other cruft as practical
+# define NOMINMAX
+//# define WIN32_LEAN_AND_MEAN
+//# include <windows.h>  // NOLINT
+# include <basetsd.h>
+# include <windef.h>
+# include <winbase.h>
+#endif
+
 namespace testing {
 
 using internal::CountIf;
@@ -1884,7 +1896,7 @@ AssertionResult IsNotSubstring(const char* needle_expr,
 
 namespace internal {
 
-#ifdef GTEST_OS_WINDOWS
+#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_WINDOWS_WINELIB)
 
 namespace {
 
@@ -1943,7 +1955,7 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
   return HRESULTFailureHelper(expr, "fails", hr);
 }
 
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 // Utility functions for encoding Unicode text (wide strings) in
 // UTF-8.
