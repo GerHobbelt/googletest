@@ -131,6 +131,7 @@
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
 //     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
+//     GTEST_OS_WINDOWS_WINELIB  - Winelib
 //     GTEST_OS_WINDOWS_MINGW    - MinGW
 //     GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
 //     GTEST_OS_WINDOWS_PHONE    - Windows Phone
@@ -145,6 +146,14 @@
 // even more welcome!).
 //
 // It is possible that none of the GTEST_OS_* macros are defined.
+//
+// GTEST_OS_WINDOWS_WINELIB is unusual in that wine provides Win32 API
+// but maybe have windows-like or posix-like C runtime/OS functions
+// depending on whether the msvcrt headers/lib or system libc/libstdc++
+// is used (controlled by -mno-cygwin and indicated by __MSVCRT__)
+// GTEST_OS_WINDOWS_WINELIB only implies GTEST_OS_WINDOWS
+// with __MSVCRT__ (and thus a fully windows-like environment);
+// otherwise it accompanies some other GTEST_OS_* flag
 
 // Feature-indicating macros
 // -------------------------

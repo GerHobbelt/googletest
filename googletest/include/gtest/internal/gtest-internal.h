@@ -472,7 +472,7 @@ class TestFactoryImpl : public TestFactoryBase {
   Test* CreateTest() override { return new TestClass; }
 };
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 // Predicate-formatters for implementing the HRESULT checking macros
 // {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}
@@ -483,7 +483,7 @@ GTEST_API_ AssertionResult IsHRESULTSuccess(const char* expr,
 GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,
                                             long hr);  // NOLINT
 
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 // Types of SetUpTestSuite() and TearDownTestSuite() functions.
 using SetUpTestSuiteFunc = void (*)();

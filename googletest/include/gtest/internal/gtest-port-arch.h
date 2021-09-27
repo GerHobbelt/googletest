@@ -36,12 +36,17 @@
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
 
 // Determines the platform on which Google Test is compiled.
+
+#if defined(__WINE__)
+# define GTEST_OS_WINDOWS_WINELIB 1
+#endif
+
 #ifdef __CYGWIN__
 # define GTEST_OS_CYGWIN 1
 # elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
 #  define GTEST_OS_WINDOWS_MINGW 1
 #  define GTEST_OS_WINDOWS 1
-#elif defined _WIN32
+#elif defined(_WIN32) && !(defined(__WINE__) && !defined(__MSVCRT__)) /* winelib without msvcrt is a posix-like C/C++ runtime, identifies it as GTEST_OS_LINUX (or whatever) */
 # define GTEST_OS_WINDOWS 1
 # ifdef _WIN32_WCE
 #  define GTEST_OS_WINDOWS_MOBILE 1
