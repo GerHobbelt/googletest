@@ -1060,6 +1060,16 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
+class TestSuiteThatFailsToSetUp : public testing::Test {
+ public:
+  static void SetUpTestSuite() { EXPECT_TRUE(false); }
+};
+TEST_F(TestSuiteThatFailsToSetUp, ShouldNotRun) {
+  std::abort();
+}
+
+
+
 #if defined(BUILD_MONOLITHIC)
 #define main(cnt, arr)	gtest_output_test_main(cnt, arr)
 #endif
