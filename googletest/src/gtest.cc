@@ -4102,7 +4102,23 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
 // Called after the unit test ends.
 void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                                                   int /*iteration*/) {
-  FILE* xmlout = OpenFileForWriting(output_file_);
+  FILE* xmlout = nullptr;
+  if (::testing::GTEST_FLAG(repeat) < 2)
+  {
+    xmlout = OpenFileForWriting(output_file_);
+  }
+  else
+  {
+    FilePath output_path(output_file_);
+    FilePath output_dir(output_path.RemoveFileName());
+    FilePath output_name(output_path.RemoveDirectoryName().RemoveExtension("xml"));
+
+    std::string output_file =
+        FilePath::GenerateUniqueFileName(output_dir, output_name, "xml")
+            .string();
+    xmlout = OpenFileForWriting(output_file);
+  }
+
   std::stringstream stream;
   PrintXmlUnitTest(&stream, unit_test);
   fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
