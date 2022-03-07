@@ -242,6 +242,7 @@ if (gtest_build_tests)
   cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
     gtest_main_no_rtti test/gtest_unittest.cc)
 
+if(BUILD_SHARED_LIBRARY)
   cxx_shared_library(gtest_dll "${cxx_default}"
     src/gtest-all.cc src/gtest_main.cc)
 
@@ -250,6 +251,7 @@ if (gtest_build_tests)
   set_target_properties(gtest_dll_test_
                         PROPERTIES
                         COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
+endif()
 
   ############################################################
   # Python tests.
