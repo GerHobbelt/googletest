@@ -26,7 +26,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // This sample shows how to use Google Test listener API to implement
 // an alternative console output and how to use the UnitTest reflection API
 // to enumerate test suites and tests and to inspect their results.
@@ -38,10 +37,10 @@
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestSuite;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
+using ::testing::TestSuite;
 using ::testing::UnitTest;
 namespace {
 // Provides alternative output mode which produces minimal amount of
@@ -59,9 +58,7 @@ class TersePrinter : public EmptyTestEventListener {
 
   // Called before a test starts.
   void OnTestStart(const TestInfo& test_info) override {
-    fprintf(stdout,
-            "*** Test %s.%s starting.\n",
-            test_info.test_suite_name(),
+    fprintf(stdout, "*** Test %s.%s starting.\n", test_info.test_suite_name(),
             test_info.name());
     fflush(stdout);
   }
@@ -80,9 +77,7 @@ class TersePrinter : public EmptyTestEventListener {
 
   // Called after a test ends.
   void OnTestEnd(const TestInfo& test_info) override {
-    fprintf(stdout,
-            "*** Test %s.%s ending.\n",
-            test_info.test_suite_name(),
+    fprintf(stdout, "*** Test %s.%s ending.\n", test_info.test_suite_name(),
             test_info.name());
     fflush(stdout);
   }
@@ -110,10 +105,11 @@ int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
 
   bool terse_output = false;
-  if (argc > 1 && strcmp(argv[1], "--terse_output") == 0 )
+  if (argc > 1 && strcmp(argv[1], "--terse_output") == 0)
     terse_output = true;
   else
-    printf("%s\n", "Run this program with --terse_output to change the way "
+    printf("%s\n",
+           "Run this program with --terse_output to change the way "
            "it prints its output.");
 
   UnitTest& unit_test = *UnitTest::GetInstance();
@@ -154,8 +150,7 @@ int main(int argc, const char** argv) {
   }
 
   // Test that were meant to fail should not affect the test program outcome.
-  if (unexpectedly_failed_tests == 0)
-    ret_val = 0;
+  if (unexpectedly_failed_tests == 0) ret_val = 0;
 
   return ret_val;
 }

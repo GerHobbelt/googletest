@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include "gtest/gtest.h"
 
 #if defined(_MSC_VER)
@@ -39,7 +38,7 @@ namespace {
 class DummyInvalidName2Test : public ::testing::TestWithParam<const char *> {};
 
 std::string StringParamTestSuffix(
-    const testing::TestParamInfo<const char*>& info) {
+    const testing::TestParamInfo<const char *> &info) {
   return std::string(info.param);
 }
 
