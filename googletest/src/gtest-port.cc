@@ -1045,7 +1045,7 @@ class CapturedStream {
 
 #if GTEST_OS_WINDOWS
     char temp_file_path[MAX_PATH + 1] = {'\0'};  // NOLINT
-    const UINT success = ::GetTempFileNameA(temp_dir_path, "gtest_redir",
+    const UINT success = ::GetTempFileNameA(temp_dir.c_str(), "gtest_redir",
                                             0,  // Generate unique file name.
                                             temp_file_path);
     GTEST_CHECK_(success != 0)
