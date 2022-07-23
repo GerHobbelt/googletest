@@ -399,8 +399,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #if GTEST_HAS_ABSL
 // When using Abseil, RE2 is required.
 #include "absl/strings/string_view.h"
-#include "re2/re2.h"
 #define GTEST_USES_RE2 1
+#endif
+
+#if GTEST_USES_RE2
+#include "re2/re2.h"
 #elif GTEST_HAS_POSIX_RE
 #include <regex.h>  // NOLINT
 #define GTEST_USES_POSIX_RE 1
@@ -861,6 +864,34 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
 #endif  // __clang__
 
+#if GTEST_HAS_ABSL
+// Always use absl::string_view for Matcher<> specializations if googletest
+// is built with absl support.
+#define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#include "absl/strings/string_view.h"
+namespace testing {
+namespace internal {
+using StringView = ::absl::string_view;
+}  // namespace internal
+}  // namespace testing
+#else
+#ifdef __has_include
+#if __has_include(<string_view>) && __cplusplus >= 201703L
+// Otherwise for C++17 and higher use std::string_view for Matcher<>
+// specializations.
+#define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#include <string_view>
+namespace testing {
+namespace internal {
+using StringView = ::std::string_view;
+}  // namespace internal
+}  // namespace testing
+// The case where absl is configured NOT to alias std::string_view is not
+// supported.
+#endif  // __has_include(<string_view>) && __cplusplus >= 201703L
+#endif  // __has_include
+#endif  // GTEST_HAS_ABSL
+
 namespace testing {
 
 class Message;
@@ -893,17 +924,17 @@ GTEST_API_ bool IsTrue(bool condition);
 // char*` constructors.
 class GTEST_API_ RE {
  public:
-  RE(absl::string_view regex) : regex_(regex) {}                  // NOLINT
-  RE(const char* regex) : RE(absl::string_view(regex)) {}         // NOLINT
-  RE(const std::string& regex) : RE(absl::string_view(regex)) {}  // NOLINT
+  RE(std::string_view regex) : regex_(regex) {}                  // NOLINT
+  RE(const char* regex) : RE(internal::StringView(regex)) {}         // NOLINT
+  RE(const std::string& regex) : RE(internal::StringView(regex)) {}  // NOLINT
   RE(const RE& other) : RE(other.pattern()) {}
 
   const std::string& pattern() const { return regex_.pattern(); }
 
-  static bool FullMatch(absl::string_view str, const RE& re) {
+  static bool FullMatch(internal::StringView str, const RE& re) {
     return RE2::FullMatch(str, re.regex_);
   }
-  static bool PartialMatch(absl::string_view str, const RE& re) {
+  static bool PartialMatch(internal::StringView str, const RE& re) {
     return RE2::PartialMatch(str, re.regex_);
   }
 
