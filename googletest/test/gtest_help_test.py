@@ -120,7 +120,7 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
     self.assertTrue(HELP_REGEX.search(output), output)
 
-    if IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD or IS_OPENBSD:
+    if IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD or IS_OPENBSD or IS_WINDOWS:
       self.assertIn(STREAM_RESULT_TO_FLAG, output)
     else:
       self.assertNotIn(STREAM_RESULT_TO_FLAG, output)

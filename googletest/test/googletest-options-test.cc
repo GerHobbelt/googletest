@@ -39,6 +39,12 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_WINDOWS_MOBILE
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #elif GTEST_OS_WINDOWS
 #include <direct.h>
