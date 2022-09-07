@@ -988,7 +988,7 @@ class EmptyTestEventListener : public TestEventListener {
   void OnTestStart(const TestInfo& /*test_info*/) override {}
   void OnTestDisabled(const TestInfo& /*test_info*/) override {}
   TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
-	  return test_part_result; 
+      return test_part_result; 
   }
   void OnTestEnd(const TestInfo& /*test_info*/) override {}
   void OnTestSuiteEnd(const TestSuite& /*test_suite*/) override {}
@@ -1596,7 +1596,7 @@ class GTEST_API_ AssertHelper {
   void operator=(const Message& message) const;
 
   TestPartResult::Type type() const {
-	  return data_->type;
+      return data_->type;
   }
 
  private:
