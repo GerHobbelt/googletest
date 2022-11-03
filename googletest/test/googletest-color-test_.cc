@@ -47,7 +47,7 @@ TEST(GTestColorTest, Dummy) {}
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
 
-  if (ShouldUseColor(true)) {
+  if (ShouldUseColor(true) == GTestColorMode::kYes) {
     // Google Test decides to use colors in the output (assuming it
     // goes to a TTY).
     printf("YES\n");
