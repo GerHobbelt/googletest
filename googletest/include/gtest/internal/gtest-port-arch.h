@@ -111,6 +111,8 @@
 #define GTEST_OS_ESP32 1
 #elif defined(__XTENSA__)
 #define GTEST_OS_XTENSA 1
+#elif defined(__hexagon__)
+#define GTEST_OS_QURT 1
 #endif  // __CYGWIN__
 
 #ifndef GTEST_OS_CYGWIN

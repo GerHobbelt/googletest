@@ -190,6 +190,14 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message);
 std::set<std::string>* GetIgnoredParameterizedTestSuites();
 
+class NonCopyable {
+ public:
+  NonCopyable() = default;
+  NonCopyable(const NonCopyable &) = delete;
+  NonCopyable &operator=(const NonCopyable &) = delete;
+  ~NonCopyable() = default;
+};
+
 }  // namespace internal
 
 // The friend relationship of some of these classes is cyclic.
