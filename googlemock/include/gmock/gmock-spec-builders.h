@@ -706,6 +706,12 @@ class GMOCK_API_ ExpectationBase {
   // describes it to the ostream.
   virtual void MaybeDescribeExtraMatcherTo(::std::ostream* os) = 0;
 
+  // Do not rely on this for correctness.
+  // This is only for making human-readable test output easier to understand.
+  void UntypedDescription(std::string description) {
+    description_ = std::move(description);
+  }
+
  protected:
   friend class ::testing::Expectation;
   friend class UntypedFunctionMockerBase;
@@ -772,9 +778,9 @@ class GMOCK_API_ ExpectationBase {
     retired_ = true;
   }
 
-  void SetName(std::string name) { name_ = std::move(name); }
-
-  const std::string& GetName() const { return name_; }
+  // Returns a human-readable description of this expectation.
+  // Do not rely on this for correctness. It is only for human readability.
+  const std::string& GetDescription() const { return description_; }
 
   // Returns true if and only if this expectation is satisfied.
   bool IsSatisfied() const GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
@@ -835,7 +841,7 @@ class GMOCK_API_ ExpectationBase {
   const char* file_;               // The file that contains the expectation.
   int line_;                       // The line number of the expectation.
   const std::string source_text_;  // The EXPECT_CALL(...) source text.
-  std::string name_;
+  std::string description_;        // User-readable name for the expectation.
   // True if and only if the cardinality is specified explicitly.
   bool cardinality_specified_;
   Cardinality cardinality_;  // The cardinality of the expectation.
@@ -914,8 +920,10 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
     return *this;
   }
 
-  TypedExpectation& Name(std::string name) {
-    SetName(std::move(name));
+  // Do not rely on this for correctness.
+  // This is only for making human-readable test output easier to understand.
+  TypedExpectation& Description(std::string name) {
+    ExpectationBase::UntypedDescription(std::move(name));
     return *this;
   }
 
@@ -1209,13 +1217,13 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
                                          ::std::ostream* why)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
-    const ::std::string& expectation_name = GetName();
+    const ::std::string& expectation_description = GetDescription();
     if (IsSaturated()) {
       // We have an excessive call.
       IncrementCallCount();
       *what << "Mock function ";
-      if (!expectation_name.empty()) {
-        *what << "with name \"" << expectation_name << "\" ";
+      if (!expectation_description.empty()) {
+        *what << "\"" << expectation_description << "\" ";
       }
       *what << "called more times than expected - ";
       mocker->DescribeDefaultActionTo(args, what);
@@ -1233,8 +1241,8 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
 
     // Must be done after IncrementCount()!
     *what << "Mock function ";
-    if (!expectation_name.empty()) {
-      *what << "with name \"" << expectation_name << "\" ";
+    if (!expectation_description.empty()) {
+      *what << "\"" << expectation_description << "\" ";
     }
     *what << "call matches " << source_text() << "...\n";
     return &(GetCurrentAction(mocker, args));

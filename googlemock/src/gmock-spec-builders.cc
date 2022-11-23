@@ -410,12 +410,13 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
       expectations_met = false;
       ::std::stringstream ss;
 
-      const ::std::string& expectation_name = untyped_expectation->GetName();
-      ss << "Actual function";
+      const ::std::string& expectation_name =
+          untyped_expectation->GetDescription();
+      ss << "Actual function ";
       if (!expectation_name.empty()) {
-        ss << " with name \"" << expectation_name << "\"";
+        ss << "\"" << expectation_name << "\" ";
       }
-      ss << " call count doesn't match " << untyped_expectation->source_text()
+      ss << "call count doesn't match " << untyped_expectation->source_text()
          << "...\n";
       // No need to show the source file location of the expectation
       // in the description, as the Expect() call that follows already
