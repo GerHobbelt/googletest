@@ -2042,7 +2042,7 @@ GTEST_API_ AssertionResult FloatLE(const char* expr1, const char* expr2,
 GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
                                     double val1, double val2);
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 // Macros that test for HRESULT failure and success, these are only useful
 // on Windows, and rely on Windows SDK macros and APIs to compile.
@@ -2065,7 +2065,7 @@ GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 #define ASSERT_HRESULT_FAILED(expr) \
   ASSERT_PRED_FORMAT1(::testing::internal::IsHRESULTFailure, (expr))
 
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 // Macros that execute statement and check that it doesn't generate new fatal
 // failures in the current thread.

@@ -168,6 +168,18 @@
 #define GTEST_HAS_BUILTIN(x) 0
 #endif  // defined(__has_builtin)
 
+#if GTEST_OS_WINDOWS_WINELIB && !GTEST_OS_WINDOWS
+// non-windows winelib still has windows.h,
+// and we need some parts for the HRESULT support functions
+// but as little other cruft as practical
+# define NOMINMAX
+//# define WIN32_LEAN_AND_MEAN
+//# include <windows.h>  // NOLINT
+# include <basetsd.h>
+# include <windef.h>
+# include <winbase.h>
+#endif
+
 namespace testing {
 
 using internal::CountIf;
@@ -642,7 +654,20 @@ static ::std::vector<std::string> g_argvs;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if GTEST_OS_WINDOWS || GTEST_OS_OS2
+#if GTEST_OS_WINDOWS_WINELIB
+  // wine passes argv[0] as a Win32 path, and also launches via $WINELOADER
+  // Furthermore, the narrow argv[0] is of rather uncertain encoding
+  // To avoid this causing confusion, use GetModuleFileNameW to ask for
+  // process executable and have wine translate this to a posix path
+  WCHAR wide_path[MAX_PATH] = { '\0' };
+  char *unix_path = nullptr;
+  if(GetModuleFileNameW(nullptr,wide_path,MAX_PATH)) {
+    if((unix_path = wine_get_unix_file_name(wide_path))) {
+      result.Set(FilePath(unix_path).RemoveExtension("exe.so"));
+    }
+    HeapFree(GetProcessHeap(),0,unix_path);
+  }
+#elif GTEST_OS_WINDOWS || GTEST_OS_OS2
   result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe"));
 #else
   result.Set(FilePath(GetArgvs()[0]));
@@ -1885,7 +1910,7 @@ AssertionResult IsNotSubstring(const char* needle_expr,
 
 namespace internal {
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 namespace {
 
@@ -1944,7 +1969,7 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
   return HRESULTFailureHelper(expr, "fails", hr);
 }
 
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_WINELIB
 
 // Utility functions for encoding Unicode text (wide strings) in
 // UTF-8.
@@ -5440,7 +5465,7 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
     // with another testing framework) and specify the former on the
     // command line for debugging.
     if (GTEST_FLAG_GET(break_on_failure)) {
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+#if (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || GTEST_OS_WINDOWS_WINELIB
       // Using DebugBreak on Windows allows gtest to still break into a debugger
       // when a failure happens and both the --gtest_break_on_failure and
       // the --gtest_catch_exceptions flags are specified.

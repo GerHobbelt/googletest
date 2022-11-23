@@ -193,6 +193,7 @@ if (gmock_build_tests)
   cxx_test_with_flags(gmock_no_rtti_test "${cxx_no_rtti}"
     gmock_main_no_rtti test/gmock-spec-builders_test.cc)
 
+  if(BUILD_SHARED_LIBS)
   cxx_shared_library(shared_gmock_main "${cxx_default}"
     "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
 
@@ -206,6 +207,7 @@ if (gmock_build_tests)
   set_target_properties(shared_gmock_test_
     PROPERTIES
     COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
+  endif()
 
   ############################################################
   # Python tests.
