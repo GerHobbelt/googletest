@@ -6818,33 +6818,29 @@ void InitGoogleTest() {
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 }
 
-#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
-namespace {
-
-// The temporary directory read from the OS canonical environment variable.
-//
-// Returns an empty string if the environment variable is not set. The returned
-// string may or may not end with the OS-specific path separator. The path is
-// not guaranteed to point to an existing directory. The directory it points to
-// is not guaranteed to be writable by the application.
-std::string GetEnvTempDir() {
-#if GTEST_OS_WINDOWS_MOBILE
-  const char* env_result = internal::posix::GetEnv("TEMP");
-#elif GTEST_OS_WINDOWS
-  char temp_dir_path[MAX_PATH + 1] = {'\0'};  // NOLINT
-  if (::GetTempPathA(sizeof(temp_dir_path), temp_dir_path) != 0)
-    return temp_dir_path;
-  const char* env_result = internal::posix::GetEnv("TEMP");
-#else
-  const char* env_result = internal::posix::GetEnv("TMPDIR");
-#endif  // GETST_OS_WINDOWS
-
-  if (env_result == nullptr) return std::string();
-  return env_result;
+#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_) || \
+    !defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+// Returns the value of the first environment variable that is set and contains
+// a non-empty string. If there are none, returns the "fallback" string. Adds
+// the directory-separator character as a suffix if not provided in the
+// environment variable value.
+// The path is not guaranteed to point to an existing directory. 
+// The directory it points to is not guaranteed to be writable by the application.
+static std::string GetDirFromEnv(
+    std::initializer_list<const char*> environment_variables,
+    const char* fallback, char separator) {
+  for (const char* variable_name : environment_variables) {
+    const char* value = internal::posix::GetEnv(variable_name);
+    if (value != nullptr && value[0] != '\0') {
+      if (value[strlen(value) - 1] != separator) {
+        return std::string(value).append(1, separator);
+      }
+      return value;
+    }
+  }
+  return fallback;
 }
-
-}  // namespace
-#endif  // !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+#endif
 
 // A directory suitable for storing temporary files.
 //
@@ -6857,17 +6853,11 @@ std::string GetEnvTempDir() {
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
-#else
-
-  std::string temp_dir = GetEnvTempDir();
-  if (!temp_dir.empty()) {
-    if (temp_dir.back() == GTEST_PATH_SEP_[0])
-      temp_dir.pop_back();
-    return temp_dir;
-  }
-
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS
-  return "\\temp";
+#elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
+  char temp_dir_path[MAX_PATH + 1] = {'\0'};  // NOLINT
+  if (::GetTempPathA(sizeof(temp_dir_path), temp_dir_path) != 0)
+    strcpy(temp_dir_path, "\\temp\\");
+  return GetDirFromEnv({"TEST_TMPDIR", "TEMP"}, temp_dir_path, '\\');
 #elif GTEST_OS_LINUX_ANDROID
   // Android applications are expected to call the framework's
   // Context.getExternalStorageDirectory() method through JNI to get the
@@ -6880,23 +6870,49 @@ std::string TempDir() {
   // Starting from Android O, the recommended generic temporary directory is
   // '/data/local/tmp'. The recommended fallback is the current directory,
   // which is usually accessible in app context.
+  const char* current_dir = nullptr;
   if (::access("/data/local/tmp", R_OK | W_OK | X_OK) == 0)
-    return "/data/local/tmp";
-  const char* current_dir = ::getcwd(nullptr, 0);
-  if (current_dir != nullptr &&
-      ::access(current_dir, R_OK | W_OK | X_OK) == 0) {
-    temp_dir = current_dir;
-    return temp_dir;
+    current_dir = "/data/local/tmp";
+  else {
+    current_dir = ::getcwd(nullptr, 0);
+    if (current_dir == nullptr &&
+        ::access(current_dir, R_OK | W_OK | X_OK) != 0)
+      current_dir = nullptr;
   }
   // Before Android O, /sdcard is usually available.
-  if (::access("/sdcard", R_OK | W_OK | X_OK) == 0) return "/sdcard";
-  // Generic POSIX fallback.
-  return "/tmp";
+  if (current_dir == nullptr &&
+      ::access("/sdcard", R_OK | W_OK | X_OK) == 0) 
+    current_dir = "/sdcard";
+  if (current_dir == nullptr)
+    current_dir = "/data/local/tmp";
+  return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, current_dir, '/');
 #else
-  return "/tmp";
-#endif  // GTEST_OS_WINDOWS_MOBILE
+  return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/tmp/", '/');
+#endif
+}
 
-#endif  // defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+#if !defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+// Returns the directory path (including terminating separator) of the current
+// executable as derived from argv[0].
+static std::string GetCurrentExecutableDirectory() {
+  internal::FilePath argv_0(internal::GetArgvs()[0]);
+  return argv_0.RemoveFileName().string();
+}
+#endif
+
+std::string SrcDir() {
+#if defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+  return GTEST_CUSTOM_SRCDIR_FUNCTION_();
+#elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
+  return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
+                       '\\');
+#elif GTEST_OS_LINUX_ANDROID
+  return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
+                       '/');
+#else
+  return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
+                       '/');
+#endif
 }
 
 // Class ScopedTrace
