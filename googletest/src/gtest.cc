@@ -5011,8 +5011,21 @@ void StreamingListener::SocketWriter::MakeConnection() {
   const int error_num =
       getaddrinfo(host_name_.c_str(), port_num_.c_str(), &hints, &servinfo);
   if (error_num != 0) {
-    GTEST_LOG_(WARNING) << "stream_result_to: getaddrinfo() failed: "
-                        << gai_strerror(error_num);
+	  GTEST_LOG_(WARNING) << "stream_result_to: getaddrinfo() failed: "
+		  /*
+		   * VC configurations may define UNICODE, to indicate to the C RTL that
+		   * WCHAR functions are preferred.
+		   * This affects functions like gai_strerror(), which is implemented as
+		   * an alias macro for gai_strerrorA() (which returns a const char *) or
+		   * gai_strerrorW() (which returns a const WCHAR *).  This source file
+		   * assumes POSIX declarations, so prefer the non-UNICODE definitions.
+		   */
+#if defined(UNICODE) && defined(gai_strerror)
+		  << gai_strerrorA(error_num)
+#else
+		  << gai_strerror(error_num)
+#endif
+		  ;
   }
 
   // Loop through all the results and connect to the first we can.
