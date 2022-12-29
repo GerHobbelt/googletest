@@ -3332,7 +3332,7 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-  static const bool in_color_mode =
+  static const auto color_mode =
 #if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
 #else

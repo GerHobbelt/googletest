@@ -632,6 +632,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // GTEST_HAS_FILE_SYSTEM
 #endif
 
+#ifndef GTEST_HAS_DEATH_TEST
+#define GTEST_HAS_DEATH_TEST 0
+#endif
+
 // Determines whether to support type-driven tests.
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
