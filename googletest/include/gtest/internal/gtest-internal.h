@@ -314,9 +314,6 @@ class FloatingPoint {
   // Returns the floating-point number that represent positive infinity.
   static RawType Infinity() { return ReinterpretBits(kExponentBitMask); }
 
-  // Returns the maximum representable finite floating-point number.
-  static RawType Max();
-
   // Non-static methods
 
   // Returns the bits that represents this number.

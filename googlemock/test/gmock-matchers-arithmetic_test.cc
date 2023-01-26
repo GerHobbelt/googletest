@@ -41,6 +41,8 @@
 
 #include "test/gmock-matchers_test.h"
 
+#include <limits>
+
 namespace testing {
 namespace gmock_matchers_test {
 namespace {
