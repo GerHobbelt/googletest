@@ -15,7 +15,7 @@ if (POLICY CMP0077)
 endif (POLICY CMP0077)
 
 project(googletest
-    VERSION 1.12.1
+    VERSION 1.13.0
     LANGUAGES CXX
 )
 include(CTest)
