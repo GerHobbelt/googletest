@@ -370,6 +370,12 @@ class GTEST_API_ Mock {
   static void AllowLeak(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+  // Tells Google Mock to instantly check for leftover mock objects and report
+  // them if there are.
+  // Returns false if there are leftover mock objects and true otherwise.
+  static bool CheckLeakInstant(void)
+      GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+
   // Verifies and clears all expectations on the given mock object.
   // If the expectations aren't satisfied, generates one or more
   // Google Test non-fatal failures and returns false.
@@ -1838,9 +1844,8 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
     // Doing so slows down compilation dramatically because the *constructor* of
     // std::function<T> is re-instantiated with different template
     // parameters each time.
-    const UninterestingCallCleanupHandler report_uninteresting_call = {
-        reaction, ss
-    };
+    const UninterestingCallCleanupHandler report_uninteresting_call = {reaction,
+                                                                       ss};
 
     return PerformActionAndPrintResult(nullptr, std::move(args), ss.str(), ss);
   }
@@ -1890,8 +1895,7 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
   // std::function<T> is re-instantiated with different template
   // parameters each time.
   const FailureCleanupHandler handle_failures = {
-      ss, why, loc, untyped_expectation, found, is_excessive
-  };
+      ss, why, loc, untyped_expectation, found, is_excessive};
 
   return PerformActionAndPrintResult(untyped_action, std::move(args), ss.str(),
                                      ss);
