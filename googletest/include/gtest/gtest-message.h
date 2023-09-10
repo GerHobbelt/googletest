@@ -56,7 +56,7 @@
 
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 #include <type_traits>
 
 #include "absl/strings/internal/has_absl_stringify.h"
@@ -122,7 +122,7 @@ class GTEST_API_ Message {
   // GoogleTest with ABSL, this overload is only enabled if the value does not
   // have an AbslStringify definition.
   template <typename T
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
             ,
             typename std::enable_if<
                 !absl::strings_internal::HasAbslStringify<T>::value,  // NOLINT
@@ -149,7 +149,7 @@ class GTEST_API_ Message {
     return *this;
   }
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
   // Streams a non-pointer value with an AbslStringify definition to this
   // object.
   template <typename T,

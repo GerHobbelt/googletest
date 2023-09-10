@@ -322,6 +322,10 @@
 #define GTEST_HAS_NOTIFICATION_ 0
 #endif
 
+#ifndef GTEST_HAS_ABSL
+#define GTEST_HAS_ABSL 0   // default assumption: google abseil not available
+#endif
+
 #if GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"

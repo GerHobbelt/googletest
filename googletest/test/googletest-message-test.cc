@@ -36,7 +36,7 @@
 #include "gtest/gtest-message.h"
 #include "gtest/gtest.h"
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 #include "absl/strings/str_format.h"
 #endif  // GTEST_HAS_ABSL
 
@@ -44,7 +44,7 @@ namespace {
 
 using ::testing::Message;
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 struct AbslStringifiablePoint {
   template <typename Sink>
   friend void AbslStringify(Sink& sink, const AbslStringifiablePoint& p) {
@@ -144,7 +144,7 @@ TEST(MessageTest, StreamsInt) {
   EXPECT_EQ("123", (Message() << 123).GetString());
 }
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // Tests streaming a type with an AbslStringify definition.
 TEST(MessageTest, StreamsAbslStringify) {
   EXPECT_EQ("(1, 2)", (Message() << AbslStringifiablePoint{1, 2}).GetString());

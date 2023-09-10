@@ -94,7 +94,7 @@
 #define GMOCK_FLAG(name) FLAGS_gmock_##name
 
 // Pick a command line flags implementation.
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 
 // Macros for defining flags.
 #define GMOCK_DEFINE_bool_(name, default_val, doc) \

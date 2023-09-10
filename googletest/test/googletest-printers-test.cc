@@ -56,7 +56,7 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 #include "absl/strings/str_format.h"
 #endif
 
@@ -128,7 +128,7 @@ void operator<<(::std::ostream& os, const StreamableInGlobal* /* x */) {
   os << "StreamableInGlobal*";
 }
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // A user-defined type with AbslStringify
 struct Point {
   template <typename Sink>
@@ -339,7 +339,7 @@ TEST(PrintEnumTest, EnumWithPrintTo) {
   EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
 }
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // Tests printing a class that defines AbslStringify
 TEST(PrintClassTest, AbslStringify) { EXPECT_EQ("(10, 20)", Print(Point())); }
 #endif
@@ -1678,7 +1678,7 @@ TEST(PrintToStringTest, PrintReferenceToStreamableInGlobal) {
   EXPECT_STREQ("StreamableInGlobal", PrintToString(r).c_str());
 }
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 TEST(PrintToStringTest, AbslStringify) {
   EXPECT_PRINT_TO_STRING_(Point(), "(10, 20)");
 }
