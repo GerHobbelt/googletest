@@ -37,6 +37,7 @@
 #include "src/gtest-internal-inl.h"
 
 using testing::internal::ShouldUseColor;
+using testing::internal::GTestColorMode;
 
 // The purpose of this is to ensure that the UnitTest singleton is
 // created before main() is entered, and thus that ShouldUseColor()
