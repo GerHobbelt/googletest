@@ -47,6 +47,7 @@
 #include <exception>
 #include <initializer_list>
 #include <iomanip>
+#include <ios>
 #include <iterator>
 #include <limits>
 #include <list>
@@ -2497,11 +2498,6 @@ void Test::TearDown() {}
 void Test::RecordProperty(const std::string& key, const std::string& value) {
   UnitTest::GetInstance()->RecordProperty(key, value);
 }
-// We do not define a customary serialization except for integers,
-// but other values could be logged in this way.
-void Test::RecordProperty(const std::string& key, int64_t value) {
-  RecordProperty(key, (Message() << value).GetString());
-}
 
 namespace internal {
 
@@ -4170,6 +4166,13 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
 // Formats the given time in milliseconds as seconds.
 std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
   ::std::stringstream ss;
+  // For the exact N seconds, makes sure output has a trailing decimal point.
+  // Sets precision so that we won't have many trailing zeros (e.g., 300 ms
+  // will be just 0.3, 410 ms 0.41, and so on)
+  ss << std::fixed
+     << std::setprecision(
+            ms % 1000 == 0 ? 0 : (ms % 100 == 0 ? 1 : (ms % 10 == 0 ? 2 : 3)))
+     << std::showpoint;
   ss << (static_cast<double>(ms) * 1e-3);
   return ss.str();
 }
