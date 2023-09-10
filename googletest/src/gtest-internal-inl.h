@@ -458,7 +458,7 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   void UponLeavingGTest() override;
 
  private:
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
   Mutex mutex_;  // Protects all internal state.
 
   // We save the stack frame below the frame that calls user code.

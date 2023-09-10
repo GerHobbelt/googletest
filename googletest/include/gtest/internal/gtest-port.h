@@ -322,7 +322,7 @@
 #define GTEST_HAS_NOTIFICATION_ 0
 #endif
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #include "absl/flags/reflection.h"
@@ -436,7 +436,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 // Select the regular expression implementation.
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // When using Abseil, RE2 is required.
 #include "absl/strings/string_view.h"
 #define GTEST_USES_RE2 1
@@ -2286,7 +2286,7 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 #endif  // !defined(GTEST_FLAG)
 
 // Pick a command line flags implementation.
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc) \
@@ -2397,11 +2397,7 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 #endif  // !defined(GTEST_INTERNAL_DEPRECATED)
 
-#ifndef GTEST_HAS_ABSL
-# define GTEST_HAS_ABSL 0
-#endif
-
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // Always use absl::any for UniversalPrinter<> specializations if googletest
 // is built with absl support.
 #define GTEST_INTERNAL_HAS_ANY 1
@@ -2443,7 +2439,7 @@ using Any = ::std::any;
 #define GTEST_INTERNAL_HAS_ANY 0
 #endif
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // Always use absl::optional for UniversalPrinter<> specializations if
 // googletest is built with absl support.
 #define GTEST_INTERNAL_HAS_OPTIONAL 1
@@ -2498,7 +2494,7 @@ inline ::std::nullopt_t Nullopt() { return ::std::nullopt; }
 #define GTEST_INTERNAL_HAS_STD_SPAN 0
 #endif
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // Always use absl::string_view for Matcher<> specializations if googletest
 // is built with absl support.
 #define GTEST_INTERNAL_HAS_STRING_VIEW 1
@@ -2539,7 +2535,7 @@ using StringView = ::std::string_view;
 #define GTEST_INTERNAL_HAS_STRING_VIEW 0
 #endif
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 // Always use absl::variant for UniversalPrinter<> specializations if googletest
 // is built with absl support.
 #define GTEST_INTERNAL_HAS_VARIANT 1
