@@ -5532,6 +5532,8 @@ int UnitTest::Run() {
       in_death_test_child_process
           ? nullptr
           : internal::posix::GetEnv("TEST_PREMATURE_EXIT_FILE"));
+#else
+  const bool in_death_test_child_process = false;
 #endif  // GTEST_HAS_DEATH_TEST
 
   // Captures the value of GTEST_FLAG(catch_exceptions).  This value will be
@@ -5580,6 +5582,8 @@ int UnitTest::Run() {
     }
 #endif
   }
+#else
+  (void)in_death_test_child_process;  // Needed inside the #if block above
 #endif  // GTEST_OS_WINDOWS
 
   return internal::HandleAllExceptionsInMethodIfSupported(
@@ -6790,8 +6794,7 @@ void ParseGoogleTestFlagsOnly(int* argc, const char** argv) {
   if (*argc > 0) {
     // absl::ParseCommandLine() requires *argc > 0.
     auto positional_args = absl::flags_internal::ParseCommandLineImpl(
-        *argc, argv, absl::flags_internal::ArgvListAction::kRemoveParsedArgs,
-        absl::flags_internal::UsageFlagsAction::kHandleUsage,
+        *argc, argv, absl::flags_internal::UsageFlagsAction::kHandleUsage,
         absl::flags_internal::OnUndefinedFlag::kReportUndefined);
     // Any command-line positional arguments not part of any command-line flag
     // (or arguments to a flag) are copied back out to argv, with the program
