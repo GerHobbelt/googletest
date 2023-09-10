@@ -1089,7 +1089,7 @@ TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-#ifdef GTEST_USES_POSIX_RE
+#if GTEST_USES_POSIX_RE
   EXPECT_THAT(r.message(),
               ContainsRegex(
                   // POSIX RE doesn't understand the (?s) prefix, but has no

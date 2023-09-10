@@ -161,10 +161,10 @@
 // NOT define them.
 //
 // These macros are public so that portable tests can be written.
-// Such tests typically surround code using a feature with an #ifdef
+// Such tests typically surround code using a feature with an #if
 // which controls that code.  For example:
 //
-// #ifdef GTEST_HAS_DEATH_TEST
+// #if GTEST_HAS_DEATH_TEST
 //   EXPECT_DEATH(DoSomethingDeadly());
 // #endif
 //
@@ -844,7 +844,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_IS_THREADSAFE
 
-#ifdef GTEST_IS_THREADSAFE
+#if GTEST_IS_THREADSAFE
 // Some platforms don't support including these threading related headers.
 #include <condition_variable>  // NOLINT
 #include <mutex>               // NOLINT
@@ -989,7 +989,7 @@ GTEST_API_ bool IsTrue(bool condition);
 
 // Defines RE.
 
-#ifdef GTEST_USES_RE2
+#if GTEST_USES_RE2
 
 // This is almost `using RE = ::RE2`, except it is copy-constructible, and it
 // needs to disambiguate the `std::string`, `absl::string_view`, and `const
@@ -1014,7 +1014,7 @@ class GTEST_API_ RE {
   RE2 regex_;
 };
 
-#elif defined(GTEST_USES_POSIX_RE) || defined(GTEST_USES_SIMPLE_RE)
+#elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
@@ -1054,7 +1054,7 @@ class GTEST_API_ RE {
   std::string pattern_;
   bool is_valid_;
 
-#ifdef GTEST_USES_POSIX_RE
+#if GTEST_USES_POSIX_RE
 
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
@@ -1236,7 +1236,7 @@ GTEST_API_ std::string ReadEntireFile(FILE* file);
 // All command line arguments.
 GTEST_API_ std::vector<std::string> GetArgvs();
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 std::vector<std::string> GetInjectableArgvs();
 // Deprecated: pass the args vector by value instead.
@@ -1251,7 +1251,7 @@ void ClearInjectableArgvs();
 #endif
 
 // Defines synchronization primitives.
-#ifdef GTEST_IS_THREADSAFE
+#if GTEST_IS_THREADSAFE
 
 #ifdef GTEST_OS_WINDOWS
 // Provides leak-safe Windows kernel handle ownership.

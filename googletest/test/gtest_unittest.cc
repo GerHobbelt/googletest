@@ -282,7 +282,7 @@ using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
 #endif
 
-#ifdef GTEST_IS_THREADSAFE
+#if GTEST_IS_THREADSAFE
 using testing::internal::ThreadWithParam;
 #endif
 
@@ -1201,7 +1201,7 @@ TEST_F(ScopedFakeTestPartResultReporterTest, DeprecatedConstructor) {
   EXPECT_EQ(1, results.size());
 }
 
-#ifdef GTEST_IS_THREADSAFE
+#if GTEST_IS_THREADSAFE
 
 class ScopedFakeTestPartResultReporterWithThreadsTest
     : public ScopedFakeTestPartResultReporterTest {
@@ -1359,7 +1359,7 @@ TEST_F(ExpectNonfatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
       "");
 }
 
-#ifdef GTEST_IS_THREADSAFE
+#if GTEST_IS_THREADSAFE
 
 typedef ScopedFakeTestPartResultReporterWithThreadsTest
     ExpectFailureWithThreadsTest;
@@ -6186,7 +6186,7 @@ TEST_F(ParseFlagsTest, FilterBad) {
 
   const char* argv2[] = {"foo.exe", "--gtest_filter", nullptr};
 
-#if GTEST_HAS_ABSL && defined(GTEST_HAS_DEATH_TEST)
+#if GTEST_HAS_ABSL && GTEST_HAS_DEATH_TEST
   // Invalid flag arguments are a fatal error when using the Abseil Flags.
   EXPECT_EXIT(GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), true),
               testing::ExitedWithCode(1),
@@ -6205,7 +6205,7 @@ TEST_F(ParseFlagsTest, OutputEmpty) {
 
   const char* argv2[] = {"foo.exe", "--gtest_output", nullptr};
 
-#if GTEST_HAS_ABSL && defined(GTEST_HAS_DEATH_TEST)
+#if GTEST_HAS_ABSL && GTEST_HAS_DEATH_TEST
   // Invalid flag arguments are a fatal error when using the Abseil Flags.
   EXPECT_EXIT(GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), true),
               testing::ExitedWithCode(1),

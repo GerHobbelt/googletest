@@ -5153,7 +5153,7 @@ void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
 #endif  // GTEST_HAS_ABSL
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 // A helper class that creates the premature-exit file in its
 // constructor and deletes the file in its destructor.
 class ScopedPrematureExitFile {
@@ -5522,7 +5522,7 @@ void UnitTest::RecordProperty(const std::string& key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
       GTEST_FLAG_GET(internal_run_death_test).length() > 0;
 
@@ -5700,7 +5700,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       random_(0),       // Will be reseeded before first use.
       start_timestamp_(0),
       elapsed_time_(0),
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
       death_test_factory_(new DefaultDeathTestFactory),
 #endif
       // Will be overridden by the flag before first use.
@@ -5740,7 +5740,7 @@ void UnitTestImpl::RecordProperty(const TestProperty& test_property) {
   test_result->RecordProperty(xml_element, test_property);
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 // Disables event forwarding if the control is currently in a death test
 // subprocess. Must not be called before InitGoogleTest.
 void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
@@ -5805,7 +5805,7 @@ void UnitTestImpl::PostFlagParsingInit() {
     listeners()->Append(new GTEST_CUSTOM_TEST_EVENT_LISTENER_());
 #endif  // defined(GTEST_CUSTOM_TEST_EVENT_LISTENER_)
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
     InitDeathTestSubprocessControlInfo();
     SuppressTestEventsIfInSubprocess();
 #endif  // GTEST_HAS_DEATH_TEST
@@ -5943,7 +5943,7 @@ bool UnitTestImpl::RunAllTests() {
   // death test.
   bool in_subprocess_for_death_test = false;
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
   in_subprocess_for_death_test = (internal_run_death_test_flag_ != nullptr);
 #if defined(GTEST_EXTRA_DEATH_TEST_CHILD_SETUP_)
   if (in_subprocess_for_death_test) {

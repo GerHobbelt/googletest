@@ -37,7 +37,7 @@
 using testing::internal::AlwaysFalse;
 using testing::internal::AlwaysTrue;
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 #ifdef GTEST_OS_WINDOWS
 #include <direct.h>  // For chdir().
@@ -1357,7 +1357,7 @@ void DieWithMessage(const char* message) {
 TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
   // googletest tests this, of course; here we ensure that including googlemock
   // has not broken it.
-#ifdef GTEST_USES_POSIX_RE
+#if GTEST_USES_POSIX_RE
   EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I d[aeiou]e");
 #else
   EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I di?e");

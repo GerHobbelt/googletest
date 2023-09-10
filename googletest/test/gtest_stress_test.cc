@@ -38,7 +38,7 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
-#ifdef GTEST_IS_THREADSAFE
+#if GTEST_IS_THREADSAFE
 
 namespace testing {
 namespace {

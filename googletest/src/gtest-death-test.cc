@@ -42,7 +42,7 @@
 #include "gtest/internal/custom/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 #ifdef GTEST_OS_MAC
 #include <crt_externs.h>
@@ -141,7 +141,7 @@ GTEST_DEFINE_string_(
 
 namespace testing {
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 
 namespace internal {
 

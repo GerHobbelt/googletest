@@ -667,7 +667,7 @@ void ThreadLocalRegistry::OnThreadLocalDestroyed(
 
 #endif  // GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
 
-#ifdef GTEST_USES_POSIX_RE
+#if GTEST_USES_POSIX_RE
 
 // Implements RE.  Currently only needed for death tests.
 
@@ -729,7 +729,7 @@ void RE::Init(const char* regex) {
   delete[] full_pattern;
 }
 
-#elif defined(GTEST_USES_SIMPLE_RE)
+#elif GTEST_USES_SIMPLE_RE
 
 // Returns true if and only if ch appears anywhere in str (excluding the
 // terminating '\0' character).
@@ -1193,7 +1193,7 @@ std::string ReadEntireFile(FILE* file) {
   return content;
 }
 
-#ifdef GTEST_HAS_DEATH_TEST
+#if GTEST_HAS_DEATH_TEST
 static const std::vector<std::string>* g_injected_test_argvs =
     nullptr;  // Owned.
 
