@@ -96,7 +96,7 @@ HELP_REGEX = re.compile(
 )
 
 
-def RunWithFlag(flag):
+def run_with_flag(flag):
   """Runs gtest_help_test_ with the given flag.
 
   Returns:
@@ -116,17 +116,14 @@ def RunWithFlag(flag):
 class GTestHelpTest(gtest_test_utils.TestCase):
   """Tests the --help flag and its equivalent forms."""
 
-  def TestHelpFlag(self, flag):
+  def test_prints_help_with_full_flag(self):
     """Verifies correct behavior when help flag is specified.
 
     The right message must be printed and the tests must
     skipped when the given flag is specified.
-
-    Args:
-      flag:  A flag to pass to the binary or None.
     """
 
-    exit_code, output = RunWithFlag(flag)
+    exit_code, output = run_with_flag('--help')
     if HAS_ABSL_FLAGS:
       # The Abseil flags library prints the ProgramUsageMessage() with
       # --help and returns 1.
@@ -146,53 +143,27 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     else:
       self.assertNotIn(DEATH_TEST_STYLE_FLAG, output)
 
-  def TestUnknownFlagWithAbseil(self, flag):
-    """Verifies correct behavior when an unknown flag is specified.
-
-    The right message must be printed and the tests must
-    skipped when the given flag is specified.
-
-    Args:
-      flag:  A flag to pass to the binary or None.
-    """
-    exit_code, output = RunWithFlag(flag)
-    self.assertEqual(1, exit_code)
-    self.assertIn('ERROR: Unknown command line flag', output)
-
-  def TestNonHelpFlag(self, flag):
+  def test_runs_tests_without_help_flag(self):
     """Verifies correct behavior when no help flag is specified.
 
     Verifies that when no help flag is specified, the tests are run
     and the help message is not printed.
-
-    Args:
-      flag:  A flag to pass to the binary or None.
     """
 
-    exit_code, output = RunWithFlag(flag)
+    exit_code, output = run_with_flag(None)
     self.assertNotEqual(exit_code, 0)
     self.assertFalse(HELP_REGEX.search(output), output)
 
-  def testPrintsHelpWithFullFlag(self):
-    self.TestHelpFlag('--help')
-
-  def testRunsTestsWithoutHelpFlag(self):
-    """Verifies correct behavior when no help flag is specified.
-
-    Verifies that when no help flag is specified, the tests are run
-    and the help message is not printed.
-    """
-
-    self.TestNonHelpFlag(None)
-
-  def testRunsTestsWithGtestInternalFlag(self):
+  def test_runs_tests_with_gtest_internal_flag(self):
     """Verifies correct behavior when internal testing flag is specified.
 
     Verifies that the tests are run and no help message is printed when
     a flag starting with Google Test prefix and 'internal_' is supplied.
     """
 
-    self.TestNonHelpFlag(INTERNAL_FLAG_FOR_TESTING)
+    exit_code, output = run_with_flag(INTERNAL_FLAG_FOR_TESTING)
+    self.assertNotEqual(exit_code, 0)
+    self.assertFalse(HELP_REGEX.search(output), output)
 
 
 if __name__ == '__main__':
