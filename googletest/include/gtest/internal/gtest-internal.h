@@ -906,7 +906,7 @@ class HasDebugStringAndShortDebugString {
       HasDebugStringType::value && HasShortDebugStringType::value;
 };
 
-#ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
+#if GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
 template <typename T>
 constexpr bool HasDebugStringAndShortDebugString<T>::value;
 #endif

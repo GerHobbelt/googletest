@@ -1222,7 +1222,7 @@ void ClearInjectableArgvs() {
 
 namespace posix {
 
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
 [[noreturn]] void Abort(const char* msg) {
 	if (IsDebuggerPresent())
 		DebugBreak();

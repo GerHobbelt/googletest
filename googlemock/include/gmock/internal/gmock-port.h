@@ -56,7 +56,7 @@
 #include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #endif

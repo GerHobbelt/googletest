@@ -471,7 +471,7 @@ struct Function<R(Args...)> {
   using MakeResultIgnoredValue = IgnoredValue(Args...);
 };
 
-#ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
+#if GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
 template <typename R, typename... Args>
 constexpr size_t Function<R(Args...)>::ArgumentCount;
 #endif
