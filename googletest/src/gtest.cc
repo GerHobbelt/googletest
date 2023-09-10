@@ -3078,7 +3078,8 @@ void TestSuite::Run() {
   internal::HandleAllExceptionsInMethodIfSupported(
       this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
-  const bool skip_all = ad_hoc_test_result().Failed();
+  const bool skip_all =
+      ad_hoc_test_result().Failed() || ad_hoc_test_result().Skipped();
 
   start_timestamp_ = internal::GetTimeInMillis();
   internal::Timer timer;

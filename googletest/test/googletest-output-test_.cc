@@ -1009,6 +1009,11 @@ class TestSuiteThatFailsToSetUp : public testing::Test {
 };
 TEST_F(TestSuiteThatFailsToSetUp, ShouldNotRun) { std::abort(); }
 
+class TestSuiteThatSkipsInSetUp : public testing::Test {
+ public:
+  static void SetUpTestSuite() { GTEST_SKIP() << "Skip entire test suite"; }
+};
+TEST_F(TestSuiteThatSkipsInSetUp, ShouldNotRun) { std::abort(); }
 
 
 #if defined(BUILD_MONOLITHIC)
