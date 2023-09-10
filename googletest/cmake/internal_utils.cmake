@@ -188,8 +188,8 @@ function(cxx_library_with_type name type cxx_flags)
     set_target_properties(${name}
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
-      target_compile_definitions(${name} INTERFACE
-        $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
+    target_compile_definitions(${name} INTERFACE
+      $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
     target_link_libraries(${name} PUBLIC Threads::Threads)
