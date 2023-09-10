@@ -62,7 +62,7 @@
 #include "gtest/internal/custom/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_OS_LINUX
+#ifdef GTEST_OS_LINUX
 
 #include <fcntl.h>   // NOLINT
 #include <limits.h>  // NOLINT
@@ -75,13 +75,13 @@
 
 #include <string>
 
-#elif GTEST_OS_ZOS
+#elif defined(GTEST_OS_ZOS)
 #include <sys/time.h>  // NOLINT
 
 // On z/OS we additionally need strings.h for strcasecmp.
 #include <strings.h>   // NOLINT
 
-#elif GTEST_OS_WINDOWS_MOBILE  // We are on Windows CE.
+#elif defined(GTEST_OS_WINDOWS_MOBILE)  // We are on Windows CE.
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -91,7 +91,7 @@
 #endif
 #include <windows.h>  // NOLINT
 
-#elif GTEST_OS_WINDOWS  // We are on Windows proper.
+#elif defined(GTEST_OS_WINDOWS)  // We are on Windows proper.
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -110,7 +110,7 @@
 #include <sys/timeb.h>  // NOLINT
 #include <sys/types.h>  // NOLINT
 
-#if GTEST_OS_WINDOWS_MINGW
+#ifdef GTEST_OS_WINDOWS_MINGW
 #include <sys/time.h>  // NOLINT
 #endif                 // GTEST_OS_WINDOWS_MINGW
 
@@ -142,11 +142,11 @@
 
 #include "src/gtest-internal-inl.h"
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 #define vsnprintf _vsnprintf
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_MAC
+#ifdef GTEST_OS_MAC
 #ifndef GTEST_OS_IOS
 #include <crt_externs.h>
 #endif
@@ -647,7 +647,7 @@ static ::std::vector<std::string> g_argvs;
 FilePath GetCurrentExecutableName() {
   FilePath result;
 
-#if GTEST_OS_WINDOWS || GTEST_OS_OS2
+#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_OS2)
   result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe"));
 #else
   result.Set(FilePath(GetArgvs()[0]));
@@ -1184,7 +1184,7 @@ TimeInMillis GetTimeInMillis() {
 
 // class String.
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef GTEST_OS_WINDOWS_MOBILE
 // Creates a UTF-16 wide string from the given ANSI string, allocating
 // memory using new. The caller is responsible for deleting the return
 // value using delete[]. Returns the wide string, or NULL if the
@@ -1900,14 +1900,14 @@ AssertionResult IsNotSubstring(const char* needle_expr,
 
 namespace internal {
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 namespace {
 
 // Helper function for IsHRESULT{SuccessFailure} predicates
 AssertionResult HRESULTFailureHelper(const char* expr, const char* expected,
                                      long hr) {  // NOLINT
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_TV_TITLE
+#if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_WINDOWS_TV_TITLE)
 
   // Windows CE doesn't support FormatMessage.
   const char error_text[] = "";
@@ -2168,9 +2168,9 @@ bool String::CaseInsensitiveWideCStringEquals(const wchar_t* lhs,
 
   if (rhs == nullptr) return false;
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   return _wcsicmp(lhs, rhs) == 0;
-#elif GTEST_OS_LINUX && !GTEST_OS_LINUX_ANDROID
+#elif defined(GTEST_OS_LINUX) && !defined(GTEST_OS_LINUX_ANDROID)
   return wcscasecmp(lhs, rhs) == 0;
 #else
   // Android, Mac OS X and Cygwin don't define wcscasecmp.
@@ -3203,7 +3203,7 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
   // following statements add the test part result message to the Output
   // window such that the user can double-click on it to jump to the
   // corresponding source code location; otherwise they do nothing.
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE)
   // We don't call OutputDebugString*() on Windows Mobile, as printing
   // to stdout is done by OutputDebugString() there already - we don't
   // want the same message printed twice.
@@ -3213,8 +3213,9 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
 }
 
 // class PrettyUnitTestResultPrinter
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
-    !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&    \
+    !defined(GTEST_OS_WINDOWS_PHONE) && !defined(GTEST_OS_WINDOWS_RT) && \
+    !defined(GTEST_OS_WINDOWS_MINGW)
 
 // Returns the character attribute for the given color.
 static WORD GetColorAttribute(GTestColor color) {
@@ -3285,7 +3286,7 @@ GTestColorMode ShouldUseColor(bool stdout_is_tty) {
   const char* const gtest_color = c.c_str();
 
   if (String::CaseInsensitiveCStringEquals(gtest_color, "auto")) {
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
     // On Windows the TERM variable is usually not set, but the
     // console there does support colors.
     return stdout_is_tty ? GTestColorMode::kYes : GTestColorMode::kNo;
@@ -3347,8 +3348,9 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     return;
   }
 
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
-    !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&    \
+    !defined(GTEST_OS_WINDOWS_PHONE) && !defined(GTEST_OS_WINDOWS_RT) && \
+    !defined(GTEST_OS_WINDOWS_MINGW)
   if (color_mode != GTestColorMode::kAnsi) {
     const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -5137,7 +5139,7 @@ void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
 #endif  // GTEST_HAS_ABSL
 }
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 // A helper class that creates the premature-exit file in its
 // constructor and deletes the file in its destructor.
 class ScopedPrematureExitFile {
@@ -5157,7 +5159,7 @@ class ScopedPrematureExitFile {
   }
 
   ~ScopedPrematureExitFile() {
-#if !GTEST_OS_ESP8266
+#ifndef GTEST_OS_ESP8266
     if (!premature_exit_filepath_.empty()) {
       int retval = remove(premature_exit_filepath_.c_str());
       if (retval) {
@@ -5454,7 +5456,8 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
     // with another testing framework) and specify the former on the
     // command line for debugging.
     if (GTEST_FLAG_GET(break_on_failure)) {
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_PHONE) && \
+    !defined(GTEST_OS_WINDOWS_RT)
       // Using DebugBreak on Windows allows gtest to still break into a debugger
       // when a failure happens and both the --gtest_break_on_failure and
       // the --gtest_catch_exceptions flags are specified.
@@ -5503,7 +5506,7 @@ void UnitTest::RecordProperty(const std::string& key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
       GTEST_FLAG_GET(internal_run_death_test).length() > 0;
 
@@ -5541,26 +5544,28 @@ int UnitTest::Run() {
   impl()->set_catch_exceptions(GTEST_FLAG_GET(catch_exceptions));
   impl()->UserExceptionHandler = UserExceptionHandler;
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   // Either the user wants Google Test to catch exceptions thrown by the
   // tests or this is executing in the context of death test child
   // process. In either case the user does not want to see pop-up dialogs
   // about crashes - they are expected.
   if (impl()->catch_exceptions() || in_death_test_child_process) {
-#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+#if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_WINDOWS_PHONE) && \
+    !defined(GTEST_OS_WINDOWS_RT)
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
-#if (defined(_MSC_VER) || GTEST_OS_WINDOWS_MINGW) && !GTEST_OS_WINDOWS_MOBILE
+#if (defined(_MSC_VER) || defined(GTEST_OS_WINDOWS_MINGW)) && \
+    !defined(GTEST_OS_WINDOWS_MOBILE)
     // Death test children can be terminated with _abort().  On Windows,
     // _abort() can show a dialog with a warning message.  This forces the
     // abort message to go to stderr instead.
     _set_error_mode(_OUT_TO_STDERR);
 #endif
 
-#if defined(_MSC_VER) && !GTEST_OS_WINDOWS_MOBILE
+#if defined(_MSC_VER) && !defined(GTEST_OS_WINDOWS_MOBILE)
     // In the debug version, Visual Studio pops up a separate dialog
     // offering a choice to debug the aborted program. We need to suppress
     // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
@@ -5679,7 +5684,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       random_(0),       // Will be reseeded before first use.
       start_timestamp_(0),
       elapsed_time_(0),
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
       death_test_factory_(new DefaultDeathTestFactory),
 #endif
       // Will be overridden by the flag before first use.
@@ -5719,7 +5724,7 @@ void UnitTestImpl::RecordProperty(const TestProperty& test_property) {
   test_result->RecordProperty(xml_element, test_property);
 }
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 // Disables event forwarding if the control is currently in a death test
 // subprocess. Must not be called before InitGoogleTest.
 void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
@@ -5782,7 +5787,7 @@ void UnitTestImpl::PostFlagParsingInit() {
     listeners()->Append(new GTEST_CUSTOM_TEST_EVENT_LISTENER_());
 #endif  // defined(GTEST_CUSTOM_TEST_EVENT_LISTENER_)
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
     InitDeathTestSubprocessControlInfo();
     SuppressTestEventsIfInSubprocess();
 #endif  // GTEST_HAS_DEATH_TEST
@@ -5920,7 +5925,7 @@ bool UnitTestImpl::RunAllTests() {
   // death test.
   bool in_subprocess_for_death_test = false;
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
   in_subprocess_for_death_test =
       (internal_run_death_test_flag_.get() != nullptr);
 #if defined(GTEST_EXTRA_DEATH_TEST_CHILD_SETUP_)
@@ -6647,7 +6652,7 @@ static const char kColorEncodedHelpMessage[] =
 #endif  // GTEST_CAN_STREAM_RESULTS_
     "\n"
     "Assertion Behavior:\n"
-#if GTEST_HAS_DEATH_TEST && !GTEST_OS_WINDOWS
+#if defined(GTEST_HAS_DEATH_TEST) && !defined(GTEST_OS_WINDOWS)
     "  @G--" GTEST_FLAG_PREFIX_
     "death_test_style=@Y(@Gfast@Y|@Gthreadsafe@Y)@D\n"
     "      Set the default death test style.\n"
@@ -6814,7 +6819,7 @@ void ParseGoogleTestFlagsOnly(int* argc, const char** argv) {
   // Fix the value of *_NSGetArgc() on macOS, but if and only if
   // *_NSGetArgv() == argv
   // Only applicable to char** version of argv
-#if GTEST_OS_MAC
+#ifdef GTEST_OS_MAC
 #ifndef GTEST_OS_IOS
   if (*_NSGetArgv() == argv) {
     *_NSGetArgc() = *argc;
@@ -6936,12 +6941,12 @@ static std::string GetDirFromEnv(
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
-#elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
+#elif defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_WINDOWS_MOBILE)
   char temp_dir_path[MAX_PATH + 1] = {'\0'};  // NOLINT
   if (::GetTempPathA(sizeof(temp_dir_path), temp_dir_path) != 0)
     strcpy(temp_dir_path, "\\temp\\");
   return GetDirFromEnv({"TEST_TMPDIR", "TEMP"}, temp_dir_path, '\\');
-#elif GTEST_OS_LINUX_ANDROID
+#elif defined(GTEST_OS_LINUX_ANDROID)
   // Android applications are expected to call the framework's
   // Context.getExternalStorageDirectory() method through JNI to get the
   // location of the world-writable SD Card directory. However, this requires a
@@ -6987,10 +6992,10 @@ static std::string GetCurrentExecutableDirectory() {
 std::string SrcDir() {
 #if defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
   return GTEST_CUSTOM_SRCDIR_FUNCTION_();
-#elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
+#elif defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_WINDOWS_MOBILE)
   return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
                        '\\');
-#elif GTEST_OS_LINUX_ANDROID
+#elif defined(GTEST_OS_LINUX_ANDROID)
   return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
                        '/');
 #else

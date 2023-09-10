@@ -38,7 +38,7 @@
 #include <fstream>
 #include <memory>
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 #include <io.h>
 #include <sys/stat.h>
 #ifndef WIN32_LEAN_AND_MEAN
@@ -57,32 +57,34 @@
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_MAC
+#ifdef GTEST_OS_MAC
 #include <mach/mach_init.h>
 #include <mach/task.h>
 #include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
-#if GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
-    GTEST_OS_NETBSD || GTEST_OS_OPENBSD
+#if defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||   \
+    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD) || \
+    defined(GTEST_OS_OPENBSD)
 #include <sys/sysctl.h>
-#if GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD
+#if defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) || \
+    defined(GTEST_OS_GNU_KFREEBSD)
 #include <sys/user.h>
 #endif
 #endif
 
-#if GTEST_OS_QNX
+#ifdef GTEST_OS_QNX
 #include <devctl.h>
 #include <fcntl.h>
 #include <sys/procfs.h>
 #endif  // GTEST_OS_QNX
 
-#if GTEST_OS_AIX
+#ifdef GTEST_OS_AIX
 #include <procinfo.h>
 #include <sys/types.h>
 #endif  // GTEST_OS_AIX
 
-#if GTEST_OS_FUCHSIA
+#ifdef GTEST_OS_FUCHSIA
 #include <zircon/process.h>
 #include <zircon/syscalls.h>
 #endif  // GTEST_OS_FUCHSIA
@@ -96,7 +98,7 @@
 namespace testing {
 namespace internal {
 
-#if GTEST_OS_LINUX || GTEST_OS_GNU_HURD
+#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_GNU_HURD)
 
 namespace {
 template <typename T>
@@ -119,7 +121,7 @@ size_t GetThreadCount() {
   return ReadProcFileField<size_t>(filename, 19);
 }
 
-#elif GTEST_OS_MAC
+#elif defined(GTEST_OS_MAC)
 
 size_t GetThreadCount() {
   const task_t task = mach_task_self();
@@ -137,20 +139,20 @@ size_t GetThreadCount() {
   }
 }
 
-#elif GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
-    GTEST_OS_NETBSD
+#elif defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) || \
+    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD)
 
-#if GTEST_OS_NETBSD
+#ifdef GTEST_OS_NETBSD
 #undef KERN_PROC
 #define KERN_PROC KERN_PROC2
 #define kinfo_proc kinfo_proc2
 #endif
 
-#if GTEST_OS_DRAGONFLY
+#ifdef GTEST_OS_DRAGONFLY
 #define KP_NLWP(kp) (kp.kp_nthreads)
-#elif GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD
+#elif defined(GTEST_OS_FREEBSD) || defined(GTEST_OS_GNU_KFREEBSD)
 #define KP_NLWP(kp) (kp.ki_numthreads)
-#elif GTEST_OS_NETBSD
+#elif defined(GTEST_OS_NETBSD)
 #define KP_NLWP(kp) (kp.p_nlwps)
 #endif
 
@@ -162,7 +164,7 @@ size_t GetThreadCount() {
     KERN_PROC,
     KERN_PROC_PID,
     getpid(),
-#if GTEST_OS_NETBSD
+#ifdef GTEST_OS_NETBSD
     sizeof(struct kinfo_proc),
     1,
 #endif
@@ -175,7 +177,7 @@ size_t GetThreadCount() {
   }
   return static_cast<size_t>(KP_NLWP(info));
 }
-#elif GTEST_OS_OPENBSD
+#elif defined(GTEST_OS_OPENBSD)
 
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
@@ -212,7 +214,7 @@ size_t GetThreadCount() {
   return nthreads;
 }
 
-#elif GTEST_OS_QNX
+#elif defined(GTEST_OS_QNX)
 
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
@@ -232,7 +234,7 @@ size_t GetThreadCount() {
   }
 }
 
-#elif GTEST_OS_AIX
+#elif defined(GTEST_OS_AIX)
 
 size_t GetThreadCount() {
   struct procentry64 entry;
@@ -245,7 +247,7 @@ size_t GetThreadCount() {
   }
 }
 
-#elif GTEST_OS_FUCHSIA
+#elif defined(GTEST_OS_FUCHSIA)
 
 size_t GetThreadCount() {
   int dummy_buffer;
@@ -270,7 +272,7 @@ size_t GetThreadCount() {
 
 #endif  // GTEST_OS_LINUX
 
-#if GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
+#if defined(GTEST_IS_THREADSAFE) && defined(GTEST_OS_WINDOWS)
 
 AutoHandle::AutoHandle() : handle_(INVALID_HANDLE_VALUE) {}
 
@@ -661,7 +663,7 @@ void ThreadLocalRegistry::OnThreadLocalDestroyed(
 
 #endif  // GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
 
-#if GTEST_USES_POSIX_RE
+#ifdef GTEST_USES_POSIX_RE
 
 // Implements RE.  Currently only needed for death tests.
 
@@ -723,7 +725,7 @@ void RE::Init(const char* regex) {
   delete[] full_pattern;
 }
 
-#elif GTEST_USES_SIMPLE_RE
+#elif defined(GTEST_USES_SIMPLE_RE)
 
 // Returns true if and only if ch appears anywhere in str (excluding the
 // terminating '\0' character).
@@ -1041,7 +1043,7 @@ class CapturedStream {
   if (temp_dir.back() != GTEST_PATH_SEP_[0])
     temp_dir.push_back(GTEST_PATH_SEP_[0]);
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
     char temp_file_path[MAX_PATH + 1] = {'\0'};  // NOLINT
     const UINT success = ::GetTempFileNameA(temp_dir.c_str(), "gtest_redir",
                                             0,  // Generate unique file name.
@@ -1187,7 +1189,7 @@ std::string ReadEntireFile(FILE* file) {
   return content;
 }
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 static const std::vector<std::string>* g_injected_test_argvs =
     nullptr;  // Owned.
 
@@ -1216,7 +1218,7 @@ void ClearInjectableArgvs() {
 
 namespace posix {
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef GTEST_OS_WINDOWS_MOBILE
 [[noreturn]] void Abort(const char* msg) {
 	if (IsDebuggerPresent())
 		DebugBreak();
