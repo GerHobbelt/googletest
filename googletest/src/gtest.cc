@@ -49,13 +49,16 @@
 #include <initializer_list>
 #include <iomanip>
 #include <ios>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <list>
 #include <map>
 #include <ostream>  // NOLINT
+#include <set>
 #include <sstream>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest-assertion-result.h"
@@ -2271,7 +2274,7 @@ TestResult::TestResult()
     : death_test_count_(0), start_timestamp_(0), elapsed_time_(0) {}
 
 // D'tor.
-TestResult::~TestResult() {}
+TestResult::~TestResult() = default;
 
 // Returns the i-th test part result among all the results. i can
 // range from 0 to total_part_count() - 1. If i is not in that range,
@@ -2486,7 +2489,7 @@ Test::Test() : gtest_flag_saver_(new GTEST_FLAG_SAVER_) {}
 // The d'tor restores the states of all flags.  The actual work is
 // done by the d'tor of the gtest_flag_saver_ field, and thus not
 // visible here.
-Test::~Test() {}
+Test::~Test() = default;
 
 // Sets up the test fixture.
 //
@@ -3427,7 +3430,7 @@ static void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
 // Class PrettyUnitTestResultPrinter is copyable.
 class PrettyUnitTestResultPrinter : public TestEventListener {
  public:
-  PrettyUnitTestResultPrinter() {}
+  PrettyUnitTestResultPrinter() = default;
   static void PrintTestName(const char* test_suite, const char* test) {
     printf("%s.%s", test_suite, test);
   }
@@ -3736,7 +3739,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
 // Class BriefUnitTestResultPrinter is copyable.
 class BriefUnitTestResultPrinter : public TestEventListener {
  public:
-  BriefUnitTestResultPrinter() {}
+  BriefUnitTestResultPrinter() = default;
   static void PrintTestName(const char* test_suite, const char* test) {
     printf("%s.%s", test_suite, test);
   }
