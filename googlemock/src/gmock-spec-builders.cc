@@ -49,10 +49,10 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-#if defined(GTEST_OS_CYGWIN) || defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC)
+#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 #include <unistd.h>  // NOLINT
 #endif
-#ifdef GTEST_OS_QURT
+#if GTEST_OS_QURT
 #include <qurt_event.h>
 #endif
 
@@ -527,7 +527,7 @@ class MockObjectRegistry {
       // RUN_ALL_TESTS() has already returned when this destructor is
       // called.  Therefore we cannot use the normal Google Test
       // failure reporting mechanism.
-#ifdef GTEST_OS_QURT
+#if GTEST_OS_QURT
       qurt_exception_raise_fatal();
 #else
       _exit(1);  // We cannot call exit() as it is not reentrant and

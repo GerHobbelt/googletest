@@ -42,7 +42,7 @@
 #include <utility>
 #include <vector>
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #include <io.h>
 #include <sys/stat.h>
 #ifndef WIN32_LEAN_AND_MEAN
@@ -61,34 +61,32 @@
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
 
-#ifdef GTEST_OS_MAC
+#if GTEST_OS_MAC
 #include <mach/mach_init.h>
 #include <mach/task.h>
 #include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
-#if defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||   \
-    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD) || \
-    defined(GTEST_OS_OPENBSD)
+#if GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
+    GTEST_OS_NETBSD || GTEST_OS_OPENBSD
 #include <sys/sysctl.h>
-#if defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) || \
-    defined(GTEST_OS_GNU_KFREEBSD)
+#if GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD
 #include <sys/user.h>
 #endif
 #endif
 
-#ifdef GTEST_OS_QNX
+#if GTEST_OS_QNX
 #include <devctl.h>
 #include <fcntl.h>
 #include <sys/procfs.h>
 #endif  // GTEST_OS_QNX
 
-#ifdef GTEST_OS_AIX
+#if GTEST_OS_AIX
 #include <procinfo.h>
 #include <sys/types.h>
 #endif  // GTEST_OS_AIX
 
-#ifdef GTEST_OS_FUCHSIA
+#if GTEST_OS_FUCHSIA
 #include <zircon/process.h>
 #include <zircon/syscalls.h>
 #endif  // GTEST_OS_FUCHSIA
@@ -102,7 +100,7 @@
 namespace testing {
 namespace internal {
 
-#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_GNU_HURD)
+#if GTEST_OS_LINUX || GTEST_OS_GNU_HURD
 
 namespace {
 template <typename T>
@@ -125,7 +123,7 @@ size_t GetThreadCount() {
   return ReadProcFileField<size_t>(filename, 19);
 }
 
-#elif defined(GTEST_OS_MAC)
+#elif GTEST_OS_MAC
 
 size_t GetThreadCount() {
   const task_t task = mach_task_self();
@@ -143,20 +141,20 @@ size_t GetThreadCount() {
   }
 }
 
-#elif defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) || \
-    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD)
+#elif GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
+    GTEST_OS_NETBSD
 
-#ifdef GTEST_OS_NETBSD
+#if GTEST_OS_NETBSD
 #undef KERN_PROC
 #define KERN_PROC KERN_PROC2
 #define kinfo_proc kinfo_proc2
 #endif
 
-#ifdef GTEST_OS_DRAGONFLY
+#if GTEST_OS_DRAGONFLY
 #define KP_NLWP(kp) (kp.kp_nthreads)
-#elif defined(GTEST_OS_FREEBSD) || defined(GTEST_OS_GNU_KFREEBSD)
+#elif GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD
 #define KP_NLWP(kp) (kp.ki_numthreads)
-#elif defined(GTEST_OS_NETBSD)
+#elif GTEST_OS_NETBSD
 #define KP_NLWP(kp) (kp.p_nlwps)
 #endif
 
@@ -168,7 +166,7 @@ size_t GetThreadCount() {
     KERN_PROC,
     KERN_PROC_PID,
     getpid(),
-#ifdef GTEST_OS_NETBSD
+#if GTEST_OS_NETBSD
     sizeof(struct kinfo_proc),
     1,
 #endif
@@ -181,7 +179,7 @@ size_t GetThreadCount() {
   }
   return static_cast<size_t>(KP_NLWP(info));
 }
-#elif defined(GTEST_OS_OPENBSD)
+#elif GTEST_OS_OPENBSD
 
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
@@ -218,7 +216,7 @@ size_t GetThreadCount() {
   return nthreads;
 }
 
-#elif defined(GTEST_OS_QNX)
+#elif GTEST_OS_QNX
 
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
@@ -238,7 +236,7 @@ size_t GetThreadCount() {
   }
 }
 
-#elif defined(GTEST_OS_AIX)
+#elif GTEST_OS_AIX
 
 size_t GetThreadCount() {
   struct procentry64 entry;
@@ -251,7 +249,7 @@ size_t GetThreadCount() {
   }
 }
 
-#elif defined(GTEST_OS_FUCHSIA)
+#elif GTEST_OS_FUCHSIA
 
 size_t GetThreadCount() {
   int dummy_buffer;
@@ -276,7 +274,7 @@ size_t GetThreadCount() {
 
 #endif  // GTEST_OS_LINUX
 
-#if defined(GTEST_IS_THREADSAFE) && defined(GTEST_OS_WINDOWS)
+#if GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
 
 AutoHandle::AutoHandle() : handle_(INVALID_HANDLE_VALUE) {}
 
@@ -1047,7 +1045,7 @@ class CapturedStream {
   if (temp_dir.back() != GTEST_PATH_SEP_[0])
     temp_dir.push_back(GTEST_PATH_SEP_[0]);
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
     char temp_file_path[MAX_PATH + 1] = {'\0'};  // NOLINT
     const UINT success = ::GetTempFileNameA(temp_dir.c_str(), "gtest_redir",
                                             0,  // Generate unique file name.

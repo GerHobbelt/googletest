@@ -1597,7 +1597,7 @@ TEST(WithArgsTest, RefQualifiedInnerAction) {
   EXPECT_EQ(19, mock.AsStdFunction()(0, 17));
 }
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 class SetErrnoAndReturnTest : public testing::Test {
  protected:

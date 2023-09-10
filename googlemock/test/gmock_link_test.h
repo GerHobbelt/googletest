@@ -116,7 +116,7 @@
 
 #include "gmock/gmock.h"
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 #include <errno.h>
 #endif
 
@@ -181,7 +181,7 @@ using testing::WithArg;
 using testing::WithArgs;
 using testing::WithoutArgs;
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
 #endif
 
@@ -306,7 +306,7 @@ TEST(LinkTest, TestSetArrayArgument) {
   mock.VoidFromString(&ch);
 }
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 // Tests the linkage of the SetErrnoAndReturn action.
 TEST(LinkTest, TestSetErrnoAndReturn) {

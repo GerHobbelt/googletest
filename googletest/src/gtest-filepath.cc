@@ -37,7 +37,7 @@
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -45,7 +45,7 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
 #include <direct.h>
 #include <io.h>
 #else
@@ -56,7 +56,7 @@
 
 #include "gtest/internal/gtest-string.h"
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #define GTEST_PATH_MAX_ _MAX_PATH
 #elif defined(PATH_MAX)
 #define GTEST_PATH_MAX_ PATH_MAX
@@ -71,7 +71,7 @@
 namespace testing {
 namespace internal {
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 // On Windows, '\\' is the standard path separator, but many tools and the
 // Windows API also accept '/' as an alternate path separator. Unless otherwise
 // noted, a file path can contain either kind of path separators, or a mixture
@@ -79,7 +79,7 @@ namespace internal {
 const char kPathSeparator = '\\';
 const char kAlternatePathSeparator = '/';
 const char kAlternatePathSeparatorString[] = "/";
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
 // Windows CE doesn't have a current directory. You should not use
 // the current directory in tests on Windows CE, but this at least
 // provides a reasonable fallback.
@@ -113,13 +113,13 @@ FilePath FilePath::GetCurrentDir() {
   // These platforms do not have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
   char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
   return FilePath(_getcwd(cwd, sizeof(cwd)) == nullptr ? "" : cwd);
 #else
   char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
   char* result = getcwd(cwd, sizeof(cwd));
-#ifdef GTEST_OS_NACL
+#if GTEST_OS_NACL
   // getcwd will likely fail in NaCl due to the sandbox, so return something
   // reasonable. The user may have provided a shim implementation for getcwd,
   // however, so fallback only when failure is detected.
@@ -162,7 +162,7 @@ size_t FilePath::CalculateRootLength() const {
   const auto& path = pathname_;
   auto s = path.begin();
   auto end = path.end();
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   if (end - s >= 2 && s[1] == ':' && (end - s == 2 || IsPathSeparator(s[2])) &&
       (('A' <= s[0] && s[0] <= 'Z') || ('a' <= s[0] && s[0] <= 'z'))) {
     // A typical absolute path like "C:\Windows" or "D:"
@@ -255,7 +255,7 @@ FilePath FilePath::ConcatPaths(const FilePath& directory,
 // Returns true if pathname describes something findable in the file-system,
 // either a file, directory, or whatever.
 bool FilePath::FileOrDirectoryExists() const {
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
   LPCWSTR unicode = String::AnsiToUtf16(pathname_.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete[] unicode;
@@ -270,7 +270,7 @@ bool FilePath::FileOrDirectoryExists() const {
 // that exists.
 bool FilePath::DirectoryExists() const {
   bool result = false;
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // Don't strip off trailing separator if path is a root directory on
   // Windows (like "C:\\").
   const FilePath& path(IsRootDirectory() ? *this
@@ -279,7 +279,7 @@ bool FilePath::DirectoryExists() const {
   const FilePath& path(*this);
 #endif
 
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
   LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete[] unicode;
@@ -355,7 +355,7 @@ bool FilePath::CreateDirectoriesRecursively() const {
 // directory for any reason, including if the parent directory does not
 // exist. Not named "CreateDirectory" because that's a macro on Windows.
 bool FilePath::CreateFolder() const {
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
   FilePath removed_sep(this->RemoveTrailingPathSeparator());
   LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
   int result = CreateDirectory(unicode, nullptr) ? 0 : -1;
@@ -393,7 +393,7 @@ void FilePath::Normalize() {
   auto out = pathname_.begin();
 
   auto i = pathname_.cbegin();
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // UNC paths are treated specially
   if (pathname_.end() - i >= 3 && IsPathSeparator(*i) &&
       IsPathSeparator(*(i + 1)) && !IsPathSeparator(*(i + 2))) {

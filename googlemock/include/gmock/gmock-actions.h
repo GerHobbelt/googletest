@@ -1279,7 +1279,7 @@ class AssignAction {
   const T2 value_;
 };
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 // Implements the SetErrnoAndReturn action to simulate return from
 // various system calls and libc functions.
@@ -1932,7 +1932,7 @@ PolymorphicAction<internal::AssignAction<T1, T2>> Assign(T1* ptr, T2 val) {
   return MakePolymorphicAction(internal::AssignAction<T1, T2>(ptr, val));
 }
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 
 // Creates an action that sets errno and returns the appropriate error.
 template <typename T>

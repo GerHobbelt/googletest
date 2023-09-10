@@ -62,7 +62,7 @@
 #endif
 #endif
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -400,7 +400,7 @@ class GTEST_API_ UnitTestOptions {
   static bool FilterMatchesTest(const std::string& test_suite_name,
                                 const std::string& test_name);
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   // Function for supporting the gtest_catch_exception flag.
 
   // Returns EXCEPTION_EXECUTE_HANDLER if given SEH exception was handled, or

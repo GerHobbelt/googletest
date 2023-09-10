@@ -41,7 +41,7 @@
 
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_OS_LINUX
+#if GTEST_OS_LINUX
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -463,7 +463,7 @@ class TestFactoryImpl : public TestFactoryBase {
   Test* CreateTest() override { return new TestClass; }
 };
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 
 // Predicate-formatters for implementing the HRESULT checking macros
 // {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}

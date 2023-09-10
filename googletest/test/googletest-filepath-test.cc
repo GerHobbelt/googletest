@@ -41,7 +41,7 @@
 #include "gtest/internal/gtest-filepath.h"
 #include "src/gtest-internal-inl.h"
 
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -49,7 +49,7 @@
 #define NOMINMAX
 #endif
 #include <windows.h>  // NOLINT
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
 #include <direct.h>  // NOLINT
 #endif               // GTEST_OS_WINDOWS_MOBILE
 
@@ -57,7 +57,7 @@ namespace testing {
 namespace internal {
 namespace {
 
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
 
 // Windows CE doesn't have the remove C function.
 int remove(const char* path) {
@@ -86,7 +86,7 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
   const FilePath cwd = FilePath::GetCurrentDir();
   posix::ChDir(original_dir.c_str());
 
-#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_OS2)
+#if GTEST_OS_WINDOWS || GTEST_OS_OS2
 
   // Skips the ":".
   const char* const cwd_without_drive = strchr(cwd.c_str(), ':');
@@ -180,7 +180,7 @@ TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileNameForAlternateSeparator) {
 
 // RemoveFileName "" -> "./"
 TEST(RemoveFileNameTest, EmptyName) {
-#ifdef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE
   // On Windows CE, we use the root as the current directory.
   EXPECT_EQ(GTEST_PATH_SEP_, FilePath("").RemoveFileName().string());
 #else
@@ -363,7 +363,7 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldReturnUnmodified) {
 }
 
 TEST(DirectoryTest, RootDirectoryExists) {
-#ifdef GTEST_OS_WINDOWS           // We are on Windows.
+#if GTEST_OS_WINDOWS              // We are on Windows.
   char current_drive[_MAX_PATH];  // NOLINT
   current_drive[0] = static_cast<char>(_getdrive() + 'A' - 1);
   current_drive[1] = ':';
@@ -375,7 +375,7 @@ TEST(DirectoryTest, RootDirectoryExists) {
 #endif  // GTEST_OS_WINDOWS
 }
 
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
 TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
   const int saved_drive_ = _getdrive();
   // Find a drive that doesn't exist. Start with 'Z' to avoid common ones.
@@ -393,7 +393,7 @@ TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
 }
 #endif  // GTEST_OS_WINDOWS
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if !GTEST_OS_WINDOWS_MOBILE
 // Windows CE _does_ consider an empty directory to exist.
 TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
   EXPECT_FALSE(FilePath("").DirectoryExists());
@@ -401,7 +401,7 @@ TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
 TEST(DirectoryTest, CurrentDirectoryExists) {
-#ifdef GTEST_OS_WINDOWS  // We are on Windows.
+#if GTEST_OS_WINDOWS  // We are on Windows.
 #ifndef _WIN32_CE     // Windows CE doesn't have a current directory.
 
   EXPECT_TRUE(FilePath(".").DirectoryExists());
@@ -429,7 +429,7 @@ TEST(NormalizeTest, MultipleConsecutiveSeparatorsInMidstring) {
 // "/bar" == //bar" == "///bar"
 TEST(NormalizeTest, MultipleConsecutiveSeparatorsAtStringStart) {
   EXPECT_EQ(GTEST_PATH_SEP_ "bar", FilePath(GTEST_PATH_SEP_ "bar").string());
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   EXPECT_EQ(GTEST_PATH_SEP_ GTEST_PATH_SEP_ "bar",
             FilePath(GTEST_PATH_SEP_ GTEST_PATH_SEP_ "bar").string());
 #else
@@ -626,7 +626,7 @@ TEST(FilePathTest, IsDirectory) {
 TEST(FilePathTest, IsAbsolutePath) {
   EXPECT_FALSE(FilePath("is" GTEST_PATH_SEP_ "relative").IsAbsolutePath());
   EXPECT_FALSE(FilePath("").IsAbsolutePath());
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   EXPECT_TRUE(
       FilePath("c:\\" GTEST_PATH_SEP_ "is_not" GTEST_PATH_SEP_ "relative")
           .IsAbsolutePath());
@@ -644,7 +644,7 @@ TEST(FilePathTest, IsAbsolutePath) {
 }
 
 TEST(FilePathTest, IsRootDirectory) {
-#ifdef GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS
   EXPECT_TRUE(FilePath("a:\\").IsRootDirectory());
   EXPECT_TRUE(FilePath("Z:/").IsRootDirectory());
   EXPECT_TRUE(FilePath("e://").IsRootDirectory());
