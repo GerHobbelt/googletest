@@ -281,11 +281,11 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
   EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(nullptr, -1));
 }
 
-#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC) ||           \
-    defined(GTEST_OS_QNX) || defined(GTEST_OS_FUCHSIA) ||         \
-    defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||   \
-    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD) || \
-    defined(GTEST_OS_OPENBSD) || defined(GTEST_OS_GNU_HURD)
+#if GTEST_OS_LINUX || GTEST_OS_MAC ||           \
+    GTEST_OS_QNX || GTEST_OS_FUCHSIA ||         \
+    GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD ||   \
+    GTEST_OS_GNU_KFREEBSD || GTEST_OS_NETBSD || \
+    GTEST_OS_OPENBSD || GTEST_OS_GNU_HURD
 void* ThreadFunc(void* data) {
   internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
   mutex->Lock();

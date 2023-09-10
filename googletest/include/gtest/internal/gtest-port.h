@@ -420,8 +420,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // On Android, <regex.h> is only available starting with Gingerbread.
 #define GTEST_HAS_POSIX_RE (__ANDROID_API__ >= 9)
 #else
-#if !(defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_XTENSA) || \
-      defined(GTEST_OS_QURT))
+#if !(GTEST_OS_WINDOWS || GTEST_OS_XTENSA || \
+      GTEST_OS_QURT)
 #define GTEST_HAS_POSIX_RE 1
 #else
 #define GTEST_HAS_POSIX_RE 0
@@ -514,11 +514,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Cygwin 1.7 and below doesn't support ::std::wstring.
 // Solaris' libc++ doesn't support it either.  Android has
 // no support for it at least as recent as Froyo (2.2).
-#if (!(defined(GTEST_OS_LINUX_ANDROID) || defined(GTEST_OS_CYGWIN) || \
-       defined(GTEST_OS_SOLARIS) || defined(GTEST_OS_HAIKU) ||        \
-       defined(GTEST_OS_ESP32) || defined(GTEST_OS_ESP8266) ||        \
-       defined(GTEST_OS_XTENSA) || defined(GTEST_OS_QURT) ||          \
-       defined(GTEST_OS_NXP_QN9090) || defined(GTEST_OS_NRF52)))
+#if (!(GTEST_OS_LINUX_ANDROID || GTEST_OS_CYGWIN || \
+       GTEST_OS_SOLARIS || GTEST_OS_HAIKU ||        \
+       GTEST_OS_ESP32 || GTEST_OS_ESP8266 ||        \
+       GTEST_OS_XTENSA || GTEST_OS_QURT ||          \
+       GTEST_OS_NXP_QN9090 || GTEST_OS_NRF52))
 #define GTEST_HAS_STD_WSTRING 1
 #else
 #define GTEST_HAS_STD_WSTRING 0
@@ -601,13 +601,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 //
 // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
 // to your compiler flags.
-#if (defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC) ||              \
-     defined(GTEST_OS_HPUX) || defined(GTEST_OS_QNX) ||               \
-     defined(GTEST_OS_FREEBSD) || defined(GTEST_OS_NACL) ||           \
-     defined(GTEST_OS_NETBSD) || defined(GTEST_OS_FUCHSIA) ||         \
-     defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_GNU_KFREEBSD) || \
-     defined(GTEST_OS_OPENBSD) || defined(GTEST_OS_HAIKU) ||          \
-     defined(GTEST_OS_GNU_HURD))
+#if (GTEST_OS_LINUX || GTEST_OS_MAC ||              \
+     GTEST_OS_HPUX || GTEST_OS_QNX ||               \
+     GTEST_OS_FREEBSD || GTEST_OS_NACL ||           \
+     GTEST_OS_NETBSD || GTEST_OS_FUCHSIA ||         \
+     GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || \
+     GTEST_OS_OPENBSD || GTEST_OS_HAIKU ||          \
+     GTEST_OS_GNU_HURD)
 #define GTEST_HAS_PTHREAD 1
 #else
 #define GTEST_HAS_PTHREAD 0
@@ -656,9 +656,9 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // By default, we assume that stream redirection is supported on all
 // platforms except known mobile / embedded ones. Also, if the port doesn't have
 // a file system, stream redirection is not supported.
-#if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_WINDOWS_PHONE) || \
-    defined(GTEST_OS_WINDOWS_RT) || defined(GTEST_OS_ESP8266) ||           \
-    defined(GTEST_OS_XTENSA) || defined(GTEST_OS_QURT) ||                  \
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 ||           \
+    GTEST_OS_XTENSA || GTEST_OS_QURT ||                  \
     !GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_STREAM_REDIRECTION 0
 #else
@@ -668,16 +668,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Determines whether to support death tests.
 // pops up a dialog window that cannot be suppressed programmatically.
-#if (defined(GTEST_OS_LINUX) || defined(GTEST_OS_CYGWIN) ||           \
-     defined(GTEST_OS_SOLARIS) ||                                     \
-     (defined(GTEST_OS_MAC) && !defined(GTEST_OS_IOS)) ||             \
-     (defined(GTEST_OS_WINDOWS_DESKTOP) && _MSC_VER) ||               \
-     defined(GTEST_OS_WINDOWS_MINGW) || defined(GTEST_OS_AIX) ||      \
-     defined(GTEST_OS_HPUX) || defined(GTEST_OS_OPENBSD) ||           \
-     defined(GTEST_OS_QNX) || defined(GTEST_OS_FREEBSD) ||            \
-     defined(GTEST_OS_NETBSD) || defined(GTEST_OS_FUCHSIA) ||         \
-     defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_GNU_KFREEBSD) || \
-     defined(GTEST_OS_HAIKU) || defined(GTEST_OS_GNU_HURD))
+#if (GTEST_OS_LINUX || GTEST_OS_CYGWIN ||           \
+     GTEST_OS_SOLARIS ||                            \
+     (GTEST_OS_MAC && !GTEST_OS_IOS) ||             \
+     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER) ||      \
+     GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX ||      \
+     GTEST_OS_HPUX || GTEST_OS_OPENBSD ||           \
+     GTEST_OS_QNX || GTEST_OS_FREEBSD ||            \
+     GTEST_OS_NETBSD || GTEST_OS_FUCHSIA ||         \
+     GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || \
+     GTEST_OS_HAIKU || GTEST_OS_GNU_HURD)
 // Death tests require a file system to work properly.
 #if GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_DEATH_TEST 1
@@ -702,19 +702,19 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 // Determines whether the system compiler uses UTF-16 for encoding wide strings.
-#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_CYGWIN) || \
-    defined(GTEST_OS_AIX) || defined(GTEST_OS_OS2)
+#if GTEST_OS_WINDOWS || GTEST_OS_CYGWIN || \
+    GTEST_OS_AIX || GTEST_OS_OS2
 #define GTEST_WIDE_STRING_USES_UTF16_ 1
 #else
 #define GTEST_WIDE_STRING_USES_UTF16_ 0
 #endif
 
 // Determines whether test results can be streamed to a socket.
-#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_GNU_KFREEBSD) || \
-    defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||  \
-    defined(GTEST_OS_NETBSD) || defined(GTEST_OS_OPENBSD) ||     \
-    defined(GTEST_OS_GNU_HURD) || defined(GTEST_OS_MAC) ||       \
-    defined(GTEST_OS_WINDOWS)
+#if GTEST_OS_LINUX || GTEST_OS_GNU_KFREEBSD || \
+    GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD ||  \
+    GTEST_OS_NETBSD || GTEST_OS_OPENBSD ||     \
+    GTEST_OS_GNU_HURD || GTEST_OS_MAC ||       \
+    GTEST_OS_WINDOWS
 #define GTEST_CAN_STREAM_RESULTS_ 1
 #else
 #define GTEST_CAN_STREAM_RESULTS_ 0
@@ -836,8 +836,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_IS_THREADSAFE
 
 #if (GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ ||                              \
-     (defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-      !defined(GTEST_OS_WINDOWS_RT)) ||                                \
+     (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && \
+      !GTEST_OS_WINDOWS_RT) ||                       \
      GTEST_HAS_PTHREAD)
 #define GTEST_IS_THREADSAFE 1
 #endif
@@ -1332,7 +1332,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4251
 // On MinGW, we can have both GTEST_OS_WINDOWS and GTEST_HAS_PTHREAD
 // defined, but we don't want to use MinGW's pthreads implementation, which
 // has conformance problems with some versions of the POSIX standard.
-#if GTEST_HAS_PTHREAD && !defined(GTEST_OS_WINDOWS_MINGW)
+#if GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
 
 // As a C-function, ThreadFuncWithCLinkage cannot be templated itself.
 // Consequently, it cannot select a correct instantiation of ThreadWithParam
@@ -1418,8 +1418,8 @@ class ThreadWithParam : public ThreadWithParamBase {
 // Mutex and ThreadLocal have already been imported into the namespace.
 // Nothing to do here.
 
-#elif defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT)
+#elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT
 
 // Mutex implements mutex on Windows platforms.  It is used in conjunction
 // with class MutexLock:
@@ -2102,9 +2102,9 @@ inline int StrCaseCmp(const char* s1, const char* s2) {
   return stricmp(s1, s2);
 }
 #else  // !__BORLANDC__
-#if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_ZOS) || \
-    defined(GTEST_OS_IOS) || defined(GTEST_OS_WINDOWS_PHONE) ||  \
-    defined(GTEST_OS_WINDOWS_RT) || defined(ESP_PLATFORM)
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_ZOS || \
+    GTEST_OS_IOS || GTEST_OS_WINDOWS_PHONE ||  \
+    GTEST_OS_WINDOWS_RT || defined(ESP_PLATFORM)
 inline int DoIsATTY(int /* fd */) { return 0; }
 #else
 inline int DoIsATTY(int fd) { return _isatty(fd); }
@@ -2142,9 +2142,9 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 #if GTEST_HAS_FILE_SYSTEM
-#if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_ESP8266) &&           \
-    !defined(GTEST_OS_XTENSA) && !defined(GTEST_OS_QURT)
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT && !GTEST_OS_ESP8266 &&           \
+    !GTEST_OS_XTENSA && !GTEST_OS_QURT
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
@@ -2181,9 +2181,9 @@ inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 
 inline const char* GetEnv(const char* name) {
-#if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_WINDOWS_PHONE) || \
-    defined(GTEST_OS_ESP8266) || defined(GTEST_OS_XTENSA) ||               \
-    defined(GTEST_OS_QURT)
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+    GTEST_OS_ESP8266 || GTEST_OS_XTENSA ||               \
+    GTEST_OS_QURT
   // We are on an embedded platform, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return nullptr;

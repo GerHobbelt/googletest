@@ -67,12 +67,12 @@
 #include <mach/vm_map.h>
 #endif  // GTEST_OS_MAC
 
-#if defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||   \
-    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD) || \
-    defined(GTEST_OS_OPENBSD)
+#if GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD ||   \
+    GTEST_OS_GNU_KFREEBSD || GTEST_OS_NETBSD || \
+    GTEST_OS_OPENBSD
 #include <sys/sysctl.h>
-#if defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) || \
-    defined(GTEST_OS_GNU_KFREEBSD)
+#if GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || \
+    GTEST_OS_GNU_KFREEBSD
 #include <sys/user.h>
 #endif
 #endif
@@ -143,8 +143,8 @@ size_t GetThreadCount() {
   }
 }
 
-#elif defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) || \
-    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD)
+#elif GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || \
+    GTEST_OS_GNU_KFREEBSD || GTEST_OS_NETBSD
 
 #if GTEST_OS_NETBSD
 #undef KERN_PROC

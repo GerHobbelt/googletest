@@ -105,11 +105,11 @@ static bool IsPathSeparator(char c) {
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-#if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_WINDOWS_PHONE) || \
-    defined(GTEST_OS_WINDOWS_RT) || defined(GTEST_OS_ESP8266) ||           \
-    defined(GTEST_OS_ESP32) || defined(GTEST_OS_XTENSA) ||                 \
-    defined(GTEST_OS_QURT) || defined(GTEST_OS_NXP_QN9090) ||              \
-    defined(GTEST_OS_NRF52)
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 ||           \
+    GTEST_OS_ESP32 || GTEST_OS_XTENSA ||                 \
+    GTEST_OS_QURT || GTEST_OS_NXP_QN9090 ||              \
+    GTEST_OS_NRF52
   // These platforms do not have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
@@ -360,11 +360,11 @@ bool FilePath::CreateFolder() const {
   LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
   int result = CreateDirectory(unicode, nullptr) ? 0 : -1;
   delete[] unicode;
-#elif defined(GTEST_OS_WINDOWS)
+#elif GTEST_OS_WINDOWS
   int result = _mkdir(pathname_.c_str());
-#elif defined(GTEST_OS_ESP8266) || defined(GTEST_OS_XTENSA) || \
-    defined(GTEST_OS_QURT) || defined(GTEST_OS_NXP_QN9090) ||  \
-    defined(GTEST_OS_NRF52)
+#elif GTEST_OS_ESP8266 || GTEST_OS_XTENSA || \
+    GTEST_OS_QURT || GTEST_OS_NXP_QN9090 ||  \
+    GTEST_OS_NRF52
   // do nothing
   int result = 0;
 #else

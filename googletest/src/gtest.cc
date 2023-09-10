@@ -3226,9 +3226,9 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
 }
 
 // class PrettyUnitTestResultPrinter
-#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&    \
-    !defined(GTEST_OS_WINDOWS_PHONE) && !defined(GTEST_OS_WINDOWS_RT) && \
-    !defined(GTEST_OS_WINDOWS_MINGW)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE &&    \
+    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && \
+    !GTEST_OS_WINDOWS_MINGW
 
 // Returns the character attribute for the given color.
 static WORD GetColorAttribute(GTestColor color) {
@@ -3362,9 +3362,9 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     return;
   }
 
-#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&    \
-    !defined(GTEST_OS_WINDOWS_PHONE) && !defined(GTEST_OS_WINDOWS_RT) && \
-    !defined(GTEST_OS_WINDOWS_MINGW)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE &&    \
+    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && \
+    !GTEST_OS_WINDOWS_MINGW
   if (color_mode != GTestColorMode::kAnsi) {
     const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -5472,8 +5472,8 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
     // with another testing framework) and specify the former on the
     // command line for debugging.
     if (GTEST_FLAG_GET(break_on_failure)) {
-#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT
       // Using DebugBreak on Windows allows gtest to still break into a debugger
       // when a failure happens and both the --gtest_break_on_failure and
       // the --gtest_catch_exceptions flags are specified.
@@ -5566,15 +5566,15 @@ int UnitTest::Run() {
   // process. In either case the user does not want to see pop-up dialogs
   // about crashes - they are expected.
   if (impl()->catch_exceptions() || in_death_test_child_process) {
-#if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT)
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
-#if (defined(_MSC_VER) || defined(GTEST_OS_WINDOWS_MINGW)) && \
-    !defined(GTEST_OS_WINDOWS_MOBILE)
+#if (defined(_MSC_VER) || GTEST_OS_WINDOWS_MINGW) && \
+    !GTEST_OS_WINDOWS_MOBILE
     // Death test children can be terminated with _abort().  On Windows,
     // _abort() can show a dialog with a warning message.  This forces the
     // abort message to go to stderr instead.
