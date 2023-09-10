@@ -840,6 +840,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
       !GTEST_OS_WINDOWS_RT) ||                       \
      GTEST_HAS_PTHREAD)
 #define GTEST_IS_THREADSAFE 1
+#else
+#define GTEST_IS_THREADSAFE 0
 #endif
 
 #endif  // GTEST_IS_THREADSAFE
@@ -2422,6 +2424,7 @@ using Any = ::absl::any;
 #define GTEST_INTERNAL_HAS_ANY 0
 #endif  // __has_include
 #endif  // !defined(GTEST_INTERNAL_HAS_ANY)
+
 #if GTEST_INTERNAL_HAS_ANY
 #include <any>
 namespace testing {
@@ -2431,13 +2434,8 @@ using Any = ::std::any;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::any is not
 // supported.
-#endif  // __has_include(<any>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
 #endif  // GTEST_INTERNAL_HAS_ANY
 #endif  // GTEST_HAS_ABSL
-
-#ifndef GTEST_INTERNAL_HAS_ANY
-#define GTEST_INTERNAL_HAS_ANY 0
-#endif
 
 #if GTEST_HAS_ABSL
 // Always use absl::optional for UniversalPrinter<> specializations if
@@ -2465,6 +2463,7 @@ inline ::absl::nullopt_t Nullopt() { return ::absl::nullopt; }
 #define GTEST_INTERNAL_HAS_OPTIONAL 0
 #endif  // __has_include
 #endif  // !defined(GTEST_INTERNAL_HAS_OPTIONAL)
+
 #if GTEST_INTERNAL_HAS_OPTIONAL
 #include <optional>
 namespace testing {
@@ -2476,13 +2475,8 @@ inline ::std::nullopt_t Nullopt() { return ::std::nullopt; }
 }  // namespace testing
 // The case where absl is configured NOT to alias std::optional is not
 // supported.
-#endif  // __has_include(<optional>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
 #endif  // GTEST_INTERNAL_HAS_OPTIONAL
 #endif  // GTEST_HAS_ABSL
-
-#ifndef GTEST_INTERNAL_HAS_OPTIONAL
-#define GTEST_INTERNAL_HAS_OPTIONAL 0
-#endif
 
 #ifdef __has_include
 #if __has_include(<span>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 202002L
@@ -2518,6 +2512,7 @@ using StringView = ::absl::string_view;
 #  define GTEST_INTERNAL_HAS_STRING_VIEW 0
 # endif  // __has_include
 #endif  // !defined(GTEST_INTERNAL_HAS_STRING_VIEW)
+
 #if GTEST_INTERNAL_HAS_STRING_VIEW
 #include <string_view>
 namespace testing {
@@ -2527,13 +2522,8 @@ using StringView = ::std::string_view;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::string_view is not
 // supported.
-#endif  // __has_include(<string_view>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 #endif  // GTEST_HAS_ABSL
-
-#ifndef GTEST_INTERNAL_HAS_STRING_VIEW
-#define GTEST_INTERNAL_HAS_STRING_VIEW 0
-#endif
 
 #if GTEST_HAS_ABSL
 // Always use absl::variant for UniversalPrinter<> specializations if googletest
@@ -2560,6 +2550,7 @@ using Variant = ::absl::variant<T...>;
 #define GTEST_INTERNAL_HAS_VARIANT 0
 #endif  // __has_include
 #endif  // !defined(GTEST_INTERNAL_HAS_VARIANT)
+
 #if GTEST_INTERNAL_HAS_VARIANT
 #include <variant>
 namespace testing {
@@ -2569,13 +2560,8 @@ using Variant = ::std::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 // The case where absl is configured NOT to alias std::variant is not supported.
-#endif  // __has_include(<variant>) && GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
 #endif  // GTEST_INTERNAL_HAS_VARIANT
 #endif  // GTEST_HAS_ABSL
-
-#ifndef GTEST_INTERNAL_HAS_VARIANT
-#define GTEST_INTERNAL_HAS_VARIANT 0
-#endif
 
 #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
     GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
