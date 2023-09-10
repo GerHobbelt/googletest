@@ -6093,10 +6093,6 @@ bool UnitTestImpl::RunAllTests() {
 #ifndef GTEST_FOR_GOOGLE_
 # define GTEST_FOR_GOOGLE_ 0
 #endif
-#if GTEST_FOR_GOOGLE_
-    ColoredPrintf(GTestColor::kRed,
-                  "For more details, see http://wiki/Main/ValidGUnitMain.\n");
-#endif  // GTEST_FOR_GOOGLE_
   }
 
   return !failed;
