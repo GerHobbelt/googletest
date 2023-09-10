@@ -62,6 +62,9 @@ using testing::internal::AlwaysTrue;
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
 
+#undef min
+#undef max
+
 namespace posix = ::testing::internal::posix;
 
 using testing::ContainsRegex;
