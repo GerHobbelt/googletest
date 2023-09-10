@@ -484,12 +484,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // checks for C++ exceptions starting at clang r206352, but which checked for
 // cleanups prior to that. To reliably check for C++ exception availability with
 // clang, check for both __EXCEPTIONS and __has_feature(cxx_exceptions).
-#  if defined(__EXCEPTIONS) && __EXCEPTIONS && __has_feature(cxx_exceptions)
-#   define GTEST_HAS_EXCEPTIONS 1
-#  else
-#   define GTEST_HAS_EXCEPTIONS 0
-#  endif
-# elif defined(__GNUC__) && defined(__EXCEPTIONS)
+#if defined(__EXCEPTIONS) && __EXCEPTIONS && __has_feature(cxx_exceptions)
+#define GTEST_HAS_EXCEPTIONS 1
+#else
+#define GTEST_HAS_EXCEPTIONS 0
+#endif
+#elif defined(__GNUC__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
 #elif defined(__SUNPRO_CC)
@@ -497,7 +497,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // detecting whether they are enabled or not.  Therefore, we assume that
 // they are enabled unless the user tells us otherwise.
 #define GTEST_HAS_EXCEPTIONS 1
-# elif defined(__IBMCPP__) && defined(__EXCEPTIONS)
+#elif defined(__IBMCPP__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // xlC defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
 #elif defined(__HP_aCC)
@@ -1014,6 +1014,8 @@ class GTEST_API_ RE {
 };
 
 #elif defined(GTEST_USES_POSIX_RE) || defined(GTEST_USES_SIMPLE_RE)
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
+/* class A needs to have dll-interface to be used by clients of class B */)
 
 // A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
 // Regular Expression syntax.
@@ -1062,7 +1064,7 @@ class GTEST_API_ RE {
 
 #endif
 };
-
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4251
 #endif  // ::testing::internal::RE implementation
 
 // Formats a source file path and a line number as they would appear
