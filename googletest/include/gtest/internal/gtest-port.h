@@ -409,6 +409,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // is not the case, we need to include headers that provide the functions
 // mentioned above.
 #include <strings.h>
+
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
 

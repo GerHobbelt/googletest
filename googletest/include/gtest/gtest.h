@@ -70,6 +70,7 @@
 #include "gtest/gtest-typed-test.h"
 #include "gtest/gtest_pred_impl.h"
 #include "gtest/gtest_prod.h"
+#include "gtest/gtest-exit-handlers.h"
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
 

@@ -3207,22 +3207,14 @@ static std::string PrintTestPartResultToString(
       .GetString();
 }
 
+// forward def:
+GTEST_ATTRIBUTE_PRINTF_(2, 3)
+static void ColoredPrintf(GTestColor color, const char* fmt, ...);
+
 // Prints a TestPartResult.
 static void PrintTestPartResult(const TestPartResult& test_part_result) {
   const std::string& result = PrintTestPartResultToString(test_part_result);
-  printf("%s\n", result.c_str());
-  fflush(stdout);
-  // If the test program runs in Visual Studio or a debugger, the
-  // following statements add the test part result message to the Output
-  // window such that the user can double-click on it to jump to the
-  // corresponding source code location; otherwise they do nothing.
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
-  // We don't call OutputDebugString*() on Windows Mobile, as printing
-  // to stdout is done by OutputDebugString() there already - we don't
-  // want the same message printed twice.
-  ::OutputDebugStringA(result.c_str());
-  ::OutputDebugStringA("\n");
-#endif
+  ColoredPrintf(GTestColor::kDefault, "%s\n", result.c_str());
 }
 
 // class PrettyUnitTestResultPrinter
@@ -3343,9 +3335,6 @@ GTestColorMode ShouldUseColor(bool stdout_is_tty) {
 
 GTEST_ATTRIBUTE_PRINTF_(2, 3)
 static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-
   static const auto color_mode =
 #if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
@@ -3357,16 +3346,21 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
       (color_mode != GTestColorMode::kNo) && (color != GTestColor::kDefault);
 
   if (!use_color) {
+    va_list args;
+    va_start(args, fmt);
     vprintf(fmt, args);
     va_end(args);
-    return;
-  }
 
+	if (fmt[strlen(fmt) - 1] == '\n')
+	  fflush(stdout);
+  }
+  else
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE &&    \
     !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && \
     !GTEST_OS_WINDOWS_MINGW
-  if (color_mode != GTestColorMode::kAnsi) {
+  if (color_mode != GTestColorMode::kAnsi && color != GTestColor::kDefault) {
     const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	va_list args;
 
     // Gets the current text color.
     CONSOLE_SCREEN_BUFFER_INFO buffer_info;
@@ -3380,19 +3374,58 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
     fflush(stdout);
     SetConsoleTextAttribute(stdout_handle, new_color);
 
-    vprintf(fmt, args);
+	va_start(args, fmt);
+	vprintf(fmt, args);
+	va_end(args);
 
     fflush(stdout);
     // Restores the text color.
     SetConsoleTextAttribute(stdout_handle, old_color_attrs);
-    return;
   }
+  else
 #endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
+  {
+    va_list args;
+	if (color != GTestColor::kDefault) {
+	  printf("\033[0;3%sm", GetAnsiColorCode(color));
+	}
+	va_start(args, fmt);
+	vprintf(fmt, args);
+	va_end(args);
+	if (color != GTestColor::kDefault) {
+	  printf("\033[m");  // Resets the terminal to default.
+	}
 
-  printf("\033[0;3%sm", GetAnsiColorCode(color));
-  vprintf(fmt, args);
-  printf("\033[m");  // Resets the terminal to default.
-  va_end(args);
+	if (fmt[strlen(fmt) - 1] == '\n')
+      fflush(stdout);
+  }
+
+  // If the test program runs in Visual Studio or a debugger, the
+  // following statements add the test part result message to the Output
+  // window such that the user can double-click on it to jump to the
+  // corresponding source code location; otherwise they do nothing.
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
+  {
+    // We don't call OutputDebugString*() on Windows Mobile, as printing
+    // to stdout is done by OutputDebugString() there already - we don't
+    // want the same message printed twice.
+    va_list args;
+	char msgbuf[2048];
+	static const char contin[] = "(continued...)\n\n";
+	va_start(args, fmt);
+	vsnprintf(msgbuf, sizeof(msgbuf), fmt, args);
+	va_end(args);
+	// When the message printed is large and (almost certainly) overflowing
+	// our print buffer, then the next strcpy() will mark the message as 
+	// *clipped* and NUL-sentinel terminated all at once, thus covering
+	// for the sprintf()-family of stdlib calls that would produce non-terminated
+	// string results under such circumstances. Hence the calculated strcpy()
+	// below makes the snprintf() guaranteed buffer-safe.
+	constexpr size_t sufsize = sizeof(contin);  
+	strcpy(msgbuf + sizeof(msgbuf) - sufsize, contin);
+    ::OutputDebugStringA(msgbuf);
+  }
+#endif
 }
 
 // Text printed in Google Test's text output and --gtest_list_tests
@@ -3405,13 +3438,14 @@ static void PrintFullTestCommentIfPresent(const TestInfo& test_info) {
   const char* const value_param = test_info.value_param();
 
   if (type_param != nullptr || value_param != nullptr) {
-    printf(", where ");
+	ColoredPrintf(GTestColor::kDefault, ", where ");
     if (type_param != nullptr) {
-      printf("%s = %s", kTypeParamLabel, type_param);
-      if (value_param != nullptr) printf(" and ");
+	  ColoredPrintf(GTestColor::kDefault, "%s = %s", kTypeParamLabel, type_param);
+      if (value_param != nullptr) 
+		ColoredPrintf(GTestColor::kDefault, " and ");
     }
     if (value_param != nullptr) {
-      printf("%s = %s", kValueParamLabel, value_param);
+	  ColoredPrintf(GTestColor::kDefault, "%s = %s", kValueParamLabel, value_param);
     }
   }
 }
@@ -3423,7 +3457,7 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
  public:
   PrettyUnitTestResultPrinter() = default;
   static void PrintTestName(const char* test_suite, const char* test) {
-    printf("%s.%s", test_suite, test);
+	ColoredPrintf(GTestColor::kDefault, "%s.%s", test_suite, test);
   }
 
   // The following methods override what's in the TestEventListener class.
@@ -3463,7 +3497,7 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
 void PrettyUnitTestResultPrinter::OnTestIterationStart(
     const UnitTest& unit_test, int iteration) {
   if (GTEST_FLAG_GET(repeat) != 1)
-    printf("\nRepeating all tests (iteration %d) . . .\n\n", iteration + 1);
+	ColoredPrintf(GTestColor::kDefault, "\nRepeating all tests (iteration %d) . . .\n\n", iteration + 1);
 
   std::string f = GTEST_FLAG_GET(filter);
   const char* const filter = f.c_str();
@@ -3489,17 +3523,15 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
   }
 
   ColoredPrintf(GTestColor::kGreen, "[==========] ");
-  printf("Running %s from %s.\n",
+  ColoredPrintf(GTestColor::kDefault, "Running %s from %s.\n",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
          FormatTestSuiteCount(unit_test.test_suite_to_run_count()).c_str());
-  fflush(stdout);
 }
 
 void PrettyUnitTestResultPrinter::OnEnvironmentsSetUpStart(
     const UnitTest& /*unit_test*/) {
   ColoredPrintf(GTestColor::kGreen, "[----------] ");
-  printf("Global test environment set-up.\n");
-  fflush(stdout);
+  ColoredPrintf(GTestColor::kDefault, "Global test environment set-up.\n");
 }
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -3507,13 +3539,12 @@ void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
   const std::string counts =
       FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(GTestColor::kGreen, "[----------] ");
-  printf("%s from %s", counts.c_str(), test_case.name());
+  ColoredPrintf(GTestColor::kDefault, "%s from %s", counts.c_str(), test_case.name());
   if (test_case.type_param() == nullptr) {
-    printf("\n");
+	ColoredPrintf(GTestColor::kDefault, "\n");
   } else {
-    printf(", where %s = %s\n", kTypeParamLabel, test_case.type_param());
+	ColoredPrintf(GTestColor::kDefault, ", where %s = %s\n", kTypeParamLabel, test_case.type_param());
   }
-  fflush(stdout);
 }
 #else
 void PrettyUnitTestResultPrinter::OnTestSuiteStart(
@@ -3521,28 +3552,25 @@ void PrettyUnitTestResultPrinter::OnTestSuiteStart(
   const std::string counts =
       FormatCountableNoun(test_suite.test_to_run_count(), "test", "tests");
   ColoredPrintf(GTestColor::kGreen, "[----------] ");
-  printf("%s from %s", counts.c_str(), test_suite.name());
+  ColoredPrintf(GTestColor::kDefault, "%s from %s", counts.c_str(), test_suite.name());
   if (test_suite.type_param() == nullptr) {
-    printf("\n");
+	ColoredPrintf(GTestColor::kDefault, "\n");
   } else {
-    printf(", where %s = %s\n", kTypeParamLabel, test_suite.type_param());
+	ColoredPrintf(GTestColor::kDefault, ", where %s = %s\n", kTypeParamLabel, test_suite.type_param());
   }
-  fflush(stdout);
 }
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(GTestColor::kGreen, "[ RUN      ] ");
   PrintTestName(test_info.test_suite_name(), test_info.name());
-  printf("\n");
-  fflush(stdout);
+  ColoredPrintf(GTestColor::kDefault, "\n");
 }
 
 void PrettyUnitTestResultPrinter::OnTestDisabled(const TestInfo& test_info) {
   ColoredPrintf(GTestColor::kYellow, "[ DISABLED ] ");
   PrintTestName(test_info.test_suite_name(), test_info.name());
-  printf("\n");
-  fflush(stdout);
+  ColoredPrintf(GTestColor::kDefault, "\n");
 }
 
 // Called after an assertion failure.
@@ -3556,7 +3584,6 @@ TestPartResult PrettyUnitTestResultPrinter::OnTestPartResult(
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
-      fflush(stdout);
 	  return result;
   }
 }
@@ -3573,13 +3600,12 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
   if (test_info.result()->Failed()) PrintFullTestCommentIfPresent(test_info);
 
   if (GTEST_FLAG_GET(print_time)) {
-    printf(" (%s ms)\n",
+	ColoredPrintf(GTestColor::kDefault, " (%s ms)\n",
            internal::StreamableToString(test_info.result()->elapsed_time())
                .c_str());
   } else {
-    printf("\n");
+	ColoredPrintf(GTestColor::kDefault, "\n");
   }
-  fflush(stdout);
 }
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -3589,9 +3615,8 @@ void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
   const std::string counts =
       FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(GTestColor::kGreen, "[----------] ");
-  printf("%s from %s (%s ms total)\n\n", counts.c_str(), test_case.name(),
+  ColoredPrintf(GTestColor::kDefault, "%s from %s (%s ms total)\n\n", counts.c_str(), test_case.name(),
          internal::StreamableToString(test_case.elapsed_time()).c_str());
-  fflush(stdout);
 }
 #else
 void PrettyUnitTestResultPrinter::OnTestSuiteEnd(const TestSuite& test_suite) {
@@ -3600,24 +3625,22 @@ void PrettyUnitTestResultPrinter::OnTestSuiteEnd(const TestSuite& test_suite) {
   const std::string counts =
       FormatCountableNoun(test_suite.test_to_run_count(), "test", "tests");
   ColoredPrintf(GTestColor::kGreen, "[----------] ");
-  printf("%s from %s (%s ms total)\n\n", counts.c_str(), test_suite.name(),
+  ColoredPrintf(GTestColor::kDefault, "%s from %s (%s ms total)\n\n", counts.c_str(), test_suite.name(),
          internal::StreamableToString(test_suite.elapsed_time()).c_str());
-  fflush(stdout);
 }
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 void PrettyUnitTestResultPrinter::OnEnvironmentsTearDownStart(
     const UnitTest& /*unit_test*/) {
   ColoredPrintf(GTestColor::kGreen, "[----------] ");
-  printf("Global test environment tear-down\n");
-  fflush(stdout);
+  ColoredPrintf(GTestColor::kDefault, "Global test environment tear-down\n");
 }
 
 // Internal helper for printing the list of failed tests.
 void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
   const int failed_test_count = unit_test.failed_test_count();
   ColoredPrintf(GTestColor::kRed, "[  FAILED  ] ");
-  printf("%s, listed below:\n", FormatTestCount(failed_test_count).c_str());
+  ColoredPrintf(GTestColor::kDefault, "%s, listed below:\n", FormatTestCount(failed_test_count).c_str());
 
   for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
     const TestSuite& test_suite = *unit_test.GetTestSuite(i);
@@ -3630,12 +3653,12 @@ void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
         continue;
       }
       ColoredPrintf(GTestColor::kRed, "[  FAILED  ] ");
-      printf("%s.%s", test_suite.name(), test_info.name());
+	  ColoredPrintf(GTestColor::kDefault, "%s.%s", test_suite.name(), test_info.name());
       PrintFullTestCommentIfPresent(test_info);
-      printf("\n");
+	  ColoredPrintf(GTestColor::kDefault, "\n");
     }
   }
-  printf("\n%2d FAILED %s\n", failed_test_count,
+  ColoredPrintf(GTestColor::kDefault, "\n%2d FAILED %s\n", failed_test_count,
          failed_test_count == 1 ? "TEST" : "TESTS");
 }
 
@@ -3651,12 +3674,12 @@ void PrettyUnitTestResultPrinter::PrintFailedTestSuites(
     }
     if (test_suite.ad_hoc_test_result().Failed()) {
       ColoredPrintf(GTestColor::kRed, "[  FAILED  ] ");
-      printf("%s: SetUpTestSuite or TearDownTestSuite\n", test_suite.name());
+	  ColoredPrintf(GTestColor::kDefault, "%s: SetUpTestSuite or TearDownTestSuite\n", test_suite.name());
       ++suite_failure_count;
     }
   }
   if (suite_failure_count > 0) {
-    printf("\n%2d FAILED TEST %s\n", suite_failure_count,
+	ColoredPrintf(GTestColor::kDefault, "\n%2d FAILED TEST %s\n", suite_failure_count,
            suite_failure_count == 1 ? "SUITE" : "SUITES");
   }
 }
@@ -3679,8 +3702,8 @@ void PrettyUnitTestResultPrinter::PrintSkippedTests(const UnitTest& unit_test) {
         continue;
       }
       ColoredPrintf(GTestColor::kGreen, "[  SKIPPED ] ");
-      printf("%s.%s", test_suite.name(), test_info.name());
-      printf("\n");
+	  ColoredPrintf(GTestColor::kDefault, "%s.%s", test_suite.name(), test_info.name());
+	  ColoredPrintf(GTestColor::kDefault, "\n");
     }
   }
 }
@@ -3688,21 +3711,21 @@ void PrettyUnitTestResultPrinter::PrintSkippedTests(const UnitTest& unit_test) {
 void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                                                      int /*iteration*/) {
   ColoredPrintf(GTestColor::kGreen, "[==========] ");
-  printf("%s from %s ran.",
+  ColoredPrintf(GTestColor::kDefault, "%s from %s ran.",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
          FormatTestSuiteCount(unit_test.test_suite_to_run_count()).c_str());
   if (GTEST_FLAG_GET(print_time)) {
-    printf(" (%s ms total)",
+	ColoredPrintf(GTestColor::kDefault, " (%s ms total)",
            internal::StreamableToString(unit_test.elapsed_time()).c_str());
   }
-  printf("\n");
+  ColoredPrintf(GTestColor::kDefault, "\n");
   ColoredPrintf(GTestColor::kGreen, "[  PASSED  ] ");
-  printf("%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
+  ColoredPrintf(GTestColor::kDefault, "%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
 
   const int skipped_test_count = unit_test.skipped_test_count();
   if (skipped_test_count > 0) {
     ColoredPrintf(GTestColor::kGreen, "[  SKIPPED ] ");
-    printf("%s, listed below:\n", FormatTestCount(skipped_test_count).c_str());
+	ColoredPrintf(GTestColor::kDefault, "%s, listed below:\n", FormatTestCount(skipped_test_count).c_str());
     PrintSkippedTests(unit_test);
   }
 
@@ -3714,13 +3737,12 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   int num_disabled = unit_test.reportable_disabled_test_count();
   if (num_disabled && !GTEST_FLAG_GET(also_run_disabled_tests)) {
     if (unit_test.Passed()) {
-      printf("\n");  // Add a spacer if no FAILURE banner is displayed.
+	  ColoredPrintf(GTestColor::kDefault, "\n");  // Add a spacer if no FAILURE banner is displayed.
     }
     ColoredPrintf(GTestColor::kYellow, "  YOU HAVE %d DISABLED %s\n\n",
                   num_disabled, num_disabled == 1 ? "TEST" : "TESTS");
   }
   // Ensure that Google Test output is printed before, e.g., heapchecker output.
-  fflush(stdout);
 }
 
 // End PrettyUnitTestResultPrinter
@@ -3732,7 +3754,7 @@ class BriefUnitTestResultPrinter : public TestEventListener {
  public:
   BriefUnitTestResultPrinter() = default;
   static void PrintTestName(const char* test_suite, const char* test) {
-    printf("%s.%s", test_suite, test);
+	ColoredPrintf(GTestColor::kDefault, "%s.%s", test_suite, test);
   }
 
   // The following methods override what's in the TestEventListener class.
@@ -3775,7 +3797,6 @@ TestPartResult BriefUnitTestResultPrinter::OnTestPartResult(
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
-      fflush(stdout);
 	  return result;
   }
 }
@@ -3787,46 +3808,44 @@ void BriefUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
     PrintFullTestCommentIfPresent(test_info);
 
     if (GTEST_FLAG_GET(print_time)) {
-      printf(" (%s ms)\n",
+	  ColoredPrintf(GTestColor::kDefault, " (%s ms)\n",
              internal::StreamableToString(test_info.result()->elapsed_time())
                  .c_str());
     } else {
-      printf("\n");
+	  ColoredPrintf(GTestColor::kDefault, "\n");
     }
-    fflush(stdout);
   }
 }
 
 void BriefUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                                                     int /*iteration*/) {
   ColoredPrintf(GTestColor::kGreen, "[==========] ");
-  printf("%s from %s ran.",
+  ColoredPrintf(GTestColor::kDefault, "%s from %s ran.",
          FormatTestCount(unit_test.test_to_run_count()).c_str(),
          FormatTestSuiteCount(unit_test.test_suite_to_run_count()).c_str());
   if (GTEST_FLAG_GET(print_time)) {
-    printf(" (%s ms total)",
+	ColoredPrintf(GTestColor::kDefault, " (%s ms total)",
            internal::StreamableToString(unit_test.elapsed_time()).c_str());
   }
-  printf("\n");
+  ColoredPrintf(GTestColor::kDefault, "\n");
   ColoredPrintf(GTestColor::kGreen, "[  PASSED  ] ");
-  printf("%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
+  ColoredPrintf(GTestColor::kDefault, "%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
 
   const int skipped_test_count = unit_test.skipped_test_count();
   if (skipped_test_count > 0) {
     ColoredPrintf(GTestColor::kGreen, "[  SKIPPED ] ");
-    printf("%s.\n", FormatTestCount(skipped_test_count).c_str());
+	ColoredPrintf(GTestColor::kDefault, "%s.\n", FormatTestCount(skipped_test_count).c_str());
   }
 
   int num_disabled = unit_test.reportable_disabled_test_count();
   if (num_disabled && !GTEST_FLAG_GET(also_run_disabled_tests)) {
     if (unit_test.Passed()) {
-      printf("\n");  // Add a spacer if no FAILURE banner is displayed.
+	  ColoredPrintf(GTestColor::kDefault, "\n");  // Add a spacer if no FAILURE banner is displayed.
     }
     ColoredPrintf(GTestColor::kYellow, "  YOU HAVE %d DISABLED %s\n\n",
                   num_disabled, num_disabled == 1 ? "TEST" : "TESTS");
   }
   // Ensure that Google Test output is printed before, e.g., heapchecker output.
-  fflush(stdout);
 }
 
 // End BriefUnitTestResultPrinter
@@ -5472,6 +5491,20 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
     // with another testing framework) and specify the former on the
     // command line for debugging.
     if (GTEST_FLAG_GET(break_on_failure)) {
+	  gtest_break_into_debugger();
+    } else if (GTEST_FLAG_GET(throw_on_failure)) {
+#if GTEST_HAS_EXCEPTIONS
+	  gtest_throw_failure_exception(result);
+#else
+      // We cannot call abort() as it generates a pop-up in debug mode
+      // that cannot be suppressed in VC 7.1 or below.
+	  gtest_exit_application(1);
+#endif
+    }
+  }
+ }
+
+void gtest_break_into_debugger(void) {
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && \
     !GTEST_OS_WINDOWS_RT
       // Using DebugBreak on Windows allows gtest to still break into a debugger
@@ -5494,16 +5527,20 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
       // from removing. We use this rather than abort() or __builtin_trap() for
       // portability: some debuggers don't correctly trap abort().
       *static_cast<volatile int*>(nullptr) = 1;
-    } else if (GTEST_FLAG_GET(throw_on_failure)) {
+}
+
+void gtest_throw_failure_exception(TestPartResult &result) {
 #if GTEST_HAS_EXCEPTIONS
-      throw internal::GoogleTestFailureException(result);
+  throw internal::GoogleTestFailureException(result);
 #else
-      // We cannot call abort() as it generates a pop-up in debug mode
-      // that cannot be suppressed in VC 7.1 or below.
-      exit(1);
+  // We cannot call abort() as it generates a pop-up in debug mode
+  // that cannot be suppressed in VC 7.1 or below.
+  gtest_exit_application(1);
 #endif
-    }
-  }
+}
+
+void gtest_exit_application(int exit_value) {
+  exit(exit_value);
 }
 
 // Adds a TestProperty to the current TestResult object when invoked from
@@ -6036,10 +6073,9 @@ bool UnitTestImpl::RunAllTests() {
               test_result.GetTestPartResult(j);
           if (test_part_result.type() == TestPartResult::kSkip) {
             const std::string& result = test_part_result.message();
-            printf("%s\n", result.c_str());
+			ColoredPrintf(GTestColor::kDefault, "%s\n", result.c_str());
           }
         }
-        fflush(stdout);
       } else if (!Test::HasFatalFailure()) {
         for (int test_index = 0; test_index < total_test_suite_count();
              test_index++) {
@@ -6129,7 +6165,6 @@ void WriteToShardStatusFileIfNeeded() {
                     "Could not write to the test shard status file \"%s\" "
                     "specified by the %s environment variable.\n",
                     test_shard_file, kTestShardStatusFile);
-      fflush(stdout);
       exit(EXIT_FAILURE);
     }
     fclose(file);
@@ -6160,7 +6195,6 @@ bool ShouldShard(const char* total_shards_env, const char* shard_index_env,
                                   << ", but have left " << kTestTotalShards
                                   << " unset.\n";
     ColoredPrintf(GTestColor::kRed, "%s", msg.GetString().c_str());
-    fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (total_shards != -1 && shard_index == -1) {
     const Message msg = Message()
@@ -6168,7 +6202,6 @@ bool ShouldShard(const char* total_shards_env, const char* shard_index_env,
                         << kTestTotalShards << " = " << total_shards
                         << ", but have left " << kTestShardIndex << " unset.\n";
     ColoredPrintf(GTestColor::kRed, "%s", msg.GetString().c_str());
-    fflush(stdout);
     exit(EXIT_FAILURE);
   } else if (shard_index < 0 || shard_index >= total_shards) {
     const Message msg =
@@ -6177,7 +6210,6 @@ bool ShouldShard(const char* total_shards_env, const char* shard_index_env,
                   << ", but you have " << kTestShardIndex << "=" << shard_index
                   << ", " << kTestTotalShards << "=" << total_shards << ".\n";
     ColoredPrintf(GTestColor::kRed, "%s", msg.GetString().c_str());
-    fflush(stdout);
     exit(EXIT_FAILURE);
   }
 
@@ -6279,14 +6311,14 @@ static void PrintOnOneLine(const char* str, int max_length) {
   if (str != nullptr) {
     for (int i = 0; *str != '\0'; ++str) {
       if (i >= max_length) {
-        printf("...");
+		ColoredPrintf(GTestColor::kDefault, "...");
         break;
       }
       if (*str == '\n') {
-        printf("\\n");
+		ColoredPrintf(GTestColor::kDefault, "\\n");
         i += 2;
       } else {
-        printf("%c", *str);
+		ColoredPrintf(GTestColor::kDefault, "%c", *str);
         ++i;
       }
     }
@@ -6306,27 +6338,27 @@ void UnitTestImpl::ListTestsMatchingFilter() {
       if (test_info->matches_filter_) {
         if (!printed_test_suite_name) {
           printed_test_suite_name = true;
-          printf("%s.", test_suite->name());
+		  ColoredPrintf(GTestColor::kDefault, "%s.", test_suite->name());
           if (test_suite->type_param() != nullptr) {
-            printf("  # %s = ", kTypeParamLabel);
+			ColoredPrintf(GTestColor::kDefault, "  # %s = ", kTypeParamLabel);
             // We print the type parameter on a single line to make
             // the output easy to parse by a program.
             PrintOnOneLine(test_suite->type_param(), kMaxParamLength);
           }
-          printf("\n");
+		  ColoredPrintf(GTestColor::kDefault, "\n");
         }
-        printf("  %s", test_info->name());
+		ColoredPrintf(GTestColor::kDefault, "  %s", test_info->name());
         if (test_info->value_param() != nullptr) {
-          printf("  # %s = ", kValueParamLabel);
+		  ColoredPrintf(GTestColor::kDefault, "  # %s = ", kValueParamLabel);
           // We print the value parameter on a single line to make the
           // output easy to parse by a program.
           PrintOnOneLine(test_info->value_param(), kMaxParamLength);
         }
-        printf("\n");
+		ColoredPrintf(GTestColor::kDefault, "\n");
       }
     }
   }
-  fflush(stdout);
+
 #if GTEST_HAS_FILE_SYSTEM
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
   if (output_format == "xml" || output_format == "json") {

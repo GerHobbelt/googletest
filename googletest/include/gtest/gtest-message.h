@@ -59,7 +59,7 @@
 #if GTEST_HAS_ABSL
 #include <type_traits>
 
-#include "absl/strings/internal/has_absl_stringify.h"
+//#include "absl/strings/internal/has_absl_stringify.h"
 #include "absl/strings/str_cat.h"
 #endif  // GTEST_HAS_ABSL
 
@@ -130,7 +130,7 @@ class GTEST_API_ Message {
 #endif  // GTEST_HAS_ABSL
             >
   inline Message& operator<<(const T& val) {
-        // Some libraries overload << for STL containers.  These
+    // Some libraries overload << for STL containers.  These
     // overloads are defined in the global namespace instead of ::std.
     //
     // C++'s symbol lookup rule (i.e. Koenig lookup) says that these
