@@ -863,6 +863,7 @@ class PositiveAndNegativeUnitTestFilter {
   UnitTestFilter positive_filter_;
   UnitTestFilter negative_filter_;
 };
+
 }  // namespace
 
 bool UnitTestOptions::MatchesFilter(const std::string& name_str,
@@ -1326,6 +1327,7 @@ std::string Message::GetString() const {
 namespace internal {
 
 namespace edit_distance {
+
 std::vector<EditType> CalculateOptimalEdits(const std::vector<size_t>& left,
                                             const std::vector<size_t>& right) {
   std::vector<std::vector<double> > costs(
@@ -3214,7 +3216,9 @@ static const char* TestPartResultTypeToString(TestPartResult::Type type) {
 
 namespace internal {
 namespace {
+
 enum class GTestColor { kDefault, kRed, kGreen, kYellow };
+
 }  // namespace
 
 // Prints a TestPartResult to an std::string.
@@ -6615,6 +6619,8 @@ static bool HasGoogleTestFlagPrefix(const char* str) {
           SkipPrefix(GTEST_FLAG_PREFIX_DASH_, &str));
 }
 
+}  // namespace internal
+
 // Prints a string containing code-encoded text.  The following escape
 // sequences can be used in the string to control the text color:
 //
@@ -6624,7 +6630,9 @@ static bool HasGoogleTestFlagPrefix(const char* str) {
 //   @Y    changes the color to yellow.
 //   @D    changes to the default terminal text color.
 //
-static void PrintColorEncoded(const char* str) {
+GTEST_API_ void PrintColorEncoded(const char* str) {
+  using namespace internal;
+
   GTestColor color = GTestColor::kDefault;  // The current color.
 
   // Conceptually, we split the string into segments divided by escape
@@ -6657,6 +6665,8 @@ static void PrintColorEncoded(const char* str) {
     }
   }
 }
+
+namespace internal {
 
 static const char kColorEncodedHelpMessage[] =
     "This program contains tests written using " GTEST_NAME_

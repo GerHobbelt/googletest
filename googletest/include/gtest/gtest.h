@@ -1354,6 +1354,17 @@ GTEST_API_ void InitGoogleTest(int* argc, const wchar_t** argv);
 // there is no argc/argv.
 GTEST_API_ void InitGoogleTest();
 
+// Prints a string containing code-encoded text.  The following escape
+// sequences can be used in the string to control the text color:
+//
+//   @@    prints a single '@' character.
+//   @R    changes the color to red.
+//   @G    changes the color to green.
+//   @Y    changes the color to yellow.
+//   @D    changes to the default terminal text color.
+//
+GTEST_API_ void PrintColorEncoded(const char* str);
+
 namespace internal {
 
 // g_help_flag is true if and only if the --help flag or an equivalent form
