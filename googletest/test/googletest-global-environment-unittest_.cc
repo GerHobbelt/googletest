@@ -34,6 +34,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 
 // An environment that always fails in its SetUp method.

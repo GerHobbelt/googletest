@@ -46,6 +46,8 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"  // for UnitTestOptions
 
+#include "googletest/include/monolithic_examples.h"
+
 using ::std::sort;
 using ::std::vector;
 

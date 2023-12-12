@@ -32,6 +32,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 #if defined(BUILD_MONOLITHIC)
 #define main(cnt, arr)	gtest_no_test_main(cnt, arr)
 #endif

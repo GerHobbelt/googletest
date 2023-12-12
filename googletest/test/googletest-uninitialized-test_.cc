@@ -29,6 +29,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 TEST(DummyTest, Dummy) {
   // This test doesn't verify anything.  We just need it to create a
   // realistic stage for testing the behavior of Google Test when

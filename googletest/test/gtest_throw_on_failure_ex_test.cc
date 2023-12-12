@@ -37,6 +37,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 // Prints the given failure message and exits the program with
 // non-zero.  We use this instead of a Google Test assertion to
 // indicate a failure, as the latter is been tested and cannot be

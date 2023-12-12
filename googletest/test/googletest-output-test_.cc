@@ -42,6 +42,8 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 
 #if GTEST_IS_THREADSAFE

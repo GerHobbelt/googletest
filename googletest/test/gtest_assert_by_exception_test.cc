@@ -37,6 +37,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 class ThrowListener : public testing::EmptyTestEventListener {
   testing::TestPartResult OnTestPartResult(const testing::TestPartResult& result) override {
     if (result.type() == testing::TestPartResult::kFatalFailure) {

@@ -37,6 +37,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 // This macro defines 10 dummy tests.
 #define TEN_TESTS_(test_case_name) \
   TEST(test_case_name, T0) {}      \

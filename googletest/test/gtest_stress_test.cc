@@ -38,6 +38,8 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 #if GTEST_IS_THREADSAFE
 
 namespace testing {

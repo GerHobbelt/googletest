@@ -52,6 +52,8 @@
 #include <stdexcept>
 #endif
 
+#include "googletest/include/monolithic_examples.h"
+
 using testing::Test;
 
 #if GTEST_HAS_SEH

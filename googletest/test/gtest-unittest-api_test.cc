@@ -38,6 +38,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 using ::testing::InitGoogleTest;
 
 namespace testing {

@@ -38,6 +38,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 
 // Test HasFixtureTest.

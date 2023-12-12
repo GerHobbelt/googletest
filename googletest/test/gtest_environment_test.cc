@@ -36,6 +36,8 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 
 enum FailureType { NO_FAILURE, NON_FATAL_FAILURE, FATAL_FAILURE };

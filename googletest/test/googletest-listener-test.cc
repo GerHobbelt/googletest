@@ -38,6 +38,8 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/custom/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 using ::testing::AddGlobalTestEnvironment;
 using ::testing::InitGoogleTest;
 using ::testing::UnitTest;

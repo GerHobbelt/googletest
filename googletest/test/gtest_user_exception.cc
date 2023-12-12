@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "googletest/include/monolithic_examples.h"
+
 class CastomExceptionBase {
  public:
   CastomExceptionBase() noexcept{};

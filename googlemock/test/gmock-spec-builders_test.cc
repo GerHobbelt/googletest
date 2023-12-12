@@ -45,6 +45,8 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
+#include "googlemock/include/monolithic_examples.h"
+
 namespace testing {
 namespace {
 

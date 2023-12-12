@@ -33,6 +33,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "googlemock/include/monolithic_examples.h"
+
 namespace testing {
 namespace {
 

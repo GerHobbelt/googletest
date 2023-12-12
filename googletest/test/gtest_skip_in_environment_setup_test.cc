@@ -34,6 +34,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 class SetupEnvironment : public testing::Environment {
  public:
   void SetUp() override { GTEST_SKIP() << "Skipping the entire environment"; }

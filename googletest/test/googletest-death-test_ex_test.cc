@@ -47,6 +47,8 @@
 
 #include "gtest/gtest-spi.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 #if GTEST_HAS_EXCEPTIONS
 
 #include <exception>  // For std::exception.

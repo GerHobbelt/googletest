@@ -36,6 +36,8 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 
 // We need this when we are testing Google Test itself and therefore

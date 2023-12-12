@@ -50,6 +50,8 @@
 #include <windows.h>
 #endif
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 
 // A test that's expected to fail.

@@ -36,6 +36,8 @@
 #include <windows.h>
 #endif
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 class DummyInvalidName2Test : public ::testing::TestWithParam<const char *> {};
 

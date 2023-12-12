@@ -37,6 +37,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "googlemock/include/monolithic_examples.h"
+
 // Silence C4100 (unreferenced formal parameter)
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 

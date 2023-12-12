@@ -29,6 +29,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 class DummyInvalidName1Test : public ::testing::TestWithParam<const char *> {};
 

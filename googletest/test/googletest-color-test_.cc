@@ -36,6 +36,8 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 using testing::internal::GTestColorMode;
 using testing::internal::ShouldUseColor;
 using testing::internal::GTestColorMode;

@@ -41,6 +41,8 @@
 
 #include "gtest/gtest.h"
 
+#include "googletest/include/monolithic_examples.h"
+
 namespace {
 
 // Several different test cases and tests that will be listed.
