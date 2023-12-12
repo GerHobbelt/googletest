@@ -2607,6 +2607,19 @@ namespace internal {
 
 #if GTEST_HAS_EXCEPTIONS
 
+// https://stackoverflow.com/questions/2896600/how-to-replace-all-occurrences-of-a-character-in-string
+// 
+// Replace any occurrence of `to` with `from` in `str` string. `to` and `from` may be arbitrary strings of any length.
+// `str` is edited in-place.
+static inline void ReplaceAll(std::string &str, const std::string& from, const std::string& to)
+{
+	size_t start_pos = 0;
+	while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+	}
+}
+
 // Adds an "exception thrown" fatal failure to the current test.
 static std::string FormatCxxExceptionMessage(const char* description,
                                              const char* location) {
@@ -2617,7 +2630,7 @@ static std::string FormatCxxExceptionMessage(const char* description,
       message << "C++ exception with description \"" << desc << "\"";
     } else {
       message << "C++ exception with description\n> ";
-      std::replace(desc.begin(), desc.end(), '\n', '\n> ');
+      ReplaceAll(desc, "\n", "\n> ");
       message << desc;
     }
   } else {
@@ -3367,7 +3380,7 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE &&    \
     !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT && \
     !GTEST_OS_WINDOWS_MINGW
-  if (color_mode != GTestColorMode::kAnsi && color != GTestColor::kDefault) {
+  if (in_color_mode != GTestColorMode::kAnsi && color != GTestColor::kDefault) {
     const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	va_list args;
 
