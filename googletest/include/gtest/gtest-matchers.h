@@ -50,6 +50,11 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
+// prevent compile-time clash with crtdbg.h defines:
+#if defined(_MSC_VER)
+#undef new
+#endif
+
 // MSVC warning C5046 is new as of VS2017 version 15.8.
 #if defined(_MSC_VER) && _MSC_VER >= 1915
 #define GTEST_MAYBE_5046_ 5046
