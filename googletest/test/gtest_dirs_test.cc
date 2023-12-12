@@ -32,6 +32,17 @@ static int unsetenv(const char *name)
 	return _putenv_s(name, "");
 }
 
+// minimal port as required for this test file; has only partial functionality!
+static char *mkdtemp(char *path)
+{
+	size_t len = strlen(path) + 1;
+	int errcode = _mktemp_s(path, len);
+	if (errcode) return NULL;
+	errcode = mkdir(path);
+	if (errcode) return NULL;
+	return path;
+}
+
 #endif // _MSC_VER
 
 namespace {
