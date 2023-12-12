@@ -94,8 +94,8 @@ TEST_P(ParamTest, TestX) {}
 
 TEST_P(ParamTest, TestY) {}
 
-INSTANTIATE_TEST_SUITE_P(SeqP, ParamFilterTest, testing::Values(1, 2));
-INSTANTIATE_TEST_SUITE_P(SeqQ, ParamFilterTest, testing::Values(5, 6));
+INSTANTIATE_TEST_SUITE_P(SeqP, ParamTest, testing::Values(1, 2));
+INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, testing::Values(5, 6));
 
 }  // namespace
 
