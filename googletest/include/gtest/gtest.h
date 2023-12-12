@@ -1389,7 +1389,14 @@ inline bool operator!=(faketype, faketype) { return false; }
   template <typename Tf, typename Uf>
   bool safe_equals(const Tf& a, const Uf& b) {
       if constexpr (has_equality_operator<Tf, Uf>::value) {
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 5056) // warning C5056: operator '==': deprecated for array types
+#endif
           return a == b;
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
       } else {
           std::cout << "Equality comparison not valid between types." << std::endl;
           return false;
