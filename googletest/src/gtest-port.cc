@@ -164,13 +164,13 @@ size_t GetThreadCount() {
 // we cannot detect it.
 size_t GetThreadCount() {
   int mib[] = {
-    CTL_KERN,
-    KERN_PROC,
-    KERN_PROC_PID,
-    getpid(),
+      CTL_KERN,
+      KERN_PROC,
+      KERN_PROC_PID,
+      getpid(),
 #if GTEST_OS_NETBSD
-    sizeof(struct kinfo_proc),
-    1,
+      sizeof(struct kinfo_proc),
+      1,
 #endif
   };
   u_int miblen = sizeof(mib) / sizeof(mib[0]);
@@ -1034,6 +1034,24 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
+namespace {
+
+#if defined(GTEST_OS_LINUX_ANDROID) || defined(GTEST_OS_IOS)
+bool EndsWithPathSeparator(const std::string& path) {
+  return !path.empty() && path.back() == GTEST_PATH_SEP_[0];
+}
+#elif defined(_WIN32) || defined(WIN32) || defined(WIN64)
+bool EndsWithPathSeparator(const std::string& path) {
+  return !path.empty() && (path.back() == '\\' || path.back() == '/');
+}
+#else
+bool EndsWithPathSeparator(const std::string& path) {
+  return !path.empty() && path.back() == GTEST_PATH_SEP_[0];
+}
+#endif
+
+}  // namespace
+
 // Object that captures an output stream (stdout/stderr).
 class CapturedStream {
  public:
@@ -1044,7 +1062,7 @@ class CapturedStream {
   // testing::TempDir() should return a directory without a path separator.
   // However, this rule was documented fairly recently, so we normalize across
   // implementations with and without a trailing path separator.
-  if (temp_dir.back() != GTEST_PATH_SEP_[0])
+  if (!EndsWithPathSeparator(temp_dir))
     temp_dir.push_back(GTEST_PATH_SEP_[0]);
 
 #if GTEST_OS_WINDOWS
