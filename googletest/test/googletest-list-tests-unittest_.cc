@@ -41,6 +41,8 @@
 
 #include "gtest/gtest.h"
 
+namespace {
+
 // Several different test cases and tests that will be listed.
 TEST(Foo, Bar1) {}
 
@@ -135,6 +137,9 @@ TYPED_TEST_P(TypeParamTest, TestB) {}
 REGISTER_TYPED_TEST_SUITE_P(TypeParamTest, TestA, TestB);
 
 INSTANTIATE_TYPED_TEST_SUITE_P(My, TypeParamTest, MyTypes);
+
+}	// anonymous namespace
+
 
 #if defined(BUILD_MONOLITHIC)
 #define main(cnt, arr)	gtest_list_test_main(cnt, arr)

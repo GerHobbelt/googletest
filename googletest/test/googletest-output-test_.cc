@@ -54,6 +54,8 @@ using testing::internal::ThreadWithParam;
 
 namespace posix = ::testing::internal::posix;
 
+namespace {
+
 // Tests catching fatal failures.
 
 // A subroutine used by the following test.
@@ -1014,6 +1016,8 @@ class TestSuiteThatSkipsInSetUp : public testing::Test {
   static void SetUpTestSuite() { GTEST_SKIP() << "Skip entire test suite"; }
 };
 TEST_F(TestSuiteThatSkipsInSetUp, ShouldNotRun) { std::abort(); }
+
+}	// anonymous namespace
 
 
 #if defined(BUILD_MONOLITHIC)
