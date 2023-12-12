@@ -9,6 +9,31 @@
 
 #if GTEST_HAS_FILE_SYSTEM
 
+#if defined(_MSC_VER)
+
+static int setenv(const char *name, const char *value, int overwrite)
+{
+	int errcode = 0;
+	if (!overwrite) {
+		size_t envsize = 0;
+		errcode = getenv_s(&envsize, NULL, 0, name);
+		if(errcode || envsize) return errcode;
+	}
+	return _putenv_s(name, value);
+}
+
+static int unsetenv(const char *name)
+{
+	int errcode = 0;
+	size_t envsize = 0;
+	errcode = getenv_s(&envsize, NULL, 0, name);
+	if(errcode) return errcode;
+	if(envsize == 0) return 0;
+	return _putenv_s(name, "");
+}
+
+#endif // _MSC_VER
+
 namespace {
 
 class SetEnv {
