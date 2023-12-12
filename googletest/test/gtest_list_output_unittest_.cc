@@ -52,10 +52,10 @@ class FoooTestFixture : public ::testing::Test {};
 TEST_F(FoooTestFixture, Test3) {}
 TEST_F(FoooTestFixture, Test4) {}
 
-class ValueParamTest : public ::testing::TestWithParam<int> {};
-TEST_P(ValueParamTest, Test5) {}
-TEST_P(ValueParamTest, Test6) {}
-INSTANTIATE_TEST_SUITE_P(ValueParam, ValueParamTest, ::testing::Values(33, 42));
+class ValueParamOutputTest : public ::testing::TestWithParam<int> {};
+TEST_P(ValueParamOutputTest, Test5) {}
+TEST_P(ValueParamOutputTest, Test6) {}
+INSTANTIATE_TEST_SUITE_P(ValueParam, ValueParamOutputTest, ::testing::Values(33, 42));
 
 template <typename T>
 class TypedTest : public ::testing::Test {};

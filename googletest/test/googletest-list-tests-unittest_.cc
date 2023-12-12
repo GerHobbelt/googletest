@@ -83,14 +83,14 @@ class MyType {
 // Teaches Google Test how to print a MyType.
 void PrintTo(const MyType& x, std::ostream* os) { *os << x.value(); }
 
-class ValueParamTest : public testing::TestWithParam<MyType> {};
+class ValueParamFilterTest : public testing::TestWithParam<MyType> {};
 
-TEST_P(ValueParamTest, TestA) {}
+TEST_P(ValueParamFilterTest, TestA) {}
 
-TEST_P(ValueParamTest, TestB) {}
+TEST_P(ValueParamFilterTest, TestB) {}
 
 INSTANTIATE_TEST_SUITE_P(
-    MyInstantiation, ValueParamTest,
+    MyInstantiation, ValueParamFilterTest,
     testing::Values(
         MyType("one line"), MyType("two\nlines"),
         MyType("a "

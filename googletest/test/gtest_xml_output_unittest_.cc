@@ -162,10 +162,10 @@ TEST(NoFixtureTest, ExternalUtilityThatCallsRecordStringValuedProperty) {
 
 // Verifies that the test parameter value is output in the 'value_param'
 // XML attribute for value-parameterized tests.
-class ValueParamTest : public TestWithParam<int> {};
-TEST_P(ValueParamTest, HasValueParamAttribute) {}
-TEST_P(ValueParamTest, AnotherTestThatHasValueParamAttribute) {}
-INSTANTIATE_TEST_SUITE_P(Single, ValueParamTest, Values(33, 42));
+class ValueParamXmlOutTest : public TestWithParam<int> {};
+TEST_P(ValueParamXmlOutTest, HasValueParamAttribute) {}
+TEST_P(ValueParamXmlOutTest, AnotherTestThatHasValueParamAttribute) {}
+INSTANTIATE_TEST_SUITE_P(Single, ValueParamXmlOutTest, Values(33, 42));
 
 // Verifies that the type parameter name is output in the 'type_param'
 // XML attribute for typed tests.

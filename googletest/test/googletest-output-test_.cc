@@ -682,17 +682,17 @@ std::string ParamNameFunc(const testing::TestParamInfo<std::string>& info) {
   return info.param;
 }
 
-class ParamTest : public testing::TestWithParam<std::string> {};
+class ParamOutputTest : public testing::TestWithParam<std::string> {};
 
-TEST_P(ParamTest, Success) { EXPECT_EQ("a", GetParam()); }
+TEST_P(ParamOutputTest, Success) { EXPECT_EQ("a", GetParam()); }
 
-TEST_P(ParamTest, Failure) { EXPECT_EQ("b", GetParam()) << "Expected failure"; }
+TEST_P(ParamOutputTest, Failure) { EXPECT_EQ("b", GetParam()) << "Expected failure"; }
 
-INSTANTIATE_TEST_SUITE_P(PrintingStrings, ParamTest,
+INSTANTIATE_TEST_SUITE_P(PrintingStrings, ParamOutputTest,
                          testing::Values(std::string("a")), ParamNameFunc);
 
 // The case where a suite has INSTANTIATE_TEST_SUITE_P but not TEST_P.
-using NoTests = ParamTest;
+using NoTests = ParamOutputTest;
 INSTANTIATE_TEST_SUITE_P(ThisIsOdd, NoTests, ::testing::Values("Hello"));
 
 // fails under kErrorOnUninstantiatedParameterizedTest=true
