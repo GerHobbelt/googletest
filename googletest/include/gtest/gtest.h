@@ -51,6 +51,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iomanip>
 #include <limits>
 #include <memory>
 #include <ostream>
@@ -59,7 +60,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
-
+#include <type_traits>
 #include "gtest/gtest-assertion-result.h"
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest-matchers.h"
@@ -1057,10 +1058,6 @@ class GTEST_API_ TestEventListeners {
     return default_xml_generator_;
   }
 
-  // Controls whether events will be forwarded by the repeater to the
-  // listeners in the list.
-  void SuppressEventForwarding(bool);
-
  private:
   friend class TestSuite;
   friend class TestInfo;
@@ -1087,9 +1084,12 @@ class GTEST_API_ TestEventListeners {
   // nothing if the previous and the current listener objects are the same.
   void SetDefaultXmlGenerator(TestEventListener* listener);
 
-  // Controls whether events will be forwarded by the repeater to the
+  // Checks whether events will be forwarded by the repeater to the
   // listeners in the list.
   bool EventForwardingEnabled() const;
+  // Controls whether events will be forwarded by the repeater to the
+  // listeners in the list.
+  void SuppressEventForwarding(bool);
 
   // The actual list of listeners.
   internal::TestEventRepeater* repeater_;
@@ -1379,12 +1379,29 @@ struct faketype {};
 inline bool operator==(faketype, faketype) { return true; }
 inline bool operator!=(faketype, faketype) { return false; }
 
+// Check for == operator
+  template<typename Tf, typename Uf, typename = void>
+  struct has_equality_operator : std::false_type {};
+
+  template<typename Tf, typename Uf>
+  struct has_equality_operator<Tf, Uf, std::void_t<decltype(std::declval<Tf>() == std::declval<Uf>())>> : std::true_type {};
+
+  template <typename Tf, typename Uf>
+  bool safe_equals(const Tf& a, const Uf& b) {
+      if constexpr (has_equality_operator<Tf, Uf>::value) {
+          return a == b;
+      } else {
+          std::cout << "Equality comparison not valid between types." << std::endl;
+          return false;
+      }
+  }
+
 // The helper function for {ASSERT|EXPECT}_EQ.
 template <typename T1, typename T2>
 AssertionResult CmpHelperEQ(const char* lhs_expression,
                             const char* rhs_expression, const T1& lhs,
                             const T2& rhs) {
-  if (lhs == rhs) {
+  if (safe_equals(lhs, rhs)) {
     return AssertionSuccess();
   }
 
@@ -1582,12 +1599,12 @@ AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
   }
 
   ::std::stringstream lhs_ss;
-  lhs_ss.precision(std::numeric_limits<RawType>::digits10 + 2);
-  lhs_ss << lhs_value;
+  lhs_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
+         << lhs_value;
 
   ::std::stringstream rhs_ss;
-  rhs_ss.precision(std::numeric_limits<RawType>::digits10 + 2);
-  rhs_ss << rhs_value;
+  rhs_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
+         << rhs_value;
 
   return EqFailure(lhs_expression, rhs_expression,
                    StringStreamToString(&lhs_ss), StringStreamToString(&rhs_ss),
@@ -2126,8 +2143,8 @@ class GTEST_API_ ScopedTrace {
 // Assuming that each thread maintains its own stack of traces.
 // Therefore, a SCOPED_TRACE() would (correctly) only affect the
 // assertions in its own thread.
-#define SCOPED_TRACE(message)                                               \
-  const ::testing::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)( \
+#define SCOPED_TRACE(message)                                         \
+  ::testing::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)( \
       __FILE__, __LINE__, (message))
 
 // Compile-time assertion for type equality.
