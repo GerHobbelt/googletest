@@ -45,7 +45,7 @@ using ::testing::InitGoogleTest;
 using ::testing::UnitTest;
 
 // Used by tests to register their events.
-std::vector<std::string>* g_events = nullptr;
+static std::vector<std::string>* g_events = nullptr;
 
 namespace testing {
 namespace internal {
@@ -56,7 +56,8 @@ class EventRecordingListener : public TestEventListener {
 
  protected:
   void OnTestProgramStart(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnTestProgramStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestProgramStart"));
   }
 
   void OnTestIterationStart(const UnitTest& /*unit_test*/,
@@ -64,47 +65,57 @@ class EventRecordingListener : public TestEventListener {
     Message message;
     message << GetFullMethodName("OnTestIterationStart") << "(" << iteration
             << ")";
-    g_events->push_back(message.GetString());
+    if (g_events)
+      g_events->push_back(message.GetString());
   }
 
   void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpStart"));
   }
 
   void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
   }
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseStart(const TestCase& /*test_case*/) override {
-    g_events->push_back(GetFullMethodName("OnTestCaseStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestCaseStart"));
   }
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnTestStart(const TestInfo& /*test_info*/) override {
-    g_events->push_back(GetFullMethodName("OnTestStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestStart"));
   }
 
   TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
-    g_events->push_back(GetFullMethodName("OnTestPartResult"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestPartResult"));
 	return test_part_result;
   }
 
   void OnTestEnd(const TestInfo& /*test_info*/) override {
-    g_events->push_back(GetFullMethodName("OnTestEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestEnd"));
   }
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   void OnTestCaseEnd(const TestCase& /*test_case*/) override {
-    g_events->push_back(GetFullMethodName("OnTestCaseEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestCaseEnd"));
   }
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
   }
 
   void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownEnd"));
   }
 
   void OnTestIterationEnd(const UnitTest& /*unit_test*/,
@@ -112,11 +123,13 @@ class EventRecordingListener : public TestEventListener {
     Message message;
     message << GetFullMethodName("OnTestIterationEnd") << "(" << iteration
             << ")";
-    g_events->push_back(message.GetString());
+    if (g_events)
+      g_events->push_back(message.GetString());
   }
 
   void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnTestProgramEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestProgramEnd"));
   }
 
  private:
@@ -132,7 +145,8 @@ class EventRecordingListener2 : public TestEventListener {
 
  protected:
   void OnTestProgramStart(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnTestProgramStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestProgramStart"));
   }
 
   void OnTestIterationStart(const UnitTest& /*unit_test*/,
@@ -140,44 +154,54 @@ class EventRecordingListener2 : public TestEventListener {
     Message message;
     message << GetFullMethodName("OnTestIterationStart") << "(" << iteration
             << ")";
-    g_events->push_back(message.GetString());
+    if (g_events)
+      g_events->push_back(message.GetString());
   }
 
   void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpStart"));
   }
 
   void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsSetUpEnd"));
   }
 
   void OnTestSuiteStart(const TestSuite& /*test_suite*/) override {
-    g_events->push_back(GetFullMethodName("OnTestSuiteStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestSuiteStart"));
   }
 
   void OnTestStart(const TestInfo& /*test_info*/) override {
-    g_events->push_back(GetFullMethodName("OnTestStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestStart"));
   }
 
   TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
-    g_events->push_back(GetFullMethodName("OnTestPartResult"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestPartResult"));
 	return test_part_result;
   }
 
   void OnTestEnd(const TestInfo& /*test_info*/) override {
-    g_events->push_back(GetFullMethodName("OnTestEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestEnd"));
   }
 
   void OnTestSuiteEnd(const TestSuite& /*test_suite*/) override {
-    g_events->push_back(GetFullMethodName("OnTestSuiteEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestSuiteEnd"));
   }
 
   void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownStart"));
   }
 
   void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnEnvironmentsTearDownEnd"));
   }
 
   void OnTestIterationEnd(const UnitTest& /*unit_test*/,
@@ -185,11 +209,13 @@ class EventRecordingListener2 : public TestEventListener {
     Message message;
     message << GetFullMethodName("OnTestIterationEnd") << "(" << iteration
             << ")";
-    g_events->push_back(message.GetString());
+    if (g_events)
+      g_events->push_back(message.GetString());
   }
 
   void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {
-    g_events->push_back(GetFullMethodName("OnTestProgramEnd"));
+    if (g_events)
+      g_events->push_back(GetFullMethodName("OnTestProgramEnd"));
   }
 
  private:
@@ -200,35 +226,51 @@ class EventRecordingListener2 : public TestEventListener {
 
 class EnvironmentInvocationCatcher : public Environment {
  protected:
-  void SetUp() override { g_events->push_back("Environment::SetUp"); }
+  void SetUp() override { 
+    if (g_events)
+      g_events->push_back("Environment::SetUp"); 
+  }
 
-  void TearDown() override { g_events->push_back("Environment::TearDown"); }
+  void TearDown() override { 
+    if (g_events)
+      g_events->push_back("Environment::TearDown"); 
+  }
 };
 
 class ListenerTest : public Test {
  protected:
   static void SetUpTestSuite() {
-    g_events->push_back("ListenerTest::SetUpTestSuite");
+	if (g_events)
+	  g_events->push_back("ListenerTest::SetUpTestSuite");
   }
 
   static void TearDownTestSuite() {
-    g_events->push_back("ListenerTest::TearDownTestSuite");
+	if (g_events)
+	  g_events->push_back("ListenerTest::TearDownTestSuite");
   }
 
-  void SetUp() override { g_events->push_back("ListenerTest::SetUp"); }
+  void SetUp() override { 
+	if (g_events)
+	  g_events->push_back("ListenerTest::SetUp"); 
+  }
 
-  void TearDown() override { g_events->push_back("ListenerTest::TearDown"); }
+  void TearDown() override { 
+	if (g_events)
+	  g_events->push_back("ListenerTest::TearDown"); 
+  }
 };
 
 TEST_F(ListenerTest, DoesFoo) {
   // Test execution order within a test case is not guaranteed so we are not
   // recording the test name.
-  g_events->push_back("ListenerTest::* Test Body");
+  if (g_events)
+    g_events->push_back("ListenerTest::* Test Body");
   SUCCEED();  // Triggers OnTestPartResult.
 }
 
 TEST_F(ListenerTest, DoesBar) {
-  g_events->push_back("ListenerTest::* Test Body");
+  if (g_events)
+    g_events->push_back("ListenerTest::* Test Body");
   SUCCEED();  // Triggers OnTestPartResult.
 }
 
@@ -270,6 +312,11 @@ void VerifyResults(const std::vector<std::string>& data,
 int main(int argc, const char** argv) {
   std::vector<std::string> events;
   g_events = &events;
+
+  int ret_val = 666;
+
+  try {
+
   InitGoogleTest(&argc, argv);
 
   UnitTest::GetInstance()->listeners().Append(
@@ -286,7 +333,7 @@ int main(int argc, const char** argv) {
 
   GTEST_FLAG_SET(repeat, 2);
   GTEST_FLAG_SET(recreate_environments_when_repeating, true);
-  int ret_val = RUN_ALL_TESTS();
+  ret_val = RUN_ALL_TESTS();
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
@@ -512,6 +559,12 @@ int main(int argc, const char** argv) {
   // We need to check manually for ad hoc test failures that happen after
   // RUN_ALL_TESTS finishes.
   if (UnitTest::GetInstance()->Failed()) ret_val = 1;
+  }
+  catch (...) {
+	  printf("\nException thrown!\n");
+  }
+
+  g_events = nullptr;
 
   return ret_val;
 }
