@@ -68,6 +68,16 @@ function(gtest_py_test name)
 endfunction()
 
 add_subdirectory(googletest)
+
+if(GTEST_HAS_ABSL)
+  if(NOT TARGET absl::base)
+    find_package(absl REQUIRED)
+  endif()
+  if(NOT TARGET re2::re2)
+    find_package(re2 REQUIRED)
+  endif()
+endif()
+
 if(BUILD_GMOCK)
     add_subdirectory(googlemock)
 endif()
