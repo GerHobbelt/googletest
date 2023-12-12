@@ -36,6 +36,7 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
+using testing::internal::GTestColorMode;
 using testing::internal::ShouldUseColor;
 using testing::internal::GTestColorMode;
 

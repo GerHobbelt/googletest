@@ -2049,7 +2049,7 @@ important information:
 You can set the `GTEST_COLOR` environment variable or the `--gtest_color`
 command line flag to `yes`, `no`, `ansi`, or `auto` (the default) to enable
 colors, disable colors, force using ANSI color escape sequences or let
-Googleest decide. When the value is `auto`, GoogleTest will use colors if and
+GoogleTest decide. When the value is `auto`, GoogleTest will use colors if and
 only if the output goes to a terminal and (on non-Windows platforms) the `TERM`
 environment variable is set to `xterm` or `xterm-color`.
 

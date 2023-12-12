@@ -3336,15 +3336,15 @@ GTestColorMode ShouldUseColor(bool stdout_is_tty) {
 
 GTEST_ATTRIBUTE_PRINTF_(2, 3)
 static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
-  static const auto color_mode =
+  static const auto in_color_mode =
 #if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
 #else
-      false;
+      GTestColorMode::kNo;
 #endif  // GTEST_HAS_FILE_SYSTEM
 
   const bool use_color =
-      (color_mode != GTestColorMode::kNo) && (color != GTestColor::kDefault);
+      (in_color_mode != GTestColorMode::kNo) && (color != GTestColor::kDefault);
 
   if (!use_color) {
     va_list args;
