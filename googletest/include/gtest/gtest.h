@@ -1799,6 +1799,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {};
 // generic name and clashes with some other libraries.
 #if !GTEST_DONT_DEFINE_FAIL
 #define FAIL() GTEST_FAIL()
+#define FAIL_AT(file, line) GTEST_FAIL_AT(file, line)
 #endif
 
 // Generates a success with a generic message.
