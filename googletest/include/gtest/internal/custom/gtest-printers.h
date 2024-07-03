@@ -39,4 +39,24 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PRINTERS_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PRINTERS_H_
 
+#include "gtest/gtest-printers.h"
+
+#ifdef _LIBCPP_AVAILABILITY_HAS_NO_TO_CHARS_FLOATING_POINT
+
+//
+// workaround for failing builds with Xcode 15.3+ (targeting macOS < 13.3)
+//  see https://github.com/google/googletest/issues/4516
+//
+
+namespace std {
+
+template <class T>
+inline void PrintTo(const ::std::chrono::time_point<T>& value, ::std::ostream* os) {
+	::testing::internal::RawBytesPrinter::PrintValue(value, os);
+}
+
+} // namespace std
+
+#endif
+
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_PRINTERS_H_
