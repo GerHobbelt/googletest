@@ -768,6 +768,7 @@ class TypedTestNames {
       return std::string("char") + ::testing::PrintToString(i);
     if (std::is_same<T, int>::value)
       return std::string("int") + ::testing::PrintToString(i);
+    return std::string("unknown");
   }
 };
 
@@ -803,6 +804,7 @@ class TypedTestPNames {
     if (std::is_same<T, unsigned int>::value) {
       return std::string("unsignedInt") + ::testing::PrintToString(i);
     }
+    return std::string("unknown");
   }
 };
 
