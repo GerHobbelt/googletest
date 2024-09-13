@@ -1863,6 +1863,14 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_TRUE(m4.Matches(internal::StringView("")));
   EXPECT_TRUE(m4.Matches(internal::StringView()));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  // https://github.com/google/googletest/issues/3084
+  const Matcher<const std::string&> m5 = MatchesRegex(new RE("Line \\d+"));
+  EXPECT_TRUE(m5.Matches("Line 1"));
+  EXPECT_TRUE(m5.Matches("Line 10"));
+  EXPECT_TRUE(m5.Matches("Line 1000"));
+  EXPECT_FALSE(m5.Matches("Line "));
+  EXPECT_FALSE(m5.Matches("Line 1 "));
 }
 
 TEST(MatchesRegexTest, CanDescribeSelf) {
