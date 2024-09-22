@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(googletest
-    VERSION 1.15.0
+    VERSION 1.15.2
     LANGUAGES CXX
 )
 include(CTest)
