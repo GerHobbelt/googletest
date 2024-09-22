@@ -3346,6 +3346,7 @@ GTestColorMode ShouldUseColor(bool stdout_is_tty) {
         term != nullptr && (String::CStringEquals(term, "xterm") ||
                             String::CStringEquals(term, "xterm-color") ||
                             String::CStringEquals(term, "xterm-kitty") ||
+                            String::CStringEquals(term, "alacritty") ||
                             String::CStringEquals(term, "screen") ||
                             String::CStringEquals(term, "tmux") ||
                             String::CStringEquals(term, "rxvt-unicode") ||
@@ -4565,8 +4566,8 @@ std::string XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
   Message attributes;
   for (int i = 0; i < result.test_property_count(); ++i) {
     const TestProperty& property = result.GetTestProperty(i);
-    attributes << " " << property.key() << "="
-               << "\"" << EscapeXmlAttribute(property.value()) << "\"";
+    attributes << " " << property.key() << "=" << "\""
+               << EscapeXmlAttribute(property.value()) << "\"";
   }
   return attributes.GetString();
 }
@@ -4876,9 +4877,7 @@ void JsonUnitTestResultPrinter::OutputJsonTestResult(::std::ostream* stream,
     if (part.failed()) {
       *stream << ",\n";
       if (++failures == 1) {
-        *stream << kIndent << "\""
-                << "failures"
-                << "\": [\n";
+        *stream << kIndent << "\"" << "failures" << "\": [\n";
       }
       const std::string location =
           internal::FormatCompilerIndependentFileLocation(part.file_name(),
@@ -5028,8 +5027,8 @@ std::string JsonUnitTestResultPrinter::TestPropertiesAsJson(
   for (int i = 0; i < result.test_property_count(); ++i) {
     const TestProperty& property = result.GetTestProperty(i);
     attributes << ",\n"
-               << indent << "\"" << property.key() << "\": "
-               << "\"" << EscapeJson(property.value()) << "\"";
+               << indent << "\"" << property.key() << "\": " << "\""
+               << EscapeJson(property.value()) << "\"";
   }
   return attributes.GetString();
 }
