@@ -32,6 +32,8 @@
 
 #include "gtest/gtest-death-test.h"
 
+#include <stdlib.h>
+
 #include <functional>
 #include <memory>
 #include <sstream>
@@ -121,7 +123,7 @@ GTEST_DEFINE_string_(
 GTEST_DEFINE_bool_(
     death_test_use_fork,
     testing::internal::BoolFromGTestEnv("death_test_use_fork", false),
-    "Instructs to use fork()/_exit() instead of clone() in death tests. "
+    "Instructs to use fork()/_Exit() instead of clone() in death tests. "
     "Ignored and always uses fork() on POSIX systems where clone() is not "
     "implemented. Useful when running under valgrind or similar tools if "
     "those do not support clone(). Valgrind 3.3.1 will just fail if "
@@ -306,7 +308,7 @@ enum DeathTestOutcome { IN_PROGRESS, DIED, LIVED, RETURNED, THREW };
     fprintf(parent, "%s", message.c_str());
     fflush(parent);
 #if 0
-	_exit(1);
+    _Exit(1);
 #else
 	throw std::runtime_error("DeathTestAbort: aborting death test child process");
 #endif
@@ -524,7 +526,7 @@ std::string DeathTestImpl::GetErrorLogs() { return GetCapturedStderr(); }
 // Signals that the death test code which should have exited, didn't.
 // Should be called only in a death test child process.
 // Writes a status byte to the child's status file descriptor, then
-// calls _exit(1).
+// calls _Exit(1).
 void DeathTestImpl::Abort(AbortReason reason) {
   // The parent process considers the death test to be a failure if
   // it finds any data in our pipe.  So, here we write a single flag byte
@@ -536,19 +538,23 @@ void DeathTestImpl::Abort(AbortReason reason) {
   GTEST_DEATH_TEST_CHECK_SYSCALL_(posix::Write(write_fd(), &status_ch, 1));
   // We are leaking the descriptor here because on some platforms (i.e.,
   // when built as Windows DLL), destructors of global objects will still
-  // run after calling _exit(). On such systems, write_fd_ will be
+  // run after calling _Exit(). On such systems, write_fd_ will be
   // indirectly closed from the destructor of UnitTestImpl, causing double
   // close if it is also closed here. On debug configurations, double close
   // may assert. As there are no in-process buffers to flush here, we are
   // relying on the OS to close the descriptor after the process terminates
   // when the destructors are not run.
-  //
+
   // [EDIT GerHobbelt] I disagree. We can simply close the descriptor here
   // and then assign it an invalid one. No double close that way.
   posix::Close(write_fd());
   set_write_fd(-1);
 
+#if 0
+  _Exit(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
+#else
   posix::ExitThread(1);  // Exits w/o any normal exit hooks (we were supposed to crash)
+#endif
 }
 
 // Returns an indented copy of stderr output for a death test.
@@ -1352,7 +1358,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 #endif  // GTEST_HAS_CLONE
 
   if (use_fork && (child_pid = fork()) == 0) {
-    _exit(ExecDeathTestChildMain(&args));
+    _Exit(ExecDeathTestChildMain(&args));
   }
 #endif  // GTEST_OS_QNX
 #if GTEST_OS_LINUX

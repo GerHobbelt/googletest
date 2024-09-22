@@ -63,7 +63,6 @@ int g_environment_tear_down_count = 0;
 
 class MyEnvironment : public testing::Environment {
  public:
-  MyEnvironment() = default;
   void SetUp() override { g_environment_set_up_count++; }
   void TearDown() override { g_environment_tear_down_count++; }
 };
@@ -119,6 +118,7 @@ void ResetCounts() {
   g_should_pass_count = 0;
   g_death_test_count = 0;
   g_param_test_count = 0;
+  testing::AddGlobalTestEnvironment(new MyEnvironment);
 }
 
 // Checks that the count for each test is expected.
@@ -203,8 +203,6 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
-
-  testing::AddGlobalTestEnvironment(new MyEnvironment);
 
   TestRepeatUnspecified();
   TestRepeat(0);
