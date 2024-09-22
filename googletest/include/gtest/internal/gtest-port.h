@@ -339,10 +339,10 @@
 #endif
 
 #ifndef GTEST_HAS_ABSL
-#define GTEST_HAS_ABSL 0   // default assumption: google abseil not available
+#define GTEST_HAS_ABSL 1   // default assumption: google abseil is available
 #endif
 
-#if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
+#if GTEST_HAS_ABSL && !defined(GTEST_NO_ABSL_FLAGS)
 #define GTEST_INTERNAL_HAS_ABSL_FLAGS  // Used only in this file.
 #include "absl/flags/flag.h"
 #include "absl/flags/declare.h"
