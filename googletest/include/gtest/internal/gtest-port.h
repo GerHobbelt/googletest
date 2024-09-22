@@ -628,7 +628,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
      GTEST_OS_NETBSD || GTEST_OS_FUCHSIA ||         \
      GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || \
      GTEST_OS_OPENBSD || GTEST_OS_HAIKU ||          \
-     GTEST_OS_GNU_HURD)
+     GTEST_OS_GNU_HURD || GTEST_OS_SOLARIS ||       \
+     GTEST_OS_AIX || GTEST_OS_ZOS)
 #define GTEST_HAS_PTHREAD 1
 #else
 #define GTEST_HAS_PTHREAD 0
@@ -690,7 +691,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether to support death tests.
 // pops up a dialog window that cannot be suppressed programmatically.
 #if (GTEST_OS_LINUX || GTEST_OS_CYGWIN ||           \
-     GTEST_OS_SOLARIS ||                            \
+     GTEST_OS_SOLARIS || GTEST_OS_ZOS ||            \
      (GTEST_OS_MAC && !GTEST_OS_IOS) ||             \
      (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER) ||      \
      GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX ||      \
