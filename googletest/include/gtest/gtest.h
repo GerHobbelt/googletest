@@ -1070,6 +1070,7 @@ class GTEST_API_ TestEventListeners {
   // subscribers.
   TestEventListener* repeater();
 
+public:
   // Sets the default_result_printer attribute to the provided listener.
   // The listener is also added to the listener list and previous
   // default_result_printer is removed from it and deleted. The listener can
@@ -1084,6 +1085,7 @@ class GTEST_API_ TestEventListeners {
   // nothing if the previous and the current listener objects are the same.
   void SetDefaultXmlGenerator(TestEventListener* listener);
 
+private:
   // Checks whether events will be forwarded by the repeater to the
   // listeners in the list.
   bool EventForwardingEnabled() const;

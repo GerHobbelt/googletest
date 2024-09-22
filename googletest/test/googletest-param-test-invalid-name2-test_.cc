@@ -72,7 +72,8 @@ static void my_crt_terminate_handler()
 #define main(cnt, arr)	gtest_param_inv_name2_test_main(cnt, arr)
 #endif
 
-int main(int argc, const char** argv) {
+extern "C"
+int main(int argc, const char **argv) {
 	try
 	{
 		_set_se_translator(seh_trans_func);

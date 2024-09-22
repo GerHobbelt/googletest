@@ -36,6 +36,7 @@ TEST(Counter, Increment) {
 #define main(cnt, arr) gtest_sample11_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

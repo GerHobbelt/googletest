@@ -147,6 +147,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, TypeParamTest, MyTypes);
 #define main(cnt, arr)	gtest_list_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 

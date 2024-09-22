@@ -102,6 +102,7 @@ TEST(Test, Test2) { kTestForContinuingTest = 1; }
 #define main(cnt, arr)	gtest_assert_ex_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
   testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);

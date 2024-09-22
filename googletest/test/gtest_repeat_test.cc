@@ -200,6 +200,7 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 #define main(cnt, arr)	gtest_repeat_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

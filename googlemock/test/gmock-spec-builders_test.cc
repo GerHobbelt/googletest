@@ -2597,6 +2597,7 @@ TEST(ParameterlessExpectationsTest,
 # define GMOCK_RENAME_MAIN 0
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of

@@ -6031,6 +6031,8 @@ bool UnitTestImpl::RunAllTests() {
     return true;
   }
 
+  ListTestsMatchingFilter();
+
   random_seed_ = GetRandomSeedFromFlag(GTEST_FLAG_GET(random_seed));
 
   // True if and only if at least one test has failed.

@@ -64,8 +64,10 @@ void loop() { RUN_ALL_TESTS(); }
 #if GTEST_OS_WINDOWS_MOBILE
 #include <tchar.h>  // NOLINT
 
+extern "C"
 GMOCK_API_ int _tmain(int argc, const TCHAR** argv) {
 #else
+extern "C"
 GMOCK_API_ int main(int argc, const char** argv) {
 #endif  // GTEST_OS_WINDOWS_MOBILE
   std::cout << "Running main() from gmock_main.cc\n";

@@ -71,6 +71,7 @@ ExitWithExceptionCode(struct _EXCEPTION_POINTERS* exception_pointers) {
 #define main(cnt, arr)	gtest_break_on_failure_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
 #if GTEST_OS_WINDOWS
   // Suppresses display of the Windows error dialog upon encountering

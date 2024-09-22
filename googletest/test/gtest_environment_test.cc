@@ -128,6 +128,7 @@ static int RunAllTests(MyEnvironment* env, FailureType failure) {
 #define main(cnt, arr)	gtest_env_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

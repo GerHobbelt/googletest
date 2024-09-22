@@ -81,6 +81,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
 #define main(cnt, arr)	gtest_list_output_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 

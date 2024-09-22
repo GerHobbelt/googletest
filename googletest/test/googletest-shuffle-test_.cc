@@ -92,6 +92,7 @@ class TestNamePrinter : public EmptyTestEventListener {
 #define main(cnt, arr)	gtest_shuffle_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
 

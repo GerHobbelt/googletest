@@ -55,6 +55,7 @@ static void TerminateHandler() {
 #define main(cnt, arr)	gtest_throw_on_fail_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
 #if GTEST_HAS_EXCEPTIONS
   std::set_terminate(&TerminateHandler);

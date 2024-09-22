@@ -278,6 +278,7 @@ void TestCatchesLeakedMocksInAdHocTests() {
 #define main(cnt, arr)	gmock_output_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of

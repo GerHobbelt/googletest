@@ -86,6 +86,7 @@ THOUSAND_TESTS_(T)
 #define main(cnt, arr)	gtest_macro_stack_footprint_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

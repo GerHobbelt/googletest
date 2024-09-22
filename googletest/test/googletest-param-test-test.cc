@@ -1161,6 +1161,7 @@ REGISTER_TYPED_TEST_SUITE_P(NotInstantiatedTypeTest, Used);
 #define main(cnt, arr)	gtest_param_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   // Used in TestGenerationTest test suite.
   AddGlobalTestEnvironment(TestGenerationTest::Environment::Instance());

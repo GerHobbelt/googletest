@@ -102,6 +102,7 @@ TEST(CustomOutputTest, Fails) {
 #define main(cnt, arr)	gtest_sample9_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
 

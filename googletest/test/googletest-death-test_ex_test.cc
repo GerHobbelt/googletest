@@ -100,6 +100,7 @@ TEST(SehExceptionDeasTest, CatchExceptionsDoesNotInterfere) {
 #define main(cnt, arr)	gtest_death_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
   GTEST_FLAG_SET(catch_exceptions, GTEST_ENABLE_CATCH_EXCEPTIONS_ != 0);

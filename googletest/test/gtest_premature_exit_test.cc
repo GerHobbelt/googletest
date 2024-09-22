@@ -114,6 +114,7 @@ TEST_F(PrematureExitTest, PrematureExitFileExistsDuringTestExecution) {
 #define main(cnt, arr)	gtest_premature_exit_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   InitGoogleTest(&argc, argv);
   const int exit_code = RUN_ALL_TESTS();

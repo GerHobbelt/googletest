@@ -82,6 +82,7 @@ static void TestFailureThrowsRuntimeError() {
 #define main(cnt, arr)	gtest_throw_on_fail_ex_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleTest(&argc, argv);
 

@@ -42,6 +42,7 @@ TEST(DummyTest, Dummy) {
 #define main(cnt, arr)	gtest_uninitialized_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   return RUN_ALL_TESTS();
 }

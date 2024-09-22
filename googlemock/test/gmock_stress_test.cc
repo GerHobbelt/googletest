@@ -222,6 +222,7 @@ TEST(StressTest, CanUseGMockWithThreads) {
 #define main(cnt, arr)	gmock_stress_test_main(cnt, arr)
 #endif
 
+extern "C"
 int main(int argc, const char** argv) {
   testing::InitGoogleMock(&argc, argv);
 

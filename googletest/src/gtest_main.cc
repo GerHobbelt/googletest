@@ -64,6 +64,7 @@ GTEST_API_ int main() {
 #define main(cnt, arr)	gtest_main(cnt, arr)
 #endif
 
+extern "C"
 GTEST_API_ int main(int argc, const char** argv) {
   printf("Running main() from %s\n", __FILE__);
   testing::InitGoogleTest(&argc, argv);
