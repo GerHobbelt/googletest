@@ -214,5 +214,14 @@
 #ifndef GTEST_OS_QURT
 #define GTEST_OS_QURT 0
 #endif
+#ifndef GTEST_OS_NXP_QN9090
+#define GTEST_OS_NXP_QN9090 0
+#endif
+#ifndef GTEST_OS_NRF52
+#define GTEST_OS_NRF52 0
+#endif
+#ifndef GTEST_OS_GNU_HURD
+#define GTEST_OS_GNU_HURD 0
+#endif
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
