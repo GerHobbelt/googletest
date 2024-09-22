@@ -3261,9 +3261,9 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
 }
 
 // class PrettyUnitTestResultPrinter
-#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&       \
-    !defined(GTEST_OS_WINDOWS_GAMES) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_WINDOWS_MINGW)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE &&       \
+    !GTEST_OS_WINDOWS_GAMES && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
 
 // Returns the character attribute for the given color.
 static WORD GetColorAttribute(GTestColor color) {
@@ -3397,9 +3397,9 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 	  fflush(stdout);
   }
   else
-#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&       \
-    !defined(GTEST_OS_WINDOWS_GAMES) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_WINDOWS_MINGW)
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE &&       \
+    !GTEST_OS_WINDOWS_GAMES && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_MINGW
   if (in_color_mode != GTestColorMode::kAnsi && color != GTestColor::kDefault) {
     const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	va_list args;
@@ -5659,8 +5659,8 @@ int UnitTest::Run() {
   // process. In either case the user does not want to see pop-up dialogs
   // about crashes - they are expected.
   if (impl()->catch_exceptions() || in_death_test_child_process) {
-#if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_WINDOWS_GAMES)
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_GAMES
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
@@ -6901,14 +6901,14 @@ void ParseGoogleTestFlagsOnly(int* argc, const char** argv) {
 #ifdef GTEST_HAS_ABSL_FLAGS
   if (*argc <= 0) return;
 
-  std::vector<char*> positional_args;
+  std::vector<const char*> positional_args;
   std::vector<absl::UnrecognizedFlag> unrecognized_flags;
   absl::ParseAbseilFlagsOnly(*argc, argv, positional_args, unrecognized_flags);
   absl::flat_hash_set<absl::string_view> unrecognized;
   for (const auto& flag : unrecognized_flags) {
     unrecognized.insert(flag.flag_name);
   }
-  absl::flat_hash_set<char*> positional;
+  absl::flat_hash_set<const char*> positional;
   for (const auto& arg : positional_args) {
     positional.insert(arg);
   }
@@ -6916,7 +6916,7 @@ void ParseGoogleTestFlagsOnly(int* argc, const char** argv) {
   int out_pos = 1;
   int in_pos = 1;
   for (; in_pos < *argc; ++in_pos) {
-    char* arg = argv[in_pos];
+    const char* arg = argv[in_pos];
     absl::string_view arg_str(arg);
     if (absl::ConsumePrefix(&arg_str, "--")) {
       // Flag-like argument. If the flag was unrecognized, keep it.

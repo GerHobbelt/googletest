@@ -679,10 +679,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // By default, we assume that stream redirection is supported on all
 // platforms except known mobile / embedded ones. Also, if the port doesn't have
 // a file system, stream redirection is not supported.
-#if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_WINDOWS_PHONE) || \
-    defined(GTEST_OS_WINDOWS_RT) || defined(GTEST_OS_WINDOWS_GAMES) ||     \
-    defined(GTEST_OS_ESP8266) || defined(GTEST_OS_XTENSA) ||               \
-    defined(GTEST_OS_QURT) || !GTEST_HAS_FILE_SYSTEM
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_GAMES ||     \
+    GTEST_OS_ESP8266 || GTEST_OS_XTENSA ||               \
+    GTEST_OS_QURT || !GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_STREAM_REDIRECTION 0
 #else
 #define GTEST_HAS_STREAM_REDIRECTION 1
@@ -2174,10 +2174,10 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 #if GTEST_HAS_FILE_SYSTEM
-#if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_WINDOWS_PHONE) && \
-    !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_WINDOWS_GAMES) &&     \
-    !defined(GTEST_OS_ESP8266) && !defined(GTEST_OS_XTENSA) &&               \
-    !defined(GTEST_OS_QURT)
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
+    !GTEST_OS_WINDOWS_RT && !GTEST_OS_WINDOWS_GAMES &&     \
+    !GTEST_OS_ESP8266 && !GTEST_OS_XTENSA &&               \
+    !GTEST_OS_QURT
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {

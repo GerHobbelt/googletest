@@ -205,5 +205,14 @@
 #ifndef GTEST_OS_ESP32
 # define GTEST_OS_ESP32 0
 #endif
+#ifndef GTEST_OS_WINDOWS_GAMES
+#define GTEST_OS_WINDOWS_GAMES 0
+#endif
+#ifndef GTEST_OS_XTENSA
+#define GTEST_OS_XTENSA 0
+#endif
+#ifndef GTEST_OS_QURT
+#define GTEST_OS_QURT 0
+#endif
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
