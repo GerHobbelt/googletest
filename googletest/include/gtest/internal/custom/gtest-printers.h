@@ -41,9 +41,8 @@
 
 #include "gtest/gtest-printers.h"
 
-#if (defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) && \
-    _LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT == 0) || \
-    defined(_LIBCPP_AVAILABILITY_HAS_NO_TO_CHARS_FLOATING_POINT)
+#if defined(_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT) \
+	&& !_LIBCPP_AVAILABILITY_HAS_TO_CHARS_FLOATING_POINT
 
 //
 // workaround for failing builds with Xcode 15.3+ (targeting macOS < 13.3)
