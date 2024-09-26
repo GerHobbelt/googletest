@@ -1250,7 +1250,8 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
   TestPartResult OnTestPartResult(const TestPartResult& test_part_result) override {
     const char* file_name = test_part_result.file_name();
     if (file_name == nullptr) file_name = "";
-    SendLn("event=TestPartResult&file=" + UrlEncode(file_name) +
+    SendLn("event=TestPartResult&type=" + FormatType(test_part_result.type()) +
+           "&file=" + UrlEncode(file_name) +
            "&line=" + StreamableToString(test_part_result.line_number()) +
            "&message=" + UrlEncode(test_part_result.message()));
 	return test_part_result;
@@ -1265,6 +1266,20 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
   void Start() { SendLn("gtest_streaming_protocol_version=1.0"); }
 
   std::string FormatBool(bool value) { return value ? "1" : "0"; }
+
+  std::string FormatType(TestPartResult::Type value) {
+    switch (value) {
+      case TestPartResult::kSkip:
+        return "skip";
+      case TestPartResult::kSuccess:
+        return "success";
+      case TestPartResult::kNonFatalFailure:
+      case TestPartResult::kFatalFailure:
+        return "failure";
+      default:
+        return "unknown";
+    }
+  }
 
   const std::unique_ptr<AbstractSocketWriter> socket_writer_;
 
