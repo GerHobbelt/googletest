@@ -2055,6 +2055,8 @@ class WhenDynamicCastToMatcher : public WhenDynamicCastToMatcherBase<To> {
 
   template <typename From>
   bool MatchAndExplain(From from, MatchResultListener* listener) const {
+		// https://stackoverflow.com/questions/246293/c-dynamic-cast-error-handling?rq=3
+		// https://learn.microsoft.com/en-us/cpp/build/reference/vd-disable-construction-displacements?view=msvc-170
     To to = dynamic_cast<To>(from);
     return MatchPrintAndExplain(to, this->matcher_, listener);
   }
