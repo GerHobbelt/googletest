@@ -49,6 +49,10 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_H_
 
+#ifndef __cplusplus
+#error "GoogleTest header files are C++ and must not be included in C source files."
+#endif
+
 #include <cstddef>
 #include <cstdint>
 #include <iomanip>

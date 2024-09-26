@@ -53,6 +53,10 @@
 //
 // where all clauses are optional and WillOnce() can be repeated.
 
+#ifndef __cplusplus
+#error "GoogleTest header files are C++ and must not be included in C source files."
+#endif
+
 #include "gmock/gmock-actions.h"  // IWYU pragma: export
 #include "gmock/gmock-cardinalities.h"  // IWYU pragma: export
 #include "gmock/gmock-function-mocker.h"  // IWYU pragma: export
