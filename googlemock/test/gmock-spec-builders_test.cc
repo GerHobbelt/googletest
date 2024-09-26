@@ -807,11 +807,14 @@ TEST(ExpectCallTest, InfersCardinality1WhenThereIsWillRepeatedly) {
 }
 
 #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
-    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG <  202000L
 
 // It should be possible to return a non-moveable type from a mock action in
 // C++17 and above, where it's guaranteed that such a type can be initialized
 // from a prvalue returned from a function.
+//
+// However, MSVC2020 (v17.11.4) complains when we compile this code in C++/20 mode.
 TEST(ExpectCallTest, NonMoveableType) {
   // Define a non-moveable result type.
   struct NonMoveableStruct {
