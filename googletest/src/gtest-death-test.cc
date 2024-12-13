@@ -398,11 +398,18 @@ DeathTest::DeathTest() {
 bool DeathTest::Create(const char* statement,
                        Matcher<const std::string&> matcher, const char* file,
                        int line, DeathTest** test) {
+#ifdef BUILD_MONOLITHIC
+	if (test)
+		*test = nullptr;
+	throw std::exception("googletest::DeathTests are not supported in monolithic builds as these recursively invoke the base application, which' CLI behaviour will most probably not match DeathTest's simplistic application invocation assumptions.");
+	return false;
+#else
 	auto u = GetUnitTestImpl();
 	auto f = u->death_test_factory();
 	return f->Create(statement, std::move(matcher), file, line, test);
 	//return GetUnitTestImpl()->death_test_factory()->Create(
     //  statement, std::move(matcher), file, line, test);
+#endif
 }
 
 const char* DeathTest::LastMessage() {
