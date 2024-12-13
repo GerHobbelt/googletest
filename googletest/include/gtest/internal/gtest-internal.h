@@ -448,7 +448,7 @@ class TestFactoryBase {
   virtual Test* CreateTest() = 0;
 
  protected:
-  TestFactoryBase() {}
+  TestFactoryBase() = default;
 
  private:
   TestFactoryBase(const TestFactoryBase&) = delete;
