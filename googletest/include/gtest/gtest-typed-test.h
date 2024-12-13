@@ -216,7 +216,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
                                    ::testing::internal::CodeLocation(         \
                                        __FILE__, __LINE__),                   \
                                    GTEST_STRINGIFY_(CaseName),                \
-                                   GTEST_STRINGIFY_(TestName), (TestSize),    \
+                                   GTEST_STRINGIFY_(TestName),                \
+								   GTEST_STRINGIFY_(TestSize),                \
                                    GTEST_STRINGIFY_(TestTag), 0,              \
                                    ::testing::internal::GenerateNames<        \
                                        GTEST_NAME_GENERATOR_(CaseName),       \
@@ -227,7 +228,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 
 #if !GTEST_DONT_DEFINE_TEST
 #define TYPED_TEST(CaseName, TestName) \
-  TYPED_TEST_(CaseName, TestName, 'S', "ALL")
+  TYPED_TEST_(CaseName, TestName, "S", "ALL")
 #define TYPED_TEST_C(CaseName, TestName, TestSize, TestTag) \
   TYPED_TEST_(CaseName, TestName, TestSize, TestTag)
 #endif

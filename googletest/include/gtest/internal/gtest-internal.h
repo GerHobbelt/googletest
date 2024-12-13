@@ -573,7 +573,7 @@ struct SuiteApiResolver : T {
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
-    std::string test_suite_name, const char* name, char size, const char* tag,
+    std::string test_suite_name, const char* name, const char* size, const char* tag,
     const char* type_param, const char* value_param, CodeLocation code_location,
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
     TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory);
@@ -591,7 +591,7 @@ class GTEST_API_ TypedTestSuitePState {
   struct TypedTestState {
     CodeLocation codeLocation;
     const std::string tag;
-    const char size;
+    const std::string size;
   };
 
  public:
@@ -601,7 +601,7 @@ class GTEST_API_ TypedTestSuitePState {
   // if the test suite hasn't been registered; otherwise aborts the
   // program.
   bool AddTestName(const char* file, int line, const char* case_name,
-                   const char* test_name, char test_size,
+                   const char* test_name, const char* test_size,
                    const char* test_tag) {
     if (registered_) {
       fprintf(stderr,
@@ -632,7 +632,7 @@ class GTEST_API_ TypedTestSuitePState {
     return it->second.tag;
   }
 
-  char GetSize(const std::string& test_name) const {
+  const std::string& GetSize(const std::string& test_name) const {
     RegisteredTestsMap::const_iterator it = registered_tests_.find(test_name);
     GTEST_CHECK_(it != registered_tests_.end());
     return it->second.size;
@@ -646,8 +646,7 @@ class GTEST_API_ TypedTestSuitePState {
                                         const char* registered_tests);
 
  private:
-  typedef ::std::map<std::string, TypedTestState, std::less<>>
-      RegisteredTestsMap;
+  typedef ::std::map<std::string, TypedTestState, std::less<>> RegisteredTestsMap;
 
   bool registered_;
   RegisteredTestsMap registered_tests_;
@@ -731,7 +730,7 @@ class TypeParameterizedTest {
   // length of Types.
   static bool Register(const char* prefix, CodeLocation code_location,
                        const char* case_name, const char* test_names,
-                       char test_size, const char* test_tag, int index,
+                       const char* test_size, const char* test_tag, int index,
                        const std::vector<std::string>& type_names =
                            GenerateNames<DefaultNameGenerator, Types>()) {
     typedef typename Types::Head Type;
@@ -754,12 +753,10 @@ class TypeParameterizedTest {
         new TestFactoryImpl<TestClass>);
 
     // Next, recurses (at compile time) with the tail of the type list.
-    return TypeParameterizedTest<
-        Fixture, TestSel, typename Types::Tail>::Register(prefix, std::move(code_location),
-                                                          case_name, test_names,
-                                                          test_size, test_tag,
-                                                          index + 1,
-                                                          type_names);
+    return TypeParameterizedTest<Fixture, TestSel, typename Types::Tail>::
+        Register(prefix, std::move(code_location), case_name, test_names,
+                 test_size, test_tag,
+                 index + 1, type_names);
   }
 };
 
@@ -769,7 +766,7 @@ class TypeParameterizedTest<Fixture, TestSel, internal::None> {
  public:
   static bool Register(const char* /*prefix*/, CodeLocation,
                        const char* /*case_name*/, const char* /*test_names*/,
-                       char /*test_size*/, const char* /*test_tag*/,
+                       const char* /*test_size*/, const char* /*test_tag*/,
                        int /*index*/,
                        const std::vector<std::string>& =
                            std::vector<std::string>() /*type_names*/) {
@@ -806,14 +803,14 @@ class TypeParameterizedTestSuite {
 	  posix::Abort("Register Test: Failed to get code location for test");
 	}
     const CodeLocation& test_location = state->GetCodeLocation(test_name);
-    const char test_size = state->GetSize(test_name);
+    const std::string& test_size = state->GetSize(test_name);
     const std::string& test_tag = state->GetTag(test_name);
 
     typedef typename Tests::Head Head;
 
     // First, register the first test in 'Test' for each type in 'Types'.
     TypeParameterizedTest<Fixture, Head, Types>::Register(
-        prefix, test_location, case_name, test_names, test_size,
+        prefix, test_location, case_name, test_names, test_size.c_str(),
         test_tag.c_str(), 0, type_names);
 
     // Next, recurses (at compile time) with the tail of the test list.
@@ -1547,7 +1544,7 @@ class NeverThrown {
   ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name,           \
                                                     test_name)::test_info_ =   \
       ::testing::internal::MakeAndRegisterTestInfo(                            \
-          #test_suite_name, #test_name, (test_size), #test_tag, nullptr,       \
+          #test_suite_name, #test_name, #test_size, #test_tag, nullptr,        \
           nullptr, ::testing::internal::CodeLocation(__FILE__, __LINE__),      \
           (parent_id),                                                         \
           ::testing::internal::SuiteApiResolver<                               \

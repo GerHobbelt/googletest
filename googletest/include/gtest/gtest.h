@@ -565,7 +565,7 @@ class GTEST_API_ TestInfo {
   const char* tag() const { return tag_.c_str(); }
 
   // Returns the test size.
-  char size() const { return size_; }
+  const char* size() const { return size_.c_str(); }
 
   // Returns the name of the parameter type, or NULL if this is not a typed
   // or a type-parameterized test.
@@ -628,7 +628,7 @@ class GTEST_API_ TestInfo {
   friend class internal::UnitTestImpl;
   friend class internal::StreamingListenerTest;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
-      std::string test_suite_name, const char* name, char size, const char* tag,
+      std::string test_suite_name, const char* name, const char* size, const char* tag,
       const char* type_param, const char* value_param,
       internal::CodeLocation code_location, internal::TypeId fixture_class_id,
       internal::SetUpTestSuiteFunc set_up_tc,
@@ -638,7 +638,7 @@ class GTEST_API_ TestInfo {
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
   TestInfo(std::string test_suite_name, std::string name,
-           char size, std::string tag,
+           std::string size, std::string tag,
            const char* a_type_param,   // NULL if not a type-parameterized test
            const char* a_value_param,  // NULL if not a value-parameterized test
            internal::CodeLocation a_code_location,
@@ -666,7 +666,7 @@ class GTEST_API_ TestInfo {
   const std::string test_suite_name_;  // test suite name
   const std::string name_;             // Test name
   const std::string tag_;              // Test tag
-  const char size_;                    // Test size
+  const std::string size_;             // Test size
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
   const std::unique_ptr<const ::std::string> type_param_;
@@ -2282,7 +2282,7 @@ constexpr bool StaticAssertTypeEq() noexcept {
 // value, as it always calls GetTypeId<>() from the Google Test
 // framework.
 #define GTEST_TEST(test_suite_name, test_name)                         \
-  GTEST_TEST_(test_suite_name, test_name, 'S', "ALL", ::testing::Test, \
+  GTEST_TEST_(test_suite_name, test_name, "S", "ALL", ::testing::Test, \
               ::testing::internal::GetTestTypeId())
 
 #define GTEST_TEST_C(test_suite_name, test_name, test_size, test_tag) \
@@ -2323,7 +2323,7 @@ constexpr bool StaticAssertTypeEq() noexcept {
 //     EXPECT_EQ(b_.size(), 1);
 //   }
 #define GTEST_TEST_F(test_fixture, test_name)                    \
-  GTEST_TEST_(test_fixture, test_name, 'S', "ALL", test_fixture, \
+  GTEST_TEST_(test_fixture, test_name, "S", "ALL", test_fixture, \
               ::testing::internal::GetTypeId<test_fixture>())
 #define GTEST_TEST_F_C(test_fixture, test_size, test_name, test_tag)      \
   GTEST_TEST_(test_fixture, test_name, test_size, test_tag, test_fixture, \
@@ -2407,7 +2407,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4805 4100
 //
 template <int&... ExplicitParameterBarrier, typename Factory>
 TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
-                       char test_size, const char* test_tag,
+                       const char* test_size, const char* test_tag,
                        const char* type_param, const char* value_param,
                        const char* file, int line, Factory factory) {
   using TestT = typename std::remove_pointer<decltype(factory())>::type;

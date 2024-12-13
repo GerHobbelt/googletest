@@ -204,8 +204,11 @@ static const char kDeathTestSuiteFilter[] = "*DeathTest:*DeathTest/*";
 // A test filter that matches everything.
 static const char kUniversalFilter[] = "*";
 
-// The default test size.
-static const char kDefaultSize[] = "*";
+// The default tag filter matches everything.
+static const char kDefaultTagFilter[] = "*";
+
+// The default test size filter matches everything.
+static const char kDefaultSizeFilter[] = "*";
 
 // The default output format.
 static const char kDefaultOutputFormat[] = "xml";
@@ -267,7 +270,7 @@ static const char* GetDefaultTag() {
   if (testbridge_tag_only != nullptr) {
     return testbridge_tag_only;
   }
-  return kUniversalFilter;
+  return kDefaultTagFilter;
 }
 
 // Bazel passes in the argument to '--test_size' via the TESTBRIDGE_SIZE_ONLY
@@ -278,7 +281,7 @@ static const char* GetDefaultSize() {
   if (testbridge_size_only != nullptr) {
     return testbridge_size_only;
   }
-  return kDefaultSize;
+  return kDefaultSizeFilter;
 }
 
 // Bazel passes in the argument to '--test_runner_fail_fast' via the
@@ -343,7 +346,7 @@ GTEST_DEFINE_string_(
     "patterns and does not match any of the negative patterns.");
 
 GTEST_DEFINE_string_(
-    size, internal::StringFromGTestEnv("size", GetDefaultSize()),
+    size, testing::internal::StringFromGTestEnv("size", testing::GetDefaultSize()),
     "A colon-separated list of glob (not regex) patterns "
     "for filtering the tests to run based on size, optionally followed by "
     "a '-' and a : separated list of negative patterns (tests to "
@@ -625,7 +628,7 @@ void InsertSyntheticTestCase(const std::string& name, CodeLocation location,
   std::string full_name = "UninstantiatedParameterizedTestSuite<" + name + ">";
   RegisterTest(  //
       "GoogleTestVerification", full_name.c_str(),
-      'S',      // Default size parameter
+      "S",      // Default size parameter
       "",       // No tag parameter.
       nullptr,  // No type parameter.
       nullptr,  // No value parameter.
@@ -691,7 +694,7 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
         "UninstantiatedTypeParameterizedTestSuite<" + testcase.first + ">";
     RegisterTest(  //
         "GoogleTestVerification", full_name.c_str(),
-        'S',      // Default size parameter
+        "S",      // Default size parameter
         "",       // No tag parameter.
         nullptr,  // No type parameter.
         nullptr,  // No value parameter.
@@ -2927,7 +2930,7 @@ bool Test::IsSkipped() {
 // Constructs a TestInfo object. It assumes ownership of the test factory
 // object.
 TestInfo::TestInfo(std::string a_test_suite_name,
-                   std::string a_name, char a_size,
+                   std::string a_name, std::string a_size,
                    std::string a_tag, const char* a_type_param,
                    const char* a_value_param,
                    internal::CodeLocation a_code_location,
@@ -2936,7 +2939,7 @@ TestInfo::TestInfo(std::string a_test_suite_name,
     : test_suite_name_(std::move(a_test_suite_name)),
       name_(std::move(a_name)),
       tag_(std::move(a_tag)),
-      size_(a_size),
+      size_(std::move(a_size)),
       type_param_(a_type_param ? new std::string(a_type_param) : nullptr),
       value_param_(a_value_param ? new std::string(a_value_param) : nullptr),
       location_(std::move(a_code_location)),
@@ -2976,7 +2979,7 @@ namespace internal {
 //                     The newly created TestInfo instance will assume
 //                     ownership of the factory object.
 TestInfo* MakeAndRegisterTestInfo(
-    std::string test_suite_name, const char* name, char size, const char* tag,
+    std::string test_suite_name, const char* name, const char* size, const char* tag,
     const char* type_param, const char* value_param, CodeLocation code_location,
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
     TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory) {
@@ -3662,20 +3665,19 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
                   filter);
   }
 
-  std::string t = GTEST_FLAG_GET(tag);
-  const char* const tag = t.c_str();
+  const char* const tag = GTEST_FLAG_GET(tag).c_str();
 
   // Prints the tag if it's not *.  This reminds the user that some
   // tests may be skipped.
-  if (!String::CStringEquals(tag, kUniversalFilter)) {
+  if (!String::CStringEquals(tag, kDefaultTagFilter)) {
     ColoredPrintf(GTestColor::kYellow, "Note: %s tag = %s\n", GTEST_NAME_, tag);
   }
 
-  const char* const size = GTEST_FLAG(size).c_str();
+  const char* const size = GTEST_FLAG_GET(size).c_str();
 
   // Prints the size if it's not *.  This reminds the user that some
   // tests may be skipped.
-  if (!String::CStringEquals(size, kUniversalFilter)) {
+  if (!String::CStringEquals(size, kDefaultSizeFilter)) {
     ColoredPrintf(GTestColor::kYellow, "Note: %s size = %s\n", GTEST_NAME_,
                   size);
   }
@@ -6497,7 +6499,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
     for (TestInfo* test_info : test_suite->test_info_list()) {
       const std::string& test_name = test_info->name_;
       const std::string& test_tag = test_info->tag_;
-      const std::string test_size(1, test_info->size_);
+      const std::string& test_size = test_info->size_;
       // A test is disabled if test suite name or test name matches
       // kDisableTestFilter.
       const bool is_disabled =
@@ -6517,7 +6519,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       test_info->matches_size_ = matches_size;
 
       const bool is_runnable =
-          (GTEST_FLAG(also_run_disabled_tests) || !is_disabled) &&
+          (GTEST_FLAG_GET(also_run_disabled_tests) || !is_disabled) &&
           matches_filter && matches_size && matches_tag;
 
       const bool is_in_another_shard =
@@ -6897,18 +6899,14 @@ static const char kColorEncodedHelpMessage[] =
     "  @G--" GTEST_FLAG_PREFIX_
     "tag=@YPOSTIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
-    "      Run only the tests whose tag matches one of the positive "
-    "patterns but\n"
-    "      none of the negative patterns. '?' matches any single character; "
-    "'*'\n"
+    "      Run only the tests whose tag matches one of the positive patterns but\n"
+    "      none of the negative patterns. '?' matches any single character; '*'\n"
     "      matches any substring; ':' separates two patterns.\n"
     "  @G--" GTEST_FLAG_PREFIX_
     "size=@YPOSTIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
-    "      Run only the tests whose size matches one of the positive "
-    "patterns but\n"
-    "      none of the negative patterns. "
-    "'S'\n"
+    "      Run only the tests whose size matches one of the positive patterns but\n"
+    "      none of the negative patterns. The default is 'S'.\n"
     "  @G--" GTEST_FLAG_PREFIX_
     "also_run_disabled_tests@D\n"
     "      Run all disabled tests too.\n"

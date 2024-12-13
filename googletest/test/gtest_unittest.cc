@@ -1685,7 +1685,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_FALSE(GTEST_FLAG_GET(fail_fast));
     EXPECT_STREQ("", GTEST_FLAG_GET(filter).c_str());
     EXPECT_STREQ("", GTEST_FLAG_GET(tag).c_str());
-    EXPECT_EQ("", GTEST_FLAG_GET(size));
+    EXPECT_STREQ("", GTEST_FLAG_GET(size).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(list_tests));
     EXPECT_STREQ("", GTEST_FLAG_GET(output).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(brief));
@@ -1706,7 +1706,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(fail_fast, true);
     GTEST_FLAG_SET(filter, "abc");
     GTEST_FLAG_SET(tag, "abc");
-    GTEST_FLAG_SET(size, 'm');
+    GTEST_FLAG_SET(size, "m");
     GTEST_FLAG_SET(list_tests, true);
     GTEST_FLAG_SET(output, "xml:foo.xml");
     GTEST_FLAG_SET(brief, true);
@@ -5817,7 +5817,7 @@ class ParseFlagsTest : public Test {
     EXPECT_EQ(expected.fail_fast, GTEST_FLAG_GET(fail_fast));
     EXPECT_STREQ(expected.filter, GTEST_FLAG_GET(filter).c_str());
     EXPECT_STREQ(expected.tag, GTEST_FLAG_GET(tag).c_str());
-    EXPECT_EQ(expected.size, GTEST_FLAG_GET(size));
+    EXPECT_STREQ(expected.size, GTEST_FLAG_GET(size).c_str());
     EXPECT_EQ(expected.list_tests, GTEST_FLAG_GET(list_tests));
     EXPECT_STREQ(expected.output, GTEST_FLAG_GET(output).c_str());
     EXPECT_EQ(expected.brief, GTEST_FLAG_GET(brief));
@@ -7966,9 +7966,8 @@ class DynamicTest : public DynamicUnitTestFixture {
 };
 
 auto* dynamic_test = testing::RegisterTest(
-    "DynamicUnitTestFixture", "DynamicTest", 'M', "TAG", "TYPE", "VALUE",
-    __FILE__, __LINE__,
-    []() -> DynamicUnitTestFixture* { return new DynamicTest; });
+    "DynamicUnitTestFixture", "DynamicTest", "M", "TAG", "TYPE", "VALUE", __FILE__, 
+    __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
 
 TEST(RegisterTest, WasRegistered) {
   const auto& unittest = testing::UnitTest::GetInstance();
