@@ -2535,7 +2535,8 @@ using Variant = ::std::variant<T...>;
 
 #if (defined(__cpp_lib_three_way_comparison) || \
      (GTEST_INTERNAL_HAS_INCLUDE(<compare>) &&  \
-      GTEST_INTERNAL_CPLUSPLUS_LANG >= 201907L))
+      GTEST_INTERNAL_CPLUSPLUS_LANG >= 201907L && \
+      !defined(GTEST_OS_LINUX_ANDROID)))
 #define GTEST_INTERNAL_HAS_COMPARE_LIB 1
 #else
 #define GTEST_INTERNAL_HAS_COMPARE_LIB 0
