@@ -50,7 +50,7 @@ void loop() { RUN_ALL_TESTS(); }
 #elif defined(GTEST_OS_QURT)
 // QuRT: program entry point is main, but argc/argv are unusable.
 
-GTEST_API_ int main() {
+/* GTEST_API_ */ int main() {
   printf("Running main() from %s\n", __FILE__);
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();
@@ -58,7 +58,7 @@ GTEST_API_ int main() {
 #else
 // Normal platforms: program entry point is main, argc/argv are initialized.
 
-GTEST_API_ int main(int argc, char **argv) {
+/* GTEST_API_ */ int main(int argc, char **argv) {
   printf("Running main() from %s\n", __FILE__);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
