@@ -4308,17 +4308,17 @@ inline internal::UnorderedElementsAreArrayMatcher<T> UnorderedElementsAreArray(
 //   2. The AnythingMatcher class has no data member or constructor,
 //      so it's OK to create global variables of this type.
 //   3. c-style has approved of using _ in this case.
-const internal::AnythingMatcher _ = {};
+const internal::AnythingMatcher __ = {};
 // Creates a matcher that matches any value of the given type T.
 template <typename T>
 inline Matcher<T> A() {
-  return _;
+  return __;
 }
 
 // Creates a matcher that matches any value of the given type T.
 template <typename T>
 inline Matcher<T> An() {
-  return _;
+  return __;
 }
 
 template <typename T, typename M>
