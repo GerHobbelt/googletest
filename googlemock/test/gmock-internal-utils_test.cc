@@ -568,7 +568,7 @@ TEST(OnCallTest, DoesNotLogWhenVerbosityIsError) {
 
 void OnCallAnyArgumentLogger() {
   DummyMock mock;
-  ON_CALL(mock, TestMethodArg(_));
+  ON_CALL(mock, TestMethodArg(_anything_));
 }
 
 // Verifies that ON_CALL prints provided _ argument.

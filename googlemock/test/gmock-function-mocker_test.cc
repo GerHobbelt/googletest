@@ -53,7 +53,7 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 namespace testing {
 namespace gmock_function_mocker_test {
 
-using testing::_;
+using testing::_anything_;
 using testing::A;
 using testing::An;
 using testing::AnyNumber;
@@ -318,7 +318,7 @@ TYPED_TEST(FunctionMockerTest, MocksUnaryFunction) {
 
 // Tests mocking a binary function.
 TYPED_TEST(FunctionMockerTest, MocksBinaryFunction) {
-  EXPECT_CALL(this->mock_foo_, Binary(2, _)).WillOnce(Return(3));
+  EXPECT_CALL(this->mock_foo_, Binary(2, _anything_)).WillOnce(Return(3));
 
   EXPECT_EQ(3, this->foo_->Binary(2, 1));
 }
@@ -361,7 +361,7 @@ TYPED_TEST(FunctionMockerTest, MocksFunctionWithConstArgument) {
 TYPED_TEST(FunctionMockerTest, MocksFunctionsOverloadedOnArgumentNumber) {
   EXPECT_CALL(this->mock_foo_, OverloadedOnArgumentNumber())
       .WillOnce(Return(1));
-  EXPECT_CALL(this->mock_foo_, OverloadedOnArgumentNumber(_))
+  EXPECT_CALL(this->mock_foo_, OverloadedOnArgumentNumber(_anything_))
       .WillOnce(Return(2));
 
   EXPECT_EQ(2, this->foo_->OverloadedOnArgumentNumber(1));
@@ -399,7 +399,7 @@ TYPED_TEST(FunctionMockerTest, MocksReturnTypeWithComma) {
 }
 
 TYPED_TEST(FunctionMockerTest, MocksTypeWithTemplatedCopyCtor) {
-  EXPECT_CALL(this->mock_foo_, TypeWithTemplatedCopyCtor(_))
+  EXPECT_CALL(this->mock_foo_, TypeWithTemplatedCopyCtor(_anything_))
       .WillOnce(Return(true));
   EXPECT_TRUE(this->foo_->TypeWithTemplatedCopyCtor(TemplatedCopyable<int>()));
 }
@@ -596,7 +596,7 @@ TYPED_TEST(TemplateMockTest, Works) {
       .WillOnce(Return(0))
       .WillOnce(Return(1))
       .WillOnce(Return(0));
-  EXPECT_CALL(mock, Push(_));
+  EXPECT_CALL(mock, Push(_anything_));
   int n = 5;
   EXPECT_CALL(mock, GetTop()).WillOnce(ReturnRef(n));
   EXPECT_CALL(mock, Pop()).Times(AnyNumber());
@@ -810,7 +810,7 @@ TEST(MockMethodMockFunctionTest, WorksFor10Arguments) {
   MockFunction<int(bool a0, char a1, int a2, int a3, int a4, int a5, int a6,
                    char a7, int a8, bool a9)>
       foo;
-  EXPECT_CALL(foo, Call(_, 'a', _, _, _, _, _, _, _, _))
+  EXPECT_CALL(foo, Call(_anything_, 'a', _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_))
       .WillOnce(Return(1))
       .WillOnce(Return(2));
   EXPECT_EQ(1, foo.Call(false, 'a', 0, 0, 0, 0, 0, 'b', 0, true));

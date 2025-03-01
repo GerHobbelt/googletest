@@ -866,10 +866,10 @@ TEST(InvokeArgumentTest, MoveOnlyType) {
                 (std::unique_ptr<Marker>, std::function<int()>), ());
   } mock;
 
-  ON_CALL(mock, MockMethod(_, _)).WillByDefault(InvokeArgument<1>());
+  ON_CALL(mock, MockMethod(_anything_, _anything_)).WillByDefault(InvokeArgument<1>());
 
   // This compiles, but is a little opaque as a workaround:
-  ON_CALL(mock, MockMethod(_, _))
+  ON_CALL(mock, MockMethod(_anything_, _anything_))
       .WillByDefault(WithArg<1>(InvokeArgument<0>()));
 }
 

@@ -966,9 +966,9 @@ class AllArgsHelper {
 
 TEST(AllArgsTest, WorksInWithClause) {
   AllArgsHelper helper;
-  ON_CALL(helper, Helper(_, _)).With(AllArgs(Lt())).WillByDefault(Return(1));
-  EXPECT_CALL(helper, Helper(_, _));
-  EXPECT_CALL(helper, Helper(_, _)).With(AllArgs(Gt())).WillOnce(Return(2));
+  ON_CALL(helper, Helper(_anything_, _anything_)).With(AllArgs(Lt())).WillByDefault(Return(1));
+  EXPECT_CALL(helper, Helper(_anything_, _anything_));
+  EXPECT_CALL(helper, Helper(_anything_, _anything_)).With(AllArgs(Gt())).WillOnce(Return(2));
 
   EXPECT_EQ(1, helper.Helper('\1', 2));
   EXPECT_EQ(2, helper.Helper('a', 1));
@@ -1450,15 +1450,15 @@ TEST(NotTest, WorksOnMoveOnlyType) {
 TEST(AllOfTest, HugeMatcher) {
   // Verify that using AllOf with many arguments doesn't cause
   // the compiler to exceed template instantiation depth limit.
-  EXPECT_THAT(0, testing::AllOf(_, _, _, _, _, _, _, _, _,
-                                testing::AllOf(_, _, _, _, _, _, _, _, _, _)));
+  EXPECT_THAT(0, testing::AllOf(_anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_,
+                                testing::AllOf(_anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_)));
 }
 
 TEST(AnyOfTest, HugeMatcher) {
   // Verify that using AnyOf with many arguments doesn't cause
   // the compiler to exceed template instantiation depth limit.
-  EXPECT_THAT(0, testing::AnyOf(_, _, _, _, _, _, _, _, _,
-                                testing::AnyOf(_, _, _, _, _, _, _, _, _, _)));
+  EXPECT_THAT(0, testing::AnyOf(_anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_,
+                                testing::AnyOf(_anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_, _anything_)));
 }
 
 namespace adl_test {

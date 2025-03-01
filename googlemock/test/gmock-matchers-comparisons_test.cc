@@ -178,7 +178,7 @@ TEST(MatcherTest, CanBeConstructedFromUndefinedVariable) {
 }
 
 // Test that a matcher parameterized with an abstract class compiles.
-TEST(MatcherTest, CanAcceptAbstractClass) { Matcher<const Undefined&> m = _; }
+TEST(MatcherTest, CanAcceptAbstractClass) { Matcher<const Undefined&> m = _anything_; }
 
 // Tests that matchers are copyable.
 TEST(MatcherTest, IsCopyable) {
@@ -830,21 +830,21 @@ TEST(AnTest, CanDescribeSelf) { EXPECT_EQ("is anything", Describe(An<int>())); }
 // value of that type.
 TEST(UnderscoreTest, MatchesAnyValue) {
   // Uses _ as a matcher for a value type.
-  Matcher<int> m1 = _;
+  Matcher<int> m1 = _anything_;
   EXPECT_TRUE(m1.Matches(123));
   EXPECT_TRUE(m1.Matches(-242));
 
   // Uses _ as a matcher for a reference type.
   bool a = false;
   const bool b = true;
-  Matcher<const bool&> m2 = _;
+  Matcher<const bool&> m2 = _anything_;
   EXPECT_TRUE(m2.Matches(a));
   EXPECT_TRUE(m2.Matches(b));
 }
 
 // Tests that _ describes itself properly.
 TEST(UnderscoreTest, CanDescribeSelf) {
-  Matcher<int> m = _;
+  Matcher<int> m = _anything_;
   EXPECT_EQ("is anything", Describe(m));
 }
 
@@ -1609,10 +1609,10 @@ TEST(PairTest, SafelyCastsInnerMatchers) {
   Matcher<int> is_positive = Gt(0);
   Matcher<int> is_negative = Lt(0);
   pair<char, bool> p('a', true);
-  EXPECT_THAT(p, Pair(is_positive, _));
-  EXPECT_THAT(p, Not(Pair(is_negative, _)));
-  EXPECT_THAT(p, Pair(_, is_positive));
-  EXPECT_THAT(p, Not(Pair(_, is_negative)));
+  EXPECT_THAT(p, Pair(is_positive, _anything_));
+  EXPECT_THAT(p, Not(Pair(is_negative, _anything_)));
+  EXPECT_THAT(p, Pair(_anything_, is_positive));
+  EXPECT_THAT(p, Not(Pair(_anything_, is_negative)));
 }
 
 TEST(PairTest, InsideContainsUsingMap) {
@@ -1621,9 +1621,9 @@ TEST(PairTest, InsideContainsUsingMap) {
   container.insert(make_pair(2, 'b'));
   container.insert(make_pair(4, 'c'));
   EXPECT_THAT(container, Contains(Pair(1, 'a')));
-  EXPECT_THAT(container, Contains(Pair(1, _)));
-  EXPECT_THAT(container, Contains(Pair(_, 'a')));
-  EXPECT_THAT(container, Not(Contains(Pair(3, _))));
+  EXPECT_THAT(container, Contains(Pair(1, _anything_)));
+  EXPECT_THAT(container, Contains(Pair(_anything_, 'a')));
+  EXPECT_THAT(container, Not(Contains(Pair(3, _anything_))));
 }
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(FieldsAreTest);
@@ -2258,13 +2258,13 @@ TEST(WhenDynamicCastToTest, WrongTypes) {
   OtherDerived other_derived;
 
   // Wrong types. NULL is passed.
-  EXPECT_THAT(&base, Not(WhenDynamicCastTo<Derived*>(Pointee(_))));
+  EXPECT_THAT(&base, Not(WhenDynamicCastTo<Derived*>(Pointee(_anything_))));
   EXPECT_THAT(&base, WhenDynamicCastTo<Derived*>(IsNull()));
   Base* as_base_ptr = &derived;
-  EXPECT_THAT(as_base_ptr, Not(WhenDynamicCastTo<OtherDerived*>(Pointee(_))));
+  EXPECT_THAT(as_base_ptr, Not(WhenDynamicCastTo<OtherDerived*>(Pointee(_anything_))));
   EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<OtherDerived*>(IsNull()));
   as_base_ptr = &other_derived;
-  EXPECT_THAT(as_base_ptr, Not(WhenDynamicCastTo<Derived*>(Pointee(_))));
+  EXPECT_THAT(as_base_ptr, Not(WhenDynamicCastTo<Derived*>(Pointee(_anything_))));
   EXPECT_THAT(as_base_ptr, WhenDynamicCastTo<Derived*>(IsNull()));
 }
 
@@ -2296,7 +2296,7 @@ TEST(WhenDynamicCastToTest, AmbiguousCast) {
 }
 
 TEST(WhenDynamicCastToTest, Describe) {
-  Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
+  Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_anything_));
   const std::string prefix =
       "when dynamic_cast to " + internal::GetTypeName<Derived*>() + ", ";
   EXPECT_EQ(prefix + "points to a value that is anything", Describe(matcher));
@@ -2305,7 +2305,7 @@ TEST(WhenDynamicCastToTest, Describe) {
 }
 
 TEST(WhenDynamicCastToTest, Explain) {
-  Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_));
+  Matcher<Base*> matcher = WhenDynamicCastTo<Derived*>(Pointee(_anything_));
   Base* null = nullptr;
   EXPECT_THAT(Explain(matcher, null), HasSubstr("NULL"));
   Derived derived;
@@ -2313,7 +2313,7 @@ TEST(WhenDynamicCastToTest, Explain) {
   EXPECT_THAT(Explain(matcher, &derived), HasSubstr("which points to "));
 
   // With references, the matcher itself can fail. Test for that one.
-  Matcher<const Base&> ref_matcher = WhenDynamicCastTo<const OtherDerived&>(_);
+  Matcher<const Base&> ref_matcher = WhenDynamicCastTo<const OtherDerived&>(_anything_);
   EXPECT_THAT(Explain(ref_matcher, derived),
               HasSubstr("which cannot be dynamic_cast"));
 }
@@ -2329,7 +2329,7 @@ TEST(WhenDynamicCastToTest, GoodReference) {
 TEST(WhenDynamicCastToTest, BadReference) {
   Derived derived;
   Base& as_base_ref = derived;
-  EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_)));
+  EXPECT_THAT(as_base_ref, Not(WhenDynamicCastTo<const OtherDerived&>(_anything_)));
 }
 #endif  // GTEST_HAS_RTTI
 

@@ -79,7 +79,7 @@ TEST(MockMethodTest, CanInstantiateWithIncompleteArgType) {
   // use the mock, as long as Google Mock knows how to print the
   // argument.
   MockIncomplete incomplete;
-  EXPECT_CALL(incomplete, ByRefFunc(_)).Times(AnyNumber());
+  EXPECT_CALL(incomplete, ByRefFunc(_anything_)).Times(AnyNumber());
 }
 
 // The definition of the printer for the argument type doesn't have to
@@ -193,7 +193,7 @@ TEST(OnCallSyntaxTest, EvaluatesFirstArgumentOnce) {
   MockA a;
   MockA* pa = &a;
 
-  ON_CALL(*pa++, DoA(_));
+  ON_CALL(*pa++, DoA(_anything_));
   EXPECT_EQ(&a + 1, pa);
 }
 
@@ -211,7 +211,7 @@ TEST(OnCallSyntaxTest, WithIsOptional) {
   MockA a;
 
   ON_CALL(a, DoA(5)).WillByDefault(Return());
-  ON_CALL(a, DoA(_)).With(_).WillByDefault(Return());
+  ON_CALL(a, DoA(_anything_)).With(_anything_).WillByDefault(Return());
 }
 
 TEST(OnCallSyntaxTest, WithCanAppearAtMostOnce) {
@@ -219,9 +219,9 @@ TEST(OnCallSyntaxTest, WithCanAppearAtMostOnce) {
 
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        ON_CALL(a, ReturnResult(_))
-            .With(_)
-            .With(_)
+        ON_CALL(a, ReturnResult(_anything_))
+            .With(_anything_)
+            .With(_anything_)
             .WillByDefault(Return(Result()));
       },
       ".With() cannot appear more than once in an ON_CALL()");
@@ -254,7 +254,7 @@ TEST(ExpectCallSyntaxTest, EvaluatesFirstArgumentOnce) {
   MockA a;
   MockA* pa = &a;
 
-  EXPECT_CALL(*pa++, DoA(_));
+  EXPECT_CALL(*pa++, DoA(_anything_));
   a.DoA(0);
   EXPECT_EQ(&a + 1, pa);
 }
@@ -274,7 +274,7 @@ TEST(ExpectCallSyntaxTest, WithIsOptional) {
   MockA a;
 
   EXPECT_CALL(a, DoA(5)).Times(0);
-  EXPECT_CALL(a, DoA(6)).With(_).Times(0);
+  EXPECT_CALL(a, DoA(6)).With(_anything_).Times(0);
 }
 
 TEST(ExpectCallSyntaxTest, WithCanAppearAtMostOnce) {
@@ -282,7 +282,7 @@ TEST(ExpectCallSyntaxTest, WithCanAppearAtMostOnce) {
 
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        EXPECT_CALL(a, DoA(6)).With(_).With(_);
+        EXPECT_CALL(a, DoA(6)).With(_anything_).With(_anything_);
       },
       ".With() cannot appear more than once in an EXPECT_CALL()");
 
@@ -294,7 +294,7 @@ TEST(ExpectCallSyntaxTest, WithMustBeFirstClause) {
 
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        EXPECT_CALL(a, DoA(1)).Times(1).With(_);
+        EXPECT_CALL(a, DoA(1)).Times(1).With(_anything_);
       },
       ".With() must be the first clause in an EXPECT_CALL()");
 
@@ -302,7 +302,7 @@ TEST(ExpectCallSyntaxTest, WithMustBeFirstClause) {
 
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        EXPECT_CALL(a, DoA(2)).WillOnce(Return()).With(_);
+        EXPECT_CALL(a, DoA(2)).WillOnce(Return()).With(_anything_);
       },
       ".With() must be the first clause in an EXPECT_CALL()");
 
@@ -694,7 +694,7 @@ TEST(OnCallTest, TakesBuiltInDefaultActionWhenNoOnCall) {
 TEST(OnCallTest, TakesBuiltInDefaultActionWhenNoOnCallMatches) {
   MockB b;
   ON_CALL(b, DoB(1)).WillByDefault(Return(1));
-  EXPECT_CALL(b, DoB(_));
+  EXPECT_CALL(b, DoB(_anything_));
 
   EXPECT_EQ(0, b.DoB(2));
 }
@@ -702,10 +702,10 @@ TEST(OnCallTest, TakesBuiltInDefaultActionWhenNoOnCallMatches) {
 // Tests that the last matching ON_CALL() action is taken.
 TEST(OnCallTest, PicksLastMatchingOnCall) {
   MockB b;
-  ON_CALL(b, DoB(_)).WillByDefault(Return(3));
+  ON_CALL(b, DoB(_anything_)).WillByDefault(Return(3));
   ON_CALL(b, DoB(2)).WillByDefault(Return(2));
   ON_CALL(b, DoB(1)).WillByDefault(Return(1));
-  EXPECT_CALL(b, DoB(_));
+  EXPECT_CALL(b, DoB(_anything_));
 
   EXPECT_EQ(2, b.DoB(2));
 }
@@ -728,7 +728,7 @@ TEST(ExpectCallTest, AllowsAnyCallWhenNoSpec) {
 // Tests that the last matching EXPECT_CALL() fires.
 TEST(ExpectCallTest, PicksLastMatchingExpectCall) {
   MockB b;
-  EXPECT_CALL(b, DoB(_)).WillRepeatedly(Return(2));
+  EXPECT_CALL(b, DoB(_anything_)).WillRepeatedly(Return(2));
   EXPECT_CALL(b, DoB(1)).WillRepeatedly(Return(1));
 
   EXPECT_EQ(1, b.DoB(1));
@@ -877,7 +877,7 @@ TEST(ExpectCallTest, TakesRepeatedActionWhenWillListIsExhausted) {
 // exhausted and there is no WillRepeatedly().
 TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
   MockB b;
-  EXPECT_CALL(b, DoB(_)).Times(1);
+  EXPECT_CALL(b, DoB(_anything_)).Times(1);
   EXPECT_CALL(b, DoB())
       .Times(AnyNumber())
       .WillOnce(Return(1))
@@ -926,7 +926,7 @@ TEST(FunctionMockerMessageTest,
   {
     NaggyMock<MockB> b;
     on_call_location = FormatFileLocation(__FILE__, __LINE__ + 1);
-    ON_CALL(b, DoB(_)).WillByDefault(Return(0));
+    ON_CALL(b, DoB(_anything_)).WillByDefault(Return(0));
     b.DoB(0);
   }
   EXPECT_PRED_FORMAT2(IsSubstring, on_call_location, GetCapturedStdout());
@@ -939,7 +939,7 @@ TEST(UninterestingCallTest, DoesDefaultAction) {
   // When there is an ON_CALL() statement, the action specified by it
   // should be taken.
   MockA a;
-  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
+  ON_CALL(a, Binary(_anything_, _anything_)).WillByDefault(Return(true));
   EXPECT_TRUE(a.Binary(1, 2));
 
   // When there is no ON_CALL(), the default value for the return type
@@ -953,7 +953,7 @@ TEST(UnexpectedCallTest, DoesDefaultAction) {
   // When there is an ON_CALL() statement, the action specified by it
   // should be taken.
   MockA a;
-  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
+  ON_CALL(a, Binary(_anything_, _anything_)).WillByDefault(Return(true));
   EXPECT_CALL(a, Binary(0, 0));
   a.Binary(0, 0);
   bool result = false;
@@ -1129,7 +1129,7 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
   // When there is an ON_CALL() statement, the action specified by it
   // should be taken.
   MockA a;
-  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
+  ON_CALL(a, Binary(_anything_, _anything_)).WillByDefault(Return(true));
   EXPECT_CALL(a, Binary(0, 0));
   a.Binary(0, 0);
   bool result = false;
@@ -1152,7 +1152,7 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
 // the failure message contains the argument values.
 TEST(ExcessiveCallTest, GeneratesFailureForVoidFunction) {
   MockA a;
-  EXPECT_CALL(a, DoA(_)).Description("DoA Method").Times(0);
+  EXPECT_CALL(a, DoA(_anything_)).Description("DoA Method").Times(0);
   EXPECT_NONFATAL_FAILURE(
       a.DoA(9),
       "Mock function \"DoA Method\" called more times than expected - "
@@ -1166,7 +1166,7 @@ TEST(ExcessiveCallTest, GeneratesFailureForVoidFunction) {
 // failure message contains the argument values and the return value.
 TEST(ExcessiveCallTest, GeneratesFailureForNonVoidFunction) {
   MockB b;
-  EXPECT_CALL(b, DoB(_));
+  EXPECT_CALL(b, DoB(_anything_));
   b.DoB(1);
   EXPECT_NONFATAL_FAILURE(
       b.DoB(2),
@@ -1274,7 +1274,7 @@ TEST(SequenceTest, AnyOrderIsOkByDefault) {
 // is specified.
 TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo1) {
   MockA a;
-  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_anything_)).WillByDefault(Return(Result()));
 
   Sequence s;
   EXPECT_CALL(a, ReturnResult(1)).InSequence(s);
@@ -1294,7 +1294,7 @@ TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo1) {
 // is specified.
 TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo2) {
   MockA a;
-  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_anything_)).WillByDefault(Return(Result()));
 
   Sequence s;
   EXPECT_CALL(a, ReturnResult(1)).InSequence(s);
@@ -1311,7 +1311,7 @@ TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo2) {
 class PartialOrderTest : public testing::Test {
  protected:
   PartialOrderTest() {
-    ON_CALL(a_, ReturnResult(_)).WillByDefault(Return(Result()));
+    ON_CALL(a_, ReturnResult(_anything_)).WillByDefault(Return(Result()));
 
     // Specifies this partial ordering:
     //
@@ -1375,7 +1375,7 @@ TEST(SequenceTest, Retirement) {
   Sequence s;
 
   EXPECT_CALL(a, DoA(1)).InSequence(s);
-  EXPECT_CALL(a, DoA(_)).InSequence(s).RetiresOnSaturation();
+  EXPECT_CALL(a, DoA(_anything_)).InSequence(s).RetiresOnSaturation();
   EXPECT_CALL(a, DoA(1)).InSequence(s);
 
   a.DoA(1);
@@ -1391,7 +1391,7 @@ TEST(ExpectationTest, ConstrutorsWork) {
 
   // Ctor from various forms of EXPECT_CALL.
   Expectation e2 = EXPECT_CALL(a, DoA(2));
-  Expectation e3 = EXPECT_CALL(a, DoA(3)).With(_);
+  Expectation e3 = EXPECT_CALL(a, DoA(3)).With(_anything_);
   {
     Sequence s;
     Expectation e4 = EXPECT_CALL(a, DoA(4)).Times(1);
@@ -1594,7 +1594,7 @@ TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo2) {
 // Calls must satisfy the partial order when specified so.
 TEST(AfterTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo) {
   MockA a;
-  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_anything_)).WillByDefault(Return(Result()));
 
   // Define ordering:
   //   a.DoA(1) ==>
@@ -1683,7 +1683,7 @@ TEST(AfterTest, AcceptsUpToFiveArguments) {
 // .After() allows input to contain duplicated Expectations.
 TEST(AfterTest, AcceptsDuplicatedInput) {
   MockA a;
-  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_anything_)).WillByDefault(Return(Result()));
 
   // Define ordering:
   //   DoA(1) ==>
@@ -1729,11 +1729,11 @@ TEST(DeletingMockEarlyTest, Success1) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_)).WillOnce(Return(1));
-    EXPECT_CALL(*a, Binary(_, _))
+    EXPECT_CALL(*b1, DoB(_anything_)).WillOnce(Return(1));
+    EXPECT_CALL(*a, Binary(_anything_, _anything_))
         .Times(AnyNumber())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber()).WillRepeatedly(Return(2));
+    EXPECT_CALL(*b2, DoB(_anything_)).Times(AnyNumber()).WillRepeatedly(Return(2));
   }
 
   EXPECT_EQ(1, b1->DoB(1));
@@ -1754,9 +1754,9 @@ TEST(DeletingMockEarlyTest, Success2) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_)).WillOnce(Return(1));
-    EXPECT_CALL(*a, Binary(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber()).WillRepeatedly(Return(2));
+    EXPECT_CALL(*b1, DoB(_anything_)).WillOnce(Return(1));
+    EXPECT_CALL(*a, Binary(_anything_, _anything_)).Times(AnyNumber());
+    EXPECT_CALL(*b2, DoB(_anything_)).Times(AnyNumber()).WillRepeatedly(Return(2));
   }
 
   delete a;  // a is trivially satisfied.
@@ -1778,13 +1778,13 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
   MockA* const a = new MockA;
-  EXPECT_CALL(*a, DoA(_)).WillOnce(Delete(a));
+  EXPECT_CALL(*a, DoA(_anything_)).WillOnce(Delete(a));
   a->DoA(42);  // This will cause a to be deleted.
 }
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningValue) {
   MockA* const a = new MockA;
-  EXPECT_CALL(*a, ReturnResult(_)).WillOnce(DoAll(Delete(a), Return(Result())));
+  EXPECT_CALL(*a, ReturnResult(_anything_)).WillOnce(DoAll(Delete(a), Return(Result())));
   a->ReturnResult(42);  // This will cause a to be deleted.
 }
 
@@ -1796,9 +1796,9 @@ TEST(DeletingMockEarlyTest, Failure1) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_)).WillOnce(Return(1));
-    EXPECT_CALL(*a, Binary(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber()).WillRepeatedly(Return(2));
+    EXPECT_CALL(*b1, DoB(_anything_)).WillOnce(Return(1));
+    EXPECT_CALL(*a, Binary(_anything_, _anything_)).Times(AnyNumber());
+    EXPECT_CALL(*b2, DoB(_anything_)).Times(AnyNumber()).WillRepeatedly(Return(2));
   }
 
   delete a;  // a is trivially satisfied.
@@ -1816,9 +1816,9 @@ TEST(DeletingMockEarlyTest, Failure2) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_));
-    EXPECT_CALL(*a, Binary(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber());
+    EXPECT_CALL(*b1, DoB(_anything_));
+    EXPECT_CALL(*a, Binary(_anything_, _anything_)).Times(AnyNumber());
+    EXPECT_CALL(*b2, DoB(_anything_)).Times(AnyNumber());
   }
 
   EXPECT_NONFATAL_FAILURE(delete b1, "Actual: never called");
@@ -2018,7 +2018,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
   void TestExpectedCall(bool should_print) {
     MockA a;
     EXPECT_CALL(a, DoA(5));
-    EXPECT_CALL(a, Binary(_, 1)).WillOnce(Return(true));
+    EXPECT_CALL(a, Binary(_anything_, 1)).WillOnce(Return(true));
 
     // A void-returning function.
     CaptureStdout();
@@ -2137,19 +2137,19 @@ class GMockLogTest : public VerboseFlagPreservingFixture {
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsWarning) {
   GMOCK_FLAG_SET(verbose, kWarningVerbosity);
-  EXPECT_CALL(helper_, Foo(_)).WillOnce(Return(PrintMeNot()));
+  EXPECT_CALL(helper_, Foo(_anything_)).WillOnce(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This is an expected call.
 }
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsError) {
   GMOCK_FLAG_SET(verbose, kErrorVerbosity);
-  EXPECT_CALL(helper_, Foo(_)).WillOnce(Return(PrintMeNot()));
+  EXPECT_CALL(helper_, Foo(_anything_)).WillOnce(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This is an expected call.
 }
 
 TEST_F(GMockLogTest, DoesNotPrintWarningInternallyIfVerbosityIsError) {
   GMOCK_FLAG_SET(verbose, kErrorVerbosity);
-  ON_CALL(helper_, Foo(_)).WillByDefault(Return(PrintMeNot()));
+  ON_CALL(helper_, Foo(_anything_)).WillByDefault(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This should generate a warning.
 }
 
@@ -2163,33 +2163,33 @@ TEST(AllowLeakTest, AllowsLeakingUnusedMockObject) {
 TEST(AllowLeakTest, CanBeCalledBeforeOnCall) {
   MockA* a = new MockA;
   Mock::AllowLeak(a);
-  ON_CALL(*a, DoA(_)).WillByDefault(Return());
+  ON_CALL(*a, DoA(_anything_)).WillByDefault(Return());
   a->DoA(0);
 }
 
 TEST(AllowLeakTest, CanBeCalledAfterOnCall) {
   MockA* a = new MockA;
-  ON_CALL(*a, DoA(_)).WillByDefault(Return());
+  ON_CALL(*a, DoA(_anything_)).WillByDefault(Return());
   Mock::AllowLeak(a);
 }
 
 TEST(AllowLeakTest, CanBeCalledBeforeExpectCall) {
   MockA* a = new MockA;
   Mock::AllowLeak(a);
-  EXPECT_CALL(*a, DoA(_));
+  EXPECT_CALL(*a, DoA(_anything_));
   a->DoA(0);
 }
 
 TEST(AllowLeakTest, CanBeCalledAfterExpectCall) {
   MockA* a = new MockA;
-  EXPECT_CALL(*a, DoA(_)).Times(AnyNumber());
+  EXPECT_CALL(*a, DoA(_anything_)).Times(AnyNumber());
   Mock::AllowLeak(a);
 }
 
 TEST(AllowLeakTest, WorksWhenBothOnCallAndExpectCallArePresent) {
   MockA* a = new MockA;
-  ON_CALL(*a, DoA(_)).WillByDefault(Return());
-  EXPECT_CALL(*a, DoA(_)).Times(AnyNumber());
+  ON_CALL(*a, DoA(_anything_)).WillByDefault(Return());
+  EXPECT_CALL(*a, DoA(_anything_)).Times(AnyNumber());
   Mock::AllowLeak(a);
 }
 
@@ -2242,7 +2242,7 @@ TEST(VerifyAndClearExpectationsTest, SomeMethodsHaveExpectationsAndFail) {
 TEST(VerifyAndClearExpectationsTest, AllMethodsHaveExpectations) {
   MockB b;
   EXPECT_CALL(b, DoB()).WillOnce(Return(1));
-  EXPECT_CALL(b, DoB(_)).WillOnce(Return(2));
+  EXPECT_CALL(b, DoB(_anything_)).WillOnce(Return(2));
   b.DoB();
   b.DoB(1);
   ASSERT_TRUE(Mock::VerifyAndClearExpectations(&b));
@@ -2258,7 +2258,7 @@ TEST(VerifyAndClearExpectationsTest, AllMethodsHaveExpectations) {
 TEST(VerifyAndClearExpectationsTest, AMethodHasManyExpectations) {
   MockB b;
   EXPECT_CALL(b, DoB(0)).WillOnce(Return(1));
-  EXPECT_CALL(b, DoB(_)).WillOnce(Return(2));
+  EXPECT_CALL(b, DoB(_anything_)).WillOnce(Return(2));
   b.DoB(1);
   bool result = true;
   EXPECT_NONFATAL_FAILURE(result = Mock::VerifyAndClearExpectations(&b),
@@ -2279,7 +2279,7 @@ TEST(VerifyAndClearExpectationsTest, CanCallManyTimes) {
   b.DoB();
   Mock::VerifyAndClearExpectations(&b);
 
-  EXPECT_CALL(b, DoB(_)).WillOnce(Return(1));
+  EXPECT_CALL(b, DoB(_anything_)).WillOnce(Return(1));
   b.DoB(1);
   Mock::VerifyAndClearExpectations(&b);
   Mock::VerifyAndClearExpectations(&b);
@@ -2316,7 +2316,7 @@ TEST(VerifyAndClearTest, SomeMethodsHaveDefaultActions) {
 TEST(VerifyAndClearTest, AllMethodsHaveDefaultActions) {
   MockB b;
   ON_CALL(b, DoB()).WillByDefault(Return(1));
-  ON_CALL(b, DoB(_)).WillByDefault(Return(2));
+  ON_CALL(b, DoB(_anything_)).WillByDefault(Return(2));
 
   Mock::VerifyAndClear(&b);
 
@@ -2332,7 +2332,7 @@ TEST(VerifyAndClearTest, AllMethodsHaveDefaultActions) {
 TEST(VerifyAndClearTest, AMethodHasManyDefaultActions) {
   MockB b;
   ON_CALL(b, DoB(0)).WillByDefault(Return(1));
-  ON_CALL(b, DoB(_)).WillByDefault(Return(2));
+  ON_CALL(b, DoB(_anything_)).WillByDefault(Return(2));
 
   Mock::VerifyAndClear(&b);
 
@@ -2350,7 +2350,7 @@ TEST(VerifyAndClearTest, CanCallManyTimes) {
   Mock::VerifyAndClear(&b);
   Mock::VerifyAndClear(&b);
 
-  ON_CALL(b, DoB(_)).WillByDefault(Return(1));
+  ON_CALL(b, DoB(_anything_)).WillByDefault(Return(1));
   Mock::VerifyAndClear(&b);
 
   EXPECT_EQ(0, b.DoB());
@@ -2376,7 +2376,7 @@ TEST(VerifyAndClearTest, Success) {
 // Tests that VerifyAndClear() works when the verification fails.
 TEST(VerifyAndClearTest, Failure) {
   MockB b;
-  ON_CALL(b, DoB(_)).WillByDefault(Return(1));
+  ON_CALL(b, DoB(_anything_)).WillByDefault(Return(1));
   EXPECT_CALL(b, DoB()).WillOnce(Return(2));
 
   b.DoB(1);
@@ -2414,13 +2414,13 @@ TEST(VerifyAndClearTest, Const) {
 TEST(VerifyAndClearTest, CanSetDefaultActionsAndExpectationsAfterwards) {
   MockB b;
   ON_CALL(b, DoB()).WillByDefault(Return(1));
-  EXPECT_CALL(b, DoB(_)).WillOnce(Return(2));
+  EXPECT_CALL(b, DoB(_anything_)).WillOnce(Return(2));
   b.DoB(1);
 
   Mock::VerifyAndClear(&b);
 
   EXPECT_CALL(b, DoB()).WillOnce(Return(3));
-  ON_CALL(b, DoB(_)).WillByDefault(Return(4));
+  ON_CALL(b, DoB(_anything_)).WillByDefault(Return(4));
 
   EXPECT_EQ(3, b.DoB());
   EXPECT_EQ(4, b.DoB(1));
@@ -2433,14 +2433,14 @@ TEST(VerifyAndClearTest, DoesNotAffectOtherMockObjects) {
   MockB b1;
   MockB b2;
 
-  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(a, Binary(_, _)).WillOnce(DoDefault()).WillOnce(Return(false));
+  ON_CALL(a, Binary(_anything_, _anything_)).WillByDefault(Return(true));
+  EXPECT_CALL(a, Binary(_anything_, _anything_)).WillOnce(DoDefault()).WillOnce(Return(false));
 
   ON_CALL(b1, DoB()).WillByDefault(Return(1));
-  EXPECT_CALL(b1, DoB(_)).WillOnce(Return(2));
+  EXPECT_CALL(b1, DoB(_anything_)).WillOnce(Return(2));
 
   ON_CALL(b2, DoB()).WillByDefault(Return(3));
-  EXPECT_CALL(b2, DoB(_));
+  EXPECT_CALL(b2, DoB(_anything_));
 
   b2.DoB(0);
   Mock::VerifyAndClear(&b2);
@@ -2460,7 +2460,7 @@ TEST(VerifyAndClearTest,
   ReferenceHoldingMock test_mock;
 
   // EXPECT_CALL stores a reference to a inside test_mock.
-  EXPECT_CALL(test_mock, AcceptReference(_))
+  EXPECT_CALL(test_mock, AcceptReference(_anything_))
       .WillRepeatedly(SetArgPointee<0>(a));
 
   // Throw away the reference to the mock that we have in a. After this, the
@@ -2480,7 +2480,7 @@ TEST(VerifyAndClearTest,
   ReferenceHoldingMock test_mock;
 
   // ON_CALL stores a reference to a inside test_mock.
-  ON_CALL(test_mock, AcceptReference(_)).WillByDefault(SetArgPointee<0>(a));
+  ON_CALL(test_mock, AcceptReference(_anything_)).WillByDefault(SetArgPointee<0>(a));
 
   // Throw away the reference to the mock that we have in a. After this, the
   // only reference to it is stored by test_mock.
@@ -2501,7 +2501,7 @@ TEST(VerifyAndClearTest,
 TEST(SynchronizationTest, CanCallMockMethodInAction) {
   MockA a;
   MockC c;
-  ON_CALL(a, DoA(_)).WillByDefault(
+  ON_CALL(a, DoA(_anything_)).WillByDefault(
       IgnoreResult(InvokeWithoutArgs(&c, &MockC::NonVoidMethod)));
   EXPECT_CALL(a, DoA(1));
   EXPECT_CALL(a, DoA(1))
@@ -2531,7 +2531,7 @@ TEST(ParameterlessExpectationsTest, CanSetExpectationsWithoutMatchers) {
   EXPECT_THAT(do_a_47_arg0, 47);
 
   ON_CALL(a, Binary).WillByDefault(Return(true));
-  ON_CALL(a, Binary(_, 14)).WillByDefault(Return(false));
+  ON_CALL(a, Binary(_anything_, 14)).WillByDefault(Return(false));
   EXPECT_THAT(a.Binary(14, 17), true);
   EXPECT_THAT(a.Binary(17, 14), false);
 }
@@ -2570,7 +2570,7 @@ class MockConstOverload {
 TEST(ParameterlessExpectationsTest,
      CanSetExpectationsForConstOverloadedMethods) {
   MockConstOverload mock;
-  ON_CALL(mock, Overloaded(_)).WillByDefault(Return(7));
+  ON_CALL(mock, Overloaded(_anything_)).WillByDefault(Return(7));
   ON_CALL(mock, Overloaded(5)).WillByDefault(Return(9));
   ON_CALL(Const(mock), Overloaded(5)).WillByDefault(Return(11));
   ON_CALL(Const(mock), Overloaded(7)).WillByDefault(Return(13));

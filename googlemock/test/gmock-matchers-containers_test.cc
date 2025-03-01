@@ -91,8 +91,8 @@ TEST(ElementsAreTest, HugeMatcherStr) {
   vector<std::string> test_vector{
       "literal_string", "", "", "", "", "", "", "", "", "", "", ""};
 
-  EXPECT_THAT(test_vector, UnorderedElementsAre("literal_string", _, _, _, _, _,
-                                                _, _, _, _, _, _));
+  EXPECT_THAT(test_vector, UnorderedElementsAre("literal_string", _anything_, _anything_, _anything_, _anything_, _anything_,
+                                                _anything_, _anything_, _anything_, _anything_, _anything_, _anything_));
 }
 
 // Tests the variadic version of the UnorderedElementsAreMatcher
@@ -307,7 +307,7 @@ TEST(PointeeTest, WorksWithConstPropagatingPointers) {
 }
 
 TEST(PointeeTest, NeverMatchesNull) {
-  const Matcher<const char*> m = Pointee(_);
+  const Matcher<const char*> m = Pointee(_anything_);
   EXPECT_FALSE(m.Matches(nullptr));
 }
 
@@ -552,7 +552,7 @@ TEST(FieldForPointerTest, WorksForReferenceToConstPointer) {
 
 // Tests that Field() does not match the NULL pointer.
 TEST(FieldForPointerTest, DoesNotMatchNull) {
-  Matcher<const AStruct*> m = Field(&AStruct::x, _);
+  Matcher<const AStruct*> m = Field(&AStruct::x, _anything_);
   EXPECT_FALSE(m.Matches(nullptr));
 }
 
@@ -850,7 +850,7 @@ TEST(PropertyForPointerTest, WorksForReferenceToConstPointer) {
 
 // Tests that Property() does not match the NULL pointer.
 TEST(PropertyForPointerTest, WorksForReferenceToNonConstProperty) {
-  Matcher<const AClass*> m = Property(&AClass::x, _);
+  Matcher<const AClass*> m = Property(&AClass::x, _anything_);
   EXPECT_FALSE(m.Matches(nullptr));
 }
 
@@ -1988,7 +1988,7 @@ TEST_F(UnorderedElementsAreTest, Performance) {
   std::vector<Matcher<int>> mv;
   for (int i = 0; i < 100; ++i) {
     s.push_back(i);
-    mv.push_back(_);
+    mv.push_back(_anything_);
   }
   mv[50] = Eq(0);
   StringMatchResultListener listener;
@@ -2005,7 +2005,7 @@ TEST_F(UnorderedElementsAreTest, PerformanceHalfStrict) {
   for (int i = 0; i < 100; ++i) {
     s.push_back(i);
     if (i & 1) {
-      mv.push_back(_);
+      mv.push_back(_anything_);
     } else {
       mv.push_back(i);
     }
@@ -2217,7 +2217,7 @@ TEST(EachTest, MatchesMapWhenAllElementsMatch) {
   another_map["fum"] = 4;
   EXPECT_THAT(another_map, Not(Each(make_pair(std::string("fee"), 1))));
   EXPECT_THAT(another_map, Not(Each(make_pair(std::string("fum"), 1))));
-  EXPECT_THAT(another_map, Each(Pair(_, Gt(0))));
+  EXPECT_THAT(another_map, Each(Pair(_anything_, Gt(0))));
 }
 
 TEST(EachTest, AcceptsMatcher) {
@@ -2696,7 +2696,7 @@ TEST(ElementsAreTest, MatchesThreeElementVector) {
   test_vector.push_back("two");
   test_vector.push_back("three");
 
-  EXPECT_THAT(test_vector, ElementsAre("one", StrEq("two"), _));
+  EXPECT_THAT(test_vector, ElementsAre("one", StrEq("two"), _anything_));
 }
 
 TEST(ElementsAreTest, MatchesOneElementEqMatcher) {
@@ -2710,7 +2710,7 @@ TEST(ElementsAreTest, MatchesOneElementAnyMatcher) {
   vector<int> test_vector;
   test_vector.push_back(4);
 
-  EXPECT_THAT(test_vector, ElementsAre(_));
+  EXPECT_THAT(test_vector, ElementsAre(_anything_));
 }
 
 TEST(ElementsAreTest, MatchesOneElementValue) {
@@ -2726,7 +2726,7 @@ TEST(ElementsAreTest, MatchesThreeElementsMixedMatchers) {
   test_vector.push_back(2);
   test_vector.push_back(3);
 
-  EXPECT_THAT(test_vector, ElementsAre(1, Eq(2), _));
+  EXPECT_THAT(test_vector, ElementsAre(1, Eq(2), _anything_));
 }
 
 TEST(ElementsAreTest, MatchesTenElementVector) {
@@ -2736,7 +2736,7 @@ TEST(ElementsAreTest, MatchesTenElementVector) {
   EXPECT_THAT(test_vector,
               // The element list can contain values and/or matchers
               // of different types.
-              ElementsAre(0, Ge(0), _, 3, 4, Ne(2), Eq(6), 7, 8, _));
+              ElementsAre(0, Ge(0), _anything_, 3, 4, Ne(2), Eq(6), 7, 8, _anything_));
 }
 
 TEST(ElementsAreTest, DoesNotMatchWrongSize) {
@@ -2776,9 +2776,9 @@ TEST(ElementsAreTest, WorksForNestedContainer) {
   }
 
   EXPECT_THAT(nested, ElementsAre(ElementsAre('H', Ne('e')),
-                                  ElementsAre('w', 'o', _, _, 'd')));
+                                  ElementsAre('w', 'o', _anything_, _anything_, 'd')));
   EXPECT_THAT(nested, Not(ElementsAre(ElementsAre('H', 'e'),
-                                      ElementsAre('w', 'o', _, _, 'd'))));
+                                      ElementsAre('w', 'o', _anything_, _anything_, 'd'))));
 }
 
 TEST(ElementsAreTest, WorksWithByRefElementMatchers) {
@@ -2793,15 +2793,15 @@ TEST(ElementsAreTest, WorksWithContainerPointerUsingPointee) {
   int a[] = {0, 1, 2};
   vector<int> v(std::begin(a), std::end(a));
 
-  EXPECT_THAT(&v, Pointee(ElementsAre(0, 1, _)));
-  EXPECT_THAT(&v, Not(Pointee(ElementsAre(0, _, 3))));
+  EXPECT_THAT(&v, Pointee(ElementsAre(0, 1, _anything_)));
+  EXPECT_THAT(&v, Not(Pointee(ElementsAre(0, _anything_, 3))));
 }
 
 TEST(ElementsAreTest, WorksWithNativeArrayPassedByReference) {
   int array[] = {0, 1, 2};
-  EXPECT_THAT(array, ElementsAre(0, 1, _));
-  EXPECT_THAT(array, Not(ElementsAre(1, _, _)));
-  EXPECT_THAT(array, Not(ElementsAre(0, _)));
+  EXPECT_THAT(array, ElementsAre(0, 1, _anything_));
+  EXPECT_THAT(array, Not(ElementsAre(1, _anything_, _anything_)));
+  EXPECT_THAT(array, Not(ElementsAre(0, _anything_)));
 }
 
 class NativeArrayPassedAsPointerAndSize {
@@ -2824,7 +2824,7 @@ TEST(ElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {
   EXPECT_THAT(array_as_tuple, Not(ElementsAre(0)));
 
   NativeArrayPassedAsPointerAndSize helper;
-  EXPECT_CALL(helper, Helper(_, _)).With(ElementsAre(0, 1));
+  EXPECT_CALL(helper, Helper(_anything_, _anything_)).With(ElementsAre(0, 1));
   helper.Helper(array, 2);
 }
 
