@@ -8,10 +8,10 @@ FATAL: In-source builds are not allowed.
 ")
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 
 project(googletest
-    VERSION 1.15.2
+    VERSION 1.16.0
     LANGUAGES CXX
 )
 include(CTest)
