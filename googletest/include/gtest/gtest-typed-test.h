@@ -207,7 +207,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   };                                                                          \
   GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static bool                           \
       gtest_##CaseName##_##TestName##_registered_                             \
-      GTEST_ATTRIBUTE_UNUSED_ = ::testing::internal::TypeParameterizedTest<   \
+        = ::testing::internal::TypeParameterizedTest<                         \
           CaseName,                                                           \
               ::testing::internal::TemplateSel<GTEST_TEST_CLASS_NAME_(        \
                   CaseName, TestName)>,                                       \
@@ -290,7 +290,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
       gtest_##TestName##_defined_ =                                               \
           GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(                 \
               __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),                    \
-              GTEST_STRINGIFY_(TestName), (TestSize), GTEST_STRINGIFY_(TestTag)); \
+              GTEST_STRINGIFY_(TestName), GTEST_STRINGIFY_(TestSize),             \
+              GTEST_STRINGIFY_(TestTag));                                         \
   }                                                                               \
   template <typename gtest_TypeParam_>                                            \
   void GTEST_SUITE_NAMESPACE_(                                                    \

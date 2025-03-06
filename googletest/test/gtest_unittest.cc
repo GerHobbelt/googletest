@@ -107,7 +107,7 @@ class StreamingListenerTest : public Test {
   StreamingListenerTest()
       : fake_sock_writer_(new FakeSocketWriter),
         streamer_(fake_sock_writer_),
-        test_info_obj_("FooTest", "Bar", nullptr, nullptr,
+        test_info_obj_("FooTest", "Bar", "S", "ALL", nullptr, nullptr,
                        CodeLocation(__FILE__, __LINE__), nullptr, nullptr) {}
 
  protected:
