@@ -206,11 +206,11 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
     void TestBody() override;                                                 \
   };                                                                          \
   GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static bool                           \
-      gtest_##CaseName##_##TestName##_registered_                     \
+      gtest_##CaseName##_##TestName##_registered_                             \
       GTEST_ATTRIBUTE_UNUSED_ = ::testing::internal::TypeParameterizedTest<   \
           CaseName,                                                           \
-          ::testing::internal::TemplateSel<GTEST_TEST_CLASS_NAME_(CaseName,   \
-                                                                  TestName)>, \
+              ::testing::internal::TemplateSel<GTEST_TEST_CLASS_NAME_(        \
+                  CaseName, TestName)>,                                       \
           GTEST_TYPE_PARAMS_(                                                 \
               CaseName)>::Register("",                                        \
                                    ::testing::internal::CodeLocation(         \

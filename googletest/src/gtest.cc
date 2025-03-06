@@ -2771,7 +2771,6 @@ static std::string FormatCxxExceptionMessage(const char* description,
   return message.GetString();
 }
 
-
 static std::string PrintTestPartResultToString(
     const TestPartResult& test_part_result);
 
@@ -7339,6 +7338,25 @@ std::string TempDir() {
   if (current_dir == nullptr)
     current_dir = "/data/local/tmp";
   return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, current_dir, '/');
+#elif defined(GTEST_OS_IOS)
+  char user_temp_dir[PATH_MAX + 1];
+
+  // Documented alternative to NSTemporaryDirectory() (for obtaining creating
+  // a temporary directory) at
+  // https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/RaceConditions.html#//apple_ref/doc/uid/TP40002585-SW10
+  //
+  // _CS_DARWIN_USER_TEMP_DIR (as well as _CS_DARWIN_USER_CACHE_DIR) is not
+  // documented in the confstr() man page at
+  // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/confstr.3.html#//apple_ref/doc/man/3/confstr
+  // but are still available, according to the WebKit patches at
+  // https://trac.webkit.org/changeset/262004/webkit
+  // https://trac.webkit.org/changeset/263705/webkit
+  //
+  // The confstr() implementation falls back to getenv("TMPDIR"). See
+  // https://opensource.apple.com/source/Libc/Libc-1439.100.3/gen/confstr.c.auto.html
+  ::confstr(_CS_DARWIN_USER_TEMP_DIR, user_temp_dir, sizeof(user_temp_dir));
+
+  return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, user_temp_dir, '/');
 #else
   return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/tmp/", '/');
 #endif
