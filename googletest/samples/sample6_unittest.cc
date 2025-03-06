@@ -33,6 +33,7 @@
 // The interface and its implementations are in this header.
 #include "prime_tables.h"
 #include "gtest/gtest.h"
+
 namespace {
 // First, we define some factory functions for creating instances of
 // the implementations.  You may be able to skip this step if all your
