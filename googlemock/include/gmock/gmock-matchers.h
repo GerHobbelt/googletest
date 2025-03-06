@@ -2283,6 +2283,9 @@ class ResultOfMatcher {
   class Impl : public MatcherInterface<T> {
     using ResultType = decltype(CallableTraits<Callable>::template Invoke<T>(
         std::declval<CallableStorageType>(), std::declval<T>()));
+    using InnerType = std::conditional_t<
+        std::is_lvalue_reference<ResultType>::value,
+        const typename std::remove_reference<ResultType>::type&, ResultType>;
 
    public:
     template <typename M>
@@ -2290,7 +2293,7 @@ class ResultOfMatcher {
          const CallableStorageType& callable, const M& matcher)
         : result_description_(result_description),
           callable_(callable),
-          matcher_(MatcherCast<ResultType>(matcher)) {}
+          matcher_(MatcherCast<InnerType>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
       if (result_description_.empty()) {
@@ -2320,7 +2323,7 @@ class ResultOfMatcher {
       // takes a non-const reference as argument.
       // Also, specifying template argument explicitly is needed because T could
       // be a non-const reference (e.g. Matcher<Uncopyable&>).
-      ResultType result =
+      InnerType result =
           CallableTraits<Callable>::template Invoke<T>(callable_, obj);
       return MatchPrintAndExplain(result, matcher_, listener);
     }
@@ -2333,7 +2336,7 @@ class ResultOfMatcher {
     // use stateful callables with ResultOf(), which doesn't guarantee
     // how many times the callable will be invoked.
     mutable CallableStorageType callable_;
-    const Matcher<ResultType> matcher_;
+    const Matcher<InnerType> matcher_;
   };  // class Impl
 
   const std::string result_description_;
