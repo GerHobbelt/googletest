@@ -866,6 +866,10 @@ class GTEST_API_ UnitTestImpl {
   std::function<void(std::exception_ptr)> UserExceptionHandler = nullptr;
 
  private:
+  // Returns true if a warning should be issued if no tests match the test
+  // filter flag.
+  bool ShouldWarnIfNoTestsMatchFilter() const;
+
   struct CompareTestSuitesByPointer {
     bool operator()(const TestSuite* lhs, const TestSuite* rhs) const {
       return lhs->name_ < rhs->name_;
