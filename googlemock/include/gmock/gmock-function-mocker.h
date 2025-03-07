@@ -226,7 +226,7 @@ using internal::FunctionMocker;
 
 #define GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT(_i, _, _elem)          \
   GMOCK_PP_IF(                                                          \
-      GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)), \
+      GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _anything_, _elem)), \
       _elem, )
 
 #define GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Tuple) \
@@ -234,14 +234,14 @@ using internal::FunctionMocker;
 
 #define GMOCK_INTERNAL_CALLTYPE_SPEC_IF_CALLTYPE(_i, _, _elem)          \
   GMOCK_PP_IF(                                                          \
-      GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CALLTYPE(_i, _, _elem)), \
+      GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CALLTYPE(_i, _anything_, _elem)), \
       GMOCK_PP_CAT(GMOCK_INTERNAL_UNPACK_, _elem), )
 
 #define GMOCK_INTERNAL_GET_REF_SPEC(_Tuple) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_REF_SPEC_IF_REF, ~, _Tuple)
 
 #define GMOCK_INTERNAL_REF_SPEC_IF_REF(_i, _, _elem)                       \
-  GMOCK_PP_IF(GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_REF(_i, _, _elem)), \
+  GMOCK_PP_IF(GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_REF(_i, _anything_, _elem)), \
               GMOCK_PP_CAT(GMOCK_INTERNAL_UNPACK_, _elem), )
 
 #ifdef GMOCK_INTERNAL_STRICT_SPEC_ASSERT
@@ -254,12 +254,12 @@ using internal::FunctionMocker;
 #else
 #define GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT(_i, _, _elem)                 \
   static_assert(                                                               \
-      (GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CONST(_i, _, _elem)) +         \
-       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_OVERRIDE(_i, _, _elem)) +      \
-       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_FINAL(_i, _, _elem)) +         \
-       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)) +      \
-       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_REF(_i, _, _elem)) +           \
-       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CALLTYPE(_i, _, _elem))) == 1, \
+      (GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CONST(_i, _anything_, _elem)) +         \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_OVERRIDE(_i, _anything_, _elem)) +      \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_FINAL(_i, _anything_, _elem)) +         \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _anything_, _elem)) +      \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_REF(_i, _anything_, _elem)) +           \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CALLTYPE(_i, _anything_, _elem))) == 1, \
       GMOCK_PP_STRINGIZE(                                                      \
           _elem) " cannot be recognized as a valid specification modifier.");
 #endif  // GMOCK_INTERNAL_STRICT_SPEC_ASSERT
@@ -316,7 +316,7 @@ using internal::FunctionMocker;
   ::testing::internal::identity_t<GMOCK_PP_IF(GMOCK_PP_IS_BEGIN_PARENS(_Ret), \
                                               GMOCK_PP_REMOVE_PARENS,         \
                                               GMOCK_PP_IDENTITY)(_Ret)>(      \
-      GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GET_TYPE, _, _Args))
+      GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GET_TYPE, _anything_, _Args))
 
 #define GMOCK_INTERNAL_GET_TYPE(_i, _, _elem)                          \
   GMOCK_PP_COMMA_IF(_i)                                                \
@@ -514,6 +514,6 @@ using internal::FunctionMocker;
       (::testing::internal::identity_t<__VA_ARGS__>))
 
 #define GMOCK_MOCKER_(arity, constness, Method) \
-  GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
+  GTEST_CONCAT_TOKEN_(gmock##constness##arity##_anything_##Method##_anything_, __LINE__)
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_FUNCTION_MOCKER_H_

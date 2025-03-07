@@ -86,7 +86,7 @@ TEST(AddressTest, MatcherDoesntCopy) {
 }
 
 TEST(AddressTest, Describe) {
-  Matcher<int> matcher = Address(_);
+  Matcher<int> matcher = Address(_anything_);
   EXPECT_EQ("has address that is anything", Describe(matcher));
   EXPECT_EQ("does not have address that is anything",
             DescribeNegation(matcher));
@@ -1458,12 +1458,12 @@ TEST(ContainsTimes, ListMatchesWhenElementQuantityMatches) {
   EXPECT_THAT(some_list, Contains(Ge(2)).Times(3));
   EXPECT_THAT(some_list, Contains(Ge(2)).Times(Gt(2)));
   EXPECT_THAT(some_list, Contains(4).Times(0));
-  EXPECT_THAT(some_list, Contains(_).Times(4));
+  EXPECT_THAT(some_list, Contains(_anything_).Times(4));
   EXPECT_THAT(some_list, Not(Contains(5).Times(1)));
-  EXPECT_THAT(some_list, Contains(5).Times(_));  // Times(_) always matches
+  EXPECT_THAT(some_list, Contains(5).Times(_anything_));  // Times(_) always matches
   EXPECT_THAT(some_list, Not(Contains(3).Times(1)));
   EXPECT_THAT(some_list, Contains(3).Times(Not(1)));
-  EXPECT_THAT(list<int>{}, Not(Contains(_)));
+  EXPECT_THAT(list<int>{}, Not(Contains(_anything_)));
 }
 
 TEST_P(ContainsTimesP, ExplainsMatchResultCorrectly) {

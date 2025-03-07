@@ -68,12 +68,12 @@ struct Dummy {};
 void TestConcurrentMockObjects(Dummy /* dummy */) {
   // Creates a mock and does some typical operations on it.
   MockFoo foo;
-  ON_CALL(foo, Bar(_)).WillByDefault(Return(1));
-  ON_CALL(foo, Baz(_, _)).WillByDefault(Return('b'));
-  ON_CALL(foo, Baz(_, "you")).WillByDefault(Return('a'));
+  ON_CALL(foo, Bar(_anything_)).WillByDefault(Return(1));
+  ON_CALL(foo, Baz(_anything_, _anything_)).WillByDefault(Return('b'));
+  ON_CALL(foo, Baz(_anything_, "you")).WillByDefault(Return('a'));
 
   EXPECT_CALL(foo, Bar(0)).Times(AtMost(3));
-  EXPECT_CALL(foo, Baz(_, _));
+  EXPECT_CALL(foo, Baz(_anything_, _anything_));
   EXPECT_CALL(foo, Baz("hi", "you"))
       .WillOnce(Return('z'))
       .WillRepeatedly(DoDefault());
@@ -115,9 +115,9 @@ void Helper1(Helper1Param param) {
 void TestConcurrentCallsOnSameObject(Dummy /* dummy */) {
   MockFoo foo;
 
-  ON_CALL(foo, Bar(_)).WillByDefault(Return(1));
-  EXPECT_CALL(foo, Baz(_, "b")).Times(kRepeat).WillRepeatedly(Return('a'));
-  EXPECT_CALL(foo, Baz(_, "c"));  // Expected to be unsatisfied.
+  ON_CALL(foo, Bar(_anything_)).WillByDefault(Return(1));
+  EXPECT_CALL(foo, Baz(_anything_, "b")).Times(kRepeat).WillRepeatedly(Return('a'));
+  EXPECT_CALL(foo, Baz(_anything_, "c"));  // Expected to be unsatisfied.
 
   // This chunk of code should generate kRepeat failures about
   // excessive calls, and 2*kRepeat failures about unexpected calls.

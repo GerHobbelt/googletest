@@ -126,7 +126,7 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-using testing::_;
+using testing::_anything_;
 using testing::A;
 using testing::Action;
 using testing::AllOf;
@@ -248,7 +248,7 @@ class FieldHelper {
 TEST(LinkTest, TestReturnVoid) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Return());
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(Return());
   mock.VoidFromString(nullptr);
 }
 
@@ -257,7 +257,7 @@ TEST(LinkTest, TestReturn) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, StringFromString(_)).WillOnce(Return(&ch));
+  EXPECT_CALL(mock, StringFromString(_anything_)).WillOnce(Return(&ch));
   mock.StringFromString(nullptr);
 }
 
@@ -265,7 +265,7 @@ TEST(LinkTest, TestReturn) {
 TEST(LinkTest, TestReturnNull) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Return());
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(Return());
   mock.VoidFromString(nullptr);
 }
 
@@ -274,7 +274,7 @@ TEST(LinkTest, TestReturnRef) {
   Mock mock;
   int n = 42;
 
-  EXPECT_CALL(mock, IntRefFromString(_)).WillOnce(ReturnRef(n));
+  EXPECT_CALL(mock, IntRefFromString(_anything_)).WillOnce(ReturnRef(n));
   mock.IntRefFromString(nullptr);
 }
 
@@ -283,7 +283,7 @@ TEST(LinkTest, TestAssign) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Assign(&ch, 'y'));
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(Assign(&ch, 'y'));
   mock.VoidFromString(nullptr);
 }
 
@@ -292,7 +292,7 @@ TEST(LinkTest, TestSetArgPointee) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(SetArgPointee<0>('y'));
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(SetArgPointee<0>('y'));
   mock.VoidFromString(&ch);
 }
 
@@ -302,7 +302,7 @@ TEST(LinkTest, TestSetArrayArgument) {
   char ch = 'x';
   char ch2 = 'y';
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(SetArrayArgument<0>(&ch2, &ch2 + 1));
   mock.VoidFromString(&ch);
 }
@@ -314,7 +314,7 @@ TEST(LinkTest, TestSetErrnoAndReturn) {
   Mock mock;
 
   int saved_errno = errno;
-  EXPECT_CALL(mock, IntFromString(_)).WillOnce(SetErrnoAndReturn(1, -1));
+  EXPECT_CALL(mock, IntFromString(_anything_)).WillOnce(SetErrnoAndReturn(1, -1));
   mock.IntFromString(nullptr);
   errno = saved_errno;
 }
@@ -326,7 +326,7 @@ TEST(LinkTest, TestInvoke) {
   Mock mock;
   InvokeHelper test_invoke_helper;
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(Invoke(&InvokeHelper::StaticVoidFromString))
       .WillOnce(Invoke(&test_invoke_helper, &InvokeHelper::VoidFromString));
   mock.VoidFromString(nullptr);
@@ -338,7 +338,7 @@ TEST(LinkTest, TestInvokeWithoutArgs) {
   Mock mock;
   InvokeHelper test_invoke_helper;
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(InvokeWithoutArgs(&InvokeHelper::StaticVoidFromVoid))
       .WillOnce(
           InvokeWithoutArgs(&test_invoke_helper, &InvokeHelper::VoidFromVoid));
@@ -351,7 +351,7 @@ TEST(LinkTest, TestInvokeArgument) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, VoidFromFunc(_)).WillOnce(InvokeArgument<0>(&ch));
+  EXPECT_CALL(mock, VoidFromFunc(_anything_)).WillOnce(InvokeArgument<0>(&ch));
   mock.VoidFromFunc(InvokeHelper::StaticVoidFromString);
 }
 
@@ -359,7 +359,7 @@ TEST(LinkTest, TestInvokeArgument) {
 TEST(LinkTest, TestWithArg) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(WithArg<0>(Invoke(&InvokeHelper::StaticVoidFromString)));
   mock.VoidFromString(nullptr);
 }
@@ -368,7 +368,7 @@ TEST(LinkTest, TestWithArg) {
 TEST(LinkTest, TestWithArgs) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(WithArgs<0>(Invoke(&InvokeHelper::StaticVoidFromString)));
   mock.VoidFromString(nullptr);
 }
@@ -377,7 +377,7 @@ TEST(LinkTest, TestWithArgs) {
 TEST(LinkTest, TestWithoutArgs) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(WithoutArgs(Return()));
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(WithoutArgs(Return()));
   mock.VoidFromString(nullptr);
 }
 
@@ -386,7 +386,7 @@ TEST(LinkTest, TestDoAll) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(DoAll(SetArgPointee<0>('y'), Return()));
   mock.VoidFromString(&ch);
 }
@@ -396,8 +396,8 @@ TEST(LinkTest, TestDoDefault) {
   Mock mock;
   char ch = 'x';
 
-  ON_CALL(mock, VoidFromString(_)).WillByDefault(Return());
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(DoDefault());
+  ON_CALL(mock, VoidFromString(_anything_)).WillByDefault(Return());
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(DoDefault());
   mock.VoidFromString(&ch);
 }
 
@@ -405,7 +405,7 @@ TEST(LinkTest, TestDoDefault) {
 TEST(LinkTest, TestIgnoreResult) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(IgnoreResult(Return(42)));
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(IgnoreResult(Return(42)));
   mock.VoidFromString(nullptr);
 }
 
@@ -414,14 +414,14 @@ TEST(LinkTest, TestIgnoreResult) {
 TEST(LinkTest, TestThrow) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Throw(42));
+  EXPECT_CALL(mock, VoidFromString(_anything_)).WillOnce(Throw(42));
   EXPECT_THROW(mock.VoidFromString(nullptr), int);
 }
 // Tests the linkage of the Rethrow action.
 TEST(LinkTest, TestRethrow) {
   Mock mock;
 
-  EXPECT_CALL(mock, VoidFromString(_))
+  EXPECT_CALL(mock, VoidFromString(_anything_))
       .WillOnce(Rethrow(std::make_exception_ptr(42)));
   EXPECT_THROW(mock.VoidFromString(nullptr), int);
 }
@@ -442,7 +442,7 @@ ACTION(Return1) { return 1; }
 TEST(LinkTest, TestActionMacro) {
   Mock mock;
 
-  EXPECT_CALL(mock, IntFromString(_)).WillOnce(Return1());
+  EXPECT_CALL(mock, IntFromString(_anything_)).WillOnce(Return1());
   mock.IntFromString(nullptr);
 }
 
@@ -454,7 +454,7 @@ ACTION_P(ReturnArgument, ret_value) { return ret_value; }
 TEST(LinkTest, TestActionPMacro) {
   Mock mock;
 
-  EXPECT_CALL(mock, IntFromString(_)).WillOnce(ReturnArgument(42));
+  EXPECT_CALL(mock, IntFromString(_anything_)).WillOnce(ReturnArgument(42));
   mock.IntFromString(nullptr);
 }
 
@@ -471,7 +471,7 @@ TEST(LinkTest, TestActionP2Macro) {
   Mock mock;
   char ch = 'x';
 
-  EXPECT_CALL(mock, IntFromString(_))
+  EXPECT_CALL(mock, IntFromString(_anything_))
       .WillOnce(ReturnEqualsEitherOf("one", "two"));
   mock.IntFromString(&ch);
 }
@@ -480,7 +480,7 @@ TEST(LinkTest, TestActionP2Macro) {
 TEST(LinkTest, TestMatcherAnything) {
   Mock mock;
 
-  ON_CALL(mock, VoidFromString(_)).WillByDefault(Return());
+  ON_CALL(mock, VoidFromString(_anything_)).WillByDefault(Return());
 }
 
 // Tests the linkage of the A matcher.
@@ -589,7 +589,7 @@ TEST(LinkTest, TestMatchersStringEquality) {
 TEST(LinkTest, TestMatcherElementsAre) {
   Mock mock;
 
-  ON_CALL(mock, VoidFromVector(ElementsAre('a', _))).WillByDefault(Return());
+  ON_CALL(mock, VoidFromVector(ElementsAre('a', _anything_))).WillByDefault(Return());
 }
 
 // Tests the linkage of the ElementsAreArray matcher.
@@ -668,25 +668,25 @@ TEST(LinkTest, TestMatcherTruly) {
 
 // Tests the linkage of the AllOf matcher.
 TEST(LinkTest, TestMatcherAllOf) {
-  Matcher<int> m = AllOf(_, Eq(1));
+  Matcher<int> m = AllOf(_anything_, Eq(1));
   EXPECT_TRUE(m.Matches(1));
 }
 
 // Tests the linkage of the AnyOf matcher.
 TEST(LinkTest, TestMatcherAnyOf) {
-  Matcher<int> m = AnyOf(_, Eq(1));
+  Matcher<int> m = AnyOf(_anything_, Eq(1));
   EXPECT_TRUE(m.Matches(1));
 }
 
 // Tests the linkage of the Not matcher.
 TEST(LinkTest, TestMatcherNot) {
-  Matcher<int> m = Not(_);
+  Matcher<int> m = Not(_anything_);
   EXPECT_FALSE(m.Matches(1));
 }
 
 // Tests the linkage of the MatcherCast<T>() function.
 TEST(LinkTest, TestMatcherCast) {
-  Matcher<const char*> m = MatcherCast<const char*>(_);
+  Matcher<const char*> m = MatcherCast<const char*>(_anything_);
   EXPECT_TRUE(m.Matches(nullptr));
 }
 

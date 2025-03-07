@@ -1007,7 +1007,7 @@ class MockClass {
 // return type by default.
 TEST(DoDefaultTest, ReturnsBuiltInDefaultValueByDefault) {
   MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_)).WillOnce(DoDefault());
+  EXPECT_CALL(mock, IntFunc(_anything_)).WillOnce(DoDefault());
   EXPECT_EQ(0, mock.IntFunc(true));
 }
 
@@ -1030,7 +1030,7 @@ void VoidFunc(bool /* flag */) {}
 
 TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
   MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_))
+  EXPECT_CALL(mock, IntFunc(_anything_))
       .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
 
   // Ideally we should verify the error message as well.  Sadly,
@@ -1045,7 +1045,7 @@ TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
 TEST(DoDefaultTest, ReturnsUserSpecifiedPerTypeDefaultValueWhenThereIsOne) {
   DefaultValue<int>::Set(1);
   MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_)).WillOnce(DoDefault());
+  EXPECT_CALL(mock, IntFunc(_anything_)).WillOnce(DoDefault());
   EXPECT_EQ(1, mock.IntFunc(false));
   DefaultValue<int>::Clear();
 }
@@ -1053,8 +1053,8 @@ TEST(DoDefaultTest, ReturnsUserSpecifiedPerTypeDefaultValueWhenThereIsOne) {
 // Tests that DoDefault() does the action specified by ON_CALL().
 TEST(DoDefaultTest, DoesWhatOnCallSpecifies) {
   MockClass mock;
-  ON_CALL(mock, IntFunc(_)).WillByDefault(Return(2));
-  EXPECT_CALL(mock, IntFunc(_)).WillOnce(DoDefault());
+  ON_CALL(mock, IntFunc(_anything_)).WillByDefault(Return(2));
+  EXPECT_CALL(mock, IntFunc(_anything_)).WillOnce(DoDefault());
   EXPECT_EQ(2, mock.IntFunc(false));
 }
 
@@ -1063,7 +1063,7 @@ TEST(DoDefaultTest, CannotBeUsedInOnCall) {
   MockClass mock;
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        ON_CALL(mock, IntFunc(_)).WillByDefault(DoDefault());
+        ON_CALL(mock, IntFunc(_anything_)).WillByDefault(DoDefault());
       },
       "DoDefault() cannot be used in ON_CALL()");
 }
@@ -1875,7 +1875,7 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   MockClass mock;
   auto make = [](int i) { return std::make_unique<int>(i); };
 
-  EXPECT_CALL(mock, TakeUnique(_)).WillRepeatedly([](std::unique_ptr<int> i) {
+  EXPECT_CALL(mock, TakeUnique(_anything_)).WillRepeatedly([](std::unique_ptr<int> i) {
     return *i;
   });
   // DoAll() does not compile, since it would move from its arguments twice.
@@ -1897,7 +1897,7 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
 
   // Some arguments are moved, some passed by reference.
   auto lvalue = make(6);
-  EXPECT_CALL(mock, TakeUnique(_, _))
+  EXPECT_CALL(mock, TakeUnique(_anything_, _anything_))
       .WillOnce([](const std::unique_ptr<int>& i, std::unique_ptr<int> j) {
         return *i * *j;
       });
@@ -1905,7 +1905,7 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
 
   // The unique_ptr can be saved by the action.
   std::unique_ptr<int> saved;
-  EXPECT_CALL(mock, TakeUnique(_)).WillOnce([&saved](std::unique_ptr<int> i) {
+  EXPECT_CALL(mock, TakeUnique(_anything_)).WillOnce([&saved](std::unique_ptr<int> i) {
     saved = std::move(i);
     return 0;
   });
