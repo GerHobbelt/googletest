@@ -11,7 +11,7 @@
   1.11.9000 = google/googletest@e2239ee6043f73722e7aa812a459f54a28552929 + osrf commits
   1.14.9000 = google/googletest@f8d7d77c06936315286eb55f8de22cd23c188571 + osrf commits
   -->
-  <version>1.15.1</version>
+  <version>1.16.0</version>
   <description>The package provides GoogleMock.</description>
 
   <maintainer email="scott@openrobotics.org">Scott K Logan</maintainer>
