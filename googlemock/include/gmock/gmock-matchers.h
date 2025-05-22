@@ -1315,7 +1315,7 @@ class AllOfMatcherImpl : public MatcherInterface<const T&> {
     if (!listener->IsInterested()) {
       // Fast path to avoid unnecessary formatting.
       for (const Matcher<T>& matcher : matchers_) {
-        if (!matcher.Matches(x)) {
+        if (!matcher.Matches(xx)) {
           return false;
         }
       }
