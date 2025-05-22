@@ -11,7 +11,7 @@ endif()
 cmake_minimum_required(VERSION 3.16)
 
 project(googletest
-    VERSION 1.16.0
+    VERSION 1.17.0
     LANGUAGES CXX
 )
 include(CTest)
