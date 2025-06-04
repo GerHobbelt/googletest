@@ -34,4 +34,39 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
 
+#include "src/gtest-internal-inl.h"
+
+// Forward declare the extern "C" function that will provide custom stack traces
+extern "C" {
+    // This function should be implemented by the test binary
+    // Returns a symbolized stack trace as a string
+    // max_depth: maximum number of frames to capture
+    // skip_count: number of top frames to skip
+    const char* GetCustomStackTrace(int max_depth, int skip_count);
+
+    // Free the string returned by GetCustomStackTrace
+    void FreeCustomStackTrace(const char* trace);
+}
+
+// Forward declaration - the actual class will be defined in gtest-custom-stacktrace.cc
+namespace testing {
+namespace internal {
+    struct CustomStackTraceGetter : testing::internal::OsStackTraceGetterInterface {
+      std::string CurrentStackTrace(int max_depth, int skip_count) override {
+        const char* trace = ::GetCustomStackTrace(max_depth, skip_count + 1);
+        if (trace) {
+          std::string result(trace);
+          ::FreeCustomStackTrace(trace);
+          return result;
+        }
+        return "";
+      }
+      void UponLeavingGTest() override {}
+    };
+}
+}
+
+// Tell Google Test to use our custom stack trace getter
+#define GTEST_OS_STACK_TRACE_GETTER_ ::testing::internal::CustomStackTraceGetter
+
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
