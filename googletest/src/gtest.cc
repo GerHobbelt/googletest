@@ -99,12 +99,6 @@
 
 #elif GTEST_OS_WINDOWS  // We are on Windows proper.
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>  // NOLINT
 
 #ifdef _MSC_VER
@@ -182,6 +176,9 @@
 #if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 #define GTEST_HAS_ABSL_FLAGS
 #endif
+
+#undef min
+#undef max
 
 namespace testing {
 
