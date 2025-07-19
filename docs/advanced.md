@@ -482,6 +482,7 @@ To write a death test, simply use one of the macros inside your test function.
 For example,
 
 ```c++
+#if GTEST_HAS_DEATH_TEST
 TEST(MyDeathTest, Foo) {
   // This death test uses a compound statement.
   ASSERT_DEATH({
@@ -498,6 +499,7 @@ TEST(MyDeathTest, KillProcess) {
   EXPECT_EXIT(KillProcess(), testing::KilledBySignal(SIGKILL),
               "Sending myself unblockable signal");
 }
+#endif // GTEST_HAS_DEATH_TEST
 ```
 
 verifies that:
