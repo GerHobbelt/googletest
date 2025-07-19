@@ -36,6 +36,8 @@
 
 #include "src/gtest-internal-inl.h"
 
+#if 0		// example code snippet!
+
 // Forward declare the extern "C" function that will provide custom stack traces
 extern "C" {
     // This function should be implemented by the test binary
@@ -68,5 +70,7 @@ namespace internal {
 
 // Tell Google Test to use our custom stack trace getter
 #define GTEST_OS_STACK_TRACE_GETTER_ ::testing::internal::CustomStackTraceGetter
+
+#endif
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
