@@ -691,6 +691,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // GTEST_HAS_FILE_SYSTEM
 #endif
 
+// WARNING/NOTE:
+// 
 // DeathTests are not supported in monolithic builds as these
 // recursively invoke the base application, which' CLI behaviour
 // will most probably not match DeathTest's simplistic
