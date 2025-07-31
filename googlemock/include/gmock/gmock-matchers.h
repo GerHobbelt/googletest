@@ -2066,11 +2066,11 @@ class DynamicCaster {
   }
 };
 
-// Implements the WhenDynamicCastTo<T>(m) matcher that matches a pointer or
-// reference that matches inner_matcher when dynamic_cast<T> is applied.
-// The result of dynamic_cast<To> is forwarded to the inner matcher.
+// Implements the `WhenDynamicCastTo<T>(m)` matcher that matches a pointer or
+// reference that matches `inner_matcher` when `dynamic_cast<T>` is applied.
+// The result of `dynamic_cast<To>` is forwarded to the inner matcher.
 
-// To is a pointer. Cast and forward the result, which might be nullptr.
+// `To` is a pointer. Cast and forward the result, which might be nullptr.
 template <typename To>
 class WhenDynamicCastToMatcher
     : public WhenCastToMatcherBase<To, DynamicCaster> {
@@ -2099,9 +2099,9 @@ class WhenDynamicCastToMatcher<To&>
 };
 #endif  // GTEST_HAS_RTTI
 
-// Implements the WhenStaticCastTo<T>(m) matcher that matches a pointer or
-// reference that matches inner_matcher when static_cast<T> is applied.
-// The result of static_cast<To> is forwarded to the inner matcher.
+// Implements the `WhenStaticCastTo<T>(m)` matcher that matches a pointer or
+// reference that matches `inner_matcher` when `static_cast<T>` is applied.
+// The result of `static_cast<To>` is forwarded to the inner matcher.
 class StaticCaster {
  public:
   static constexpr const char* Name = "static_cast";
@@ -4451,8 +4451,8 @@ WhenDynamicCastTo(const Matcher<To>& inner_matcher) {
 #endif  // GTEST_HAS_RTTI
 
 // Creates a matcher that matches a pointer or reference that matches
-// inner_matcher when static_cast<To> is applied.
-// The result of static_cast<To> is forwarded to the inner matcher.
+// `inner_matcher` when `static_cast<To>` is applied.
+// The result of `static_cast<To>` is forwarded to the inner matcher.
 template <typename To>
 inline PolymorphicMatcher<internal::WhenStaticCastToMatcher<To>>
 WhenStaticCastTo(const Matcher<To>& inner_matcher) {

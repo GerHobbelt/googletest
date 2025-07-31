@@ -213,9 +213,9 @@ messages, you can use:
 `WhenDynamicCast` can be used for safely checking the dynamic type of an object
 and navigating the inheritance tree of an object.
 
-`WhenStaticCast` is primarily used to check and argument which was type-erased
+`WhenStaticCast` is primarily used to check an argument which was type-erased
 as `void*`. It can also be used as an unsafe replacement of `WhenDynamicCast`
-in environemnts without RTTI, or for pointer-based type punning by chaining
+in environments without RTTI, or for pointer-based type punning by chaining
 a cast to `void*` and then another pointer (equivalent to `reinterpret_cast`).
 
 ## Multi-argument Matchers {#MultiArgMatchers}
