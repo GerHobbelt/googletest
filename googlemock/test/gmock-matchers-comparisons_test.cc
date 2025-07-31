@@ -2380,22 +2380,27 @@ TEST(WhenStaticCastToTest, VoidPointer) {
 
 TEST(WhenStaticCastToTest, Inheritance) {
   Derived derived;
+  Derived _;
   EXPECT_THAT(derived, WhenStaticCastTo<const Base&>(_));
-  EXPECT_THAT(&derived, WhenStaticCastTo<Base*>(_));
+  EXPECT_THAT(&derived, WhenStaticCastTo<Base*>(&_));
   EXPECT_THAT(derived, WhenStaticCastTo<const Derived&>(_));
-  EXPECT_THAT(&derived, WhenStaticCastTo<Derived*>(_));
+  EXPECT_THAT(&derived, WhenStaticCastTo<Derived*>(&_));
   // These will not compile because direct sidecasts are invalid
-  // EXPECT_THAT(derived, WhenStaticCastTo<const OtherDerived&>(_));
-  // EXPECT_THAT(&derived, WhenStaticCastTo<OtherDerived*>(_));
+#if 0
+  EXPECT_THAT(derived, WhenStaticCastTo<const OtherDerived&>(_));
+  EXPECT_THAT(&derived, WhenStaticCastTo<OtherDerived*>(&_));
+#endif
 
   Base& as_base_ref = derived;
   EXPECT_THAT(as_base_ref, WhenStaticCastTo<const Base&>(_));
-  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<Base*>(_));
+  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<Base*>(&_));
   EXPECT_THAT(as_base_ref, WhenStaticCastTo<const Derived&>(_));
-  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<Derived*>(_));
-  // These will compile and match, but are not safe
+  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<Derived*>(&_));
+  // These will not compile because direct sidecasts are invalid
+#if 0
   EXPECT_THAT(as_base_ref, WhenStaticCastTo<const OtherDerived&>(_));
-  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<OtherDerived*>(_));
+  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<OtherDerived*>(&_));
+#endif
 }
 
 TEST(WhenStaticCastToTest, Punning) {

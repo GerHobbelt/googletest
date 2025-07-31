@@ -437,7 +437,7 @@ TYPED_TEST(FunctionMockerTest, MocksDecimalFunctionWithCallType) {
 
 // Tests mocking functions overloaded on the const-ness of this object.
 TYPED_TEST(FunctionMockerTest, MocksFunctionsConstFunctionWithCallType) {
-  EXPECT_CALL(Const(this->mock_foo_), CTConst(_)).WillOnce(Return('a'));
+  EXPECT_CALL(Const(this->mock_foo_), CTConst(0)).WillOnce(Return('a'));
 
   EXPECT_EQ('a', Const(*this->foo_).CTConst(0));
 }
@@ -685,7 +685,7 @@ TYPED_TEST(TemplateMockTestWithCallType, Works) {
       .WillOnce(Return(0))
       .WillOnce(Return(1))
       .WillOnce(Return(0));
-  EXPECT_CALL(mock, Push(_));
+  EXPECT_CALL(mock, Push(0));
   int n = 5;
   EXPECT_CALL(mock, GetTop()).WillOnce(ReturnRef(n));
   EXPECT_CALL(mock, Pop()).Times(AnyNumber());
