@@ -1046,11 +1046,25 @@ GTestLog::GTestLog(GTestLogSeverity severity, const char* file, int line)
 }
 
 // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
-GTestLog::~GTestLog() {
+void GTestLog::CleanUp(void) {
   GetStream() << ::std::endl;
   if (severity_ == GTEST_FATAL) {
     fflush(stderr);
-	posix::Abort("GoogleTest Logging FATAL level: aborting the application");
+    try {
+      posix::Abort("GoogleTest Logging FATAL level: aborting the application");
+    } catch (...) {
+      std::exception_ptr e = std::current_exception(); // capture
+      const char *msg = (e != nullptr ? e->what() : nullptr);
+      if (msg != nullptr)
+        fprintf(stderr, "Aborting Exception caught: %s. Rotten way to do this sort of thing anyway.\n", msg);
+      else
+        fprintf(stderr, "Aborting Exception caught. Rotten way to do this sort of thing anyway.\n");
+		
+	  if (e != nullptr)
+        std::rethrow_exception(e);
+	  else
+	    throw std::exception("Unknown C++ exception (abort)");
+    }
   }
 }
 
