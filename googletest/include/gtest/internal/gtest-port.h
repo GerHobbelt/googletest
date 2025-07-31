@@ -1106,12 +1106,17 @@ class GTEST_API_ GTestLog {
   GTestLog(GTestLogSeverity severity, const char* file, int line);
 
   // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
-  ~GTestLog();
+  ~GTestLog() {
+	  CleanUp();
+  }
 
   ::std::ostream& GetStream() { return ::std::cerr; }
 
  private:
   const GTestLogSeverity severity_;
+
+  // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
+  void CleanUp(void);
 
   GTestLog(const GTestLog&) = delete;
   GTestLog& operator=(const GTestLog&) = delete;

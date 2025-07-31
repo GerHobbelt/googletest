@@ -2855,6 +2855,7 @@ Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
       return HandleSehExceptionsInMethodIfSupported(object, method, location);
     } catch (const AssertionException&) {  // NOLINT
       // This failure was reported already.
+      (void)0;
     } catch (const internal::GoogleTestFailureException&) {  // NOLINT
       // This exception type can only be thrown by a failed Google
       // Test assertion with the intention of letting another testing
