@@ -2441,9 +2441,15 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
 //
 // This function was formerly a macro; thus, it is in the global
 // namespace and has an all-caps name.
-[[nodiscard]] int RUN_ALL_TESTS();
+[[nodiscard]] int RUN_ALL_TESTS() noexcept(false);
 
-inline int RUN_ALL_TESTS() { return ::testing::UnitTest::GetInstance()->Run(); }
+inline int RUN_ALL_TESTS() noexcept(false) {
+	try{
+		return ::testing::UnitTest::GetInstance()->Run();
+        } catch (const std::exception& e) {
+          throw e;
+        }
+}
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
