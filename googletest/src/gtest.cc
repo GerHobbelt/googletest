@@ -2805,7 +2805,7 @@ GoogleTestFailureException::GoogleTestFailureException(
 // wrapper function for handling SEH exceptions.)
 template <class T, typename Result>
 Result HandleSehExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
-                                              const char* location) {
+                                              const char* location) noexcept(false) {
 #if GTEST_HAS_SEH
   __try {
     return (object->*method)();
@@ -2824,7 +2824,7 @@ Result HandleSehExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
 // Result in case of an SEH exception.
 template <class T, typename Result>
 Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
-                                           const char* location) {
+                                           const char* location) noexcept(false) {
   // NOTE: The user code can affect the way in which Google Test handles
   // exceptions by setting GTEST_FLAG(catch_exceptions), but only before
   // RUN_ALL_TESTS() starts. It is technically possible to check the flag
@@ -2893,20 +2893,30 @@ Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
 // returns the 0-value for type Result in case of an exception.
 template <class T, typename Result>
 Result HandleAllExceptionsInMethodIfSupported(
-	T* object, Result(T::* method)(), const char* location) {
+	T* object, Result(T::* method)(), const char* location) noexcept(false) {
   // Outer handler must be the SEH handler to catch them all.
+	try		{
   return HandleExceptionsInMethodIfSupported(object, method, location);
+        } catch (const std::exception& e) {
+          throw e;
+        }
 }
 
 }  // namespace internal
 
 // Runs the test and updates the test result.
-void Test::Run() {
+void Test::Run() noexcept(false) {
   if (!HasSameFixtureClass()) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
+
+  try {
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleAllExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
+  } catch (const std::exception& e) {
+    throw e;
+  }
+
   // We will run the test only if SetUp() was successful and didn't call
   // GTEST_SKIP().
   if (!HasFatalFailure() && !IsSkipped()) {
@@ -3038,7 +3048,7 @@ void UnitTestImpl::RegisterParameterizedTests() {
 
 // Creates the test object, runs it, records its result, and then
 // deletes it.
-void TestInfo::Run() {
+void TestInfo::Run() noexcept(false) {
   TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
   if (!should_run_) {
     if (is_disabled_ && matches_filter_) repeater->OnTestDisabled(*this);
@@ -3197,7 +3207,7 @@ void TestSuite::AddTestInfo(TestInfo* test_info) {
 }
 
 // Runs every test in this TestSuite.
-void TestSuite::Run() {
+void TestSuite::Run() noexcept(false) {
   if (!should_run_) return;
 
   UnitTest::GetInstance()->set_current_test_suite(this);
@@ -5827,7 +5837,7 @@ void UnitTest::RecordProperty(const std::string& key,
 //
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
-int UnitTest::Run() {
+int UnitTest::Run() noexcept(false) {
 #if GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
       !GTEST_FLAG_GET(internal_run_death_test).empty();
@@ -5913,11 +5923,15 @@ int UnitTest::Run() {
   (void)in_death_test_child_process;  // Needed inside the #if block above
 #endif  // GTEST_OS_WINDOWS
 
+  try{
   return internal::HandleAllExceptionsInMethodIfSupported(
              impl(), &internal::UnitTestImpl::RunAllTests,
              "auxiliary test code (environments or event listeners)")
              ? 0
              : 1;
+  } catch (const std::exception& e) {
+    throw e;
+  }
 }
 
 #if GTEST_HAS_FILE_SYSTEM
@@ -6231,7 +6245,7 @@ static void AppendToTestWarningsOutputFile(const std::string& str) {
 // parameterized tests first in RegisterParameterizedTests().
 // All other functions called from RunAllTests() may safely assume that
 // parameterized tests are ready to be counted and run.
-bool UnitTestImpl::RunAllTests() {
+bool UnitTestImpl::RunAllTests() noexcept(false) {
   // True if and only if Google Test is initialized before RUN_ALL_TESTS() is
   // called.
   const bool gtest_is_initialized_before_run_all_tests = GTestIsInitialized();
