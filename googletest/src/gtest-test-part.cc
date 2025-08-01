@@ -42,9 +42,10 @@ namespace testing {
 
 // Gets the summary of the failure message by omitting the stack trace
 // in it.
-std::string TestPartResult::ExtractSummary(const char* message) {
-  const char* const stack_trace = strstr(message, internal::kStackTraceMarker);
-  return stack_trace == nullptr ? message : std::string(message, stack_trace);
+std::string TestPartResult::ExtractSummary(const std::string& message) {
+  const char* const msg = message.c_str();
+  const char* const stack_trace = strstr(msg, internal::kStackTraceMarker);
+  return stack_trace == nullptr ? message : std::string(msg, stack_trace);
 }
 
 // Prints a TestPartResult object.
