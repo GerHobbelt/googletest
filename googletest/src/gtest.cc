@@ -2805,7 +2805,7 @@ GoogleTestFailureException::GoogleTestFailureException(
 // wrapper function for handling SEH exceptions.)
 template <class T, typename Result>
 Result HandleSehExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
-                                              const char* location) noexcept(false) {
+                                              const char* location) {
 #if GTEST_HAS_SEH
   __try {
     return (object->*method)();
@@ -2824,7 +2824,7 @@ Result HandleSehExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
 // Result in case of an SEH exception.
 template <class T, typename Result>
 Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
-                                           const char* location) noexcept(false) {
+                                           const char* location) {
   // NOTE: The user code can affect the way in which Google Test handles
   // exceptions by setting GTEST_FLAG(catch_exceptions), but only before
   // RUN_ALL_TESTS() starts. It is technically possible to check the flag
@@ -2893,30 +2893,20 @@ Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
 // returns the 0-value for type Result in case of an exception.
 template <class T, typename Result>
 Result HandleAllExceptionsInMethodIfSupported(
-	T* object, Result(T::* method)(), const char* location) noexcept(false) {
+	T* object, Result(T::* method)(), const char* location) {
   // Outer handler must be the SEH handler to catch them all.
-	try		{
   return HandleExceptionsInMethodIfSupported(object, method, location);
-        } catch (const std::exception& e) {
-          throw e;
-        }
 }
 
 }  // namespace internal
 
 // Runs the test and updates the test result.
-void Test::Run() noexcept(false) {
+void Test::Run() {
   if (!HasSameFixtureClass()) return;
 
   internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
-
-  try {
   impl->os_stack_trace_getter()->UponLeavingGTest();
   internal::HandleAllExceptionsInMethodIfSupported(this, &Test::SetUp, "SetUp()");
-  } catch (const std::exception& e) {
-    throw e;
-  }
-
   // We will run the test only if SetUp() was successful and didn't call
   // GTEST_SKIP().
   if (!HasFatalFailure() && !IsSkipped()) {
@@ -2948,6 +2938,11 @@ bool Test::HasNonfatalFailure() {
 // Returns true if and only if the current test was skipped.
 bool Test::IsSkipped() {
   return internal::GetUnitTestImpl()->current_test_result()->Skipped();
+}
+
+// Returns reference to TestResult for the current test.
+TestResult* Test::current_test_result() {
+  return internal::GetUnitTestImpl()->current_test_result();
 }
 
 // class TestInfo
@@ -3048,7 +3043,7 @@ void UnitTestImpl::RegisterParameterizedTests() {
 
 // Creates the test object, runs it, records its result, and then
 // deletes it.
-void TestInfo::Run() noexcept(false) {
+void TestInfo::Run() {
   TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
   if (!should_run_) {
     if (is_disabled_ && matches_filter_) repeater->OnTestDisabled(*this);
@@ -3207,7 +3202,7 @@ void TestSuite::AddTestInfo(TestInfo* test_info) {
 }
 
 // Runs every test in this TestSuite.
-void TestSuite::Run() noexcept(false) {
+void TestSuite::Run() {
   if (!should_run_) return;
 
   UnitTest::GetInstance()->set_current_test_suite(this);
@@ -4057,6 +4052,8 @@ class TestEventRepeater : public TestEventListener {
   TestEventRepeater() : forwarding_enabled_(true) {}
   ~TestEventRepeater() override;
   void Append(TestEventListener* listener);
+  void Prepend(TestEventListener* listener);
+  bool Has(TestEventListener* listener) const;
   TestEventListener* Release(TestEventListener* listener);
 
   // Controls whether events will be forwarded to listeners_. Set to false
@@ -4102,22 +4099,65 @@ class TestEventRepeater : public TestEventListener {
 };
 
 TestEventRepeater::~TestEventRepeater() {
-  ForEach(listeners_, Delete<TestEventListener>);
+  // as listeners MAY have been registered MULTIPLE TIMES in the list,
+  // we have to 'release' them one by one and delete them as they are
+  // removed from the list:
+#if 0
+  while (listeners_.size() > 0) {
+    auto* listener = Release(listeners_[0]);
+    delete listener;
+  }
+#else
+  // faster than calling Release() in a loop: as we are cleaning up, we won't
+  // need to redimension the listeners_ vector as we go; we merely have to
+  // nil processed slots and nuke each non-nil slot which remains, before
+  // we drop the vector as a whole...
+  for (size_t i = 0; i < listeners_.size(); ++i) {
+    auto* listener = listeners_[i];
+    if (listener != nullptr) {
+      listeners_[i] = nullptr;
+
+	  // scan for duplicate entries, just in case...
+      for (size_t j = i + 1; j < listeners_.size(); ++j) {
+        if (listener == listeners_[j]) {
+          listeners_[j] = nullptr;
+	    }
+	  }
+
+	  delete listener;
+    }
+  }
+  // now all listeners_[] slots have been nilled.
+  listeners_.clear();
+#endif
 }
 
 void TestEventRepeater::Append(TestEventListener* listener) {
   listeners_.push_back(listener);
 }
 
+void TestEventRepeater::Prepend(TestEventListener* listener) {
+  listeners_.insert(listeners_.begin(), listener);
+}
+
+bool TestEventRepeater::Has(TestEventListener* listener) const {
+  return std::find(listeners_.cbegin(), listeners_.cend(), listener) != listeners_.cend();
+}
+
 TestEventListener* TestEventRepeater::Release(TestEventListener* listener) {
+  bool bingo = false;
   for (size_t i = 0; i < listeners_.size(); ++i) {
     if (listeners_[i] == listener) {
+      bingo = true;
       listeners_.erase(listeners_.begin() + static_cast<int>(i));
-      return listener;
+
+	  // some particular listeners MAY have registered themselves TWICE, e.g. our latest incantation of an 'expected failures' handler (see googlelog unit tests):
+	  // just in case, test this slot again, as the vector contents have been shifted up by the vector.erase() call:
+      --i;
     }
   }
 
-  return nullptr;
+  return bingo ? listener : nullptr;
 }
 
 // Since most methods are very similar, use macros to reduce boilerplate.
@@ -5486,12 +5526,23 @@ TestEventListeners::TestEventListeners()
 
 TestEventListeners::~TestEventListeners() { delete repeater_; }
 
-// Returns the standard listener responsible for the default console
-// output.  Can be removed from the listeners list to shut down default
-// console output.  Note that removing this object from the listener list
-// with Release transfers its ownership to the user.
+// Appends an event listener to the end of the list. Google Test assumes
+// the ownership of the listener (i.e. it will delete the listener when
+// the test program finishes).
 void TestEventListeners::Append(TestEventListener* listener) {
   repeater_->Append(listener);
+}
+
+// Prepends an event listener to the start of the list. Google Test assumes
+// the ownership of the listener (i.e. it will delete the listener when
+// the test program finishes).
+void TestEventListeners::Prepend(TestEventListener* listener) {
+  repeater_->Prepend(listener);
+}
+
+// Return true when the specified listener is present in the registered set.
+bool TestEventListeners::Has(TestEventListener* listener) const {
+  return repeater_->Has(listener);
 }
 
 // Removes the given event listener from the list and returns it.  It then
@@ -5771,7 +5822,8 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
     // command line for debugging.
     if (GTEST_FLAG_GET(break_on_failure)) {
 	  gtest_break_into_debugger();
-    } else if (GTEST_FLAG_GET(throw_on_failure)) {
+    }
+	if (GTEST_FLAG_GET(throw_on_failure)) {
 #if GTEST_HAS_EXCEPTIONS
 	  gtest_throw_failure_exception(result);
 #else
@@ -5837,7 +5889,7 @@ void UnitTest::RecordProperty(const std::string& key,
 //
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
-int UnitTest::Run() noexcept(false) {
+int UnitTest::Run() {
 #if GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
       !GTEST_FLAG_GET(internal_run_death_test).empty();
@@ -5923,15 +5975,11 @@ int UnitTest::Run() noexcept(false) {
   (void)in_death_test_child_process;  // Needed inside the #if block above
 #endif  // GTEST_OS_WINDOWS
 
-  try{
   return internal::HandleAllExceptionsInMethodIfSupported(
              impl(), &internal::UnitTestImpl::RunAllTests,
              "auxiliary test code (environments or event listeners)")
              ? 0
              : 1;
-  } catch (const std::exception& e) {
-    throw e;
-  }
 }
 
 #if GTEST_HAS_FILE_SYSTEM
@@ -6245,7 +6293,7 @@ static void AppendToTestWarningsOutputFile(const std::string& str) {
 // parameterized tests first in RegisterParameterizedTests().
 // All other functions called from RunAllTests() may safely assume that
 // parameterized tests are ready to be counted and run.
-bool UnitTestImpl::RunAllTests() noexcept(false) {
+bool UnitTestImpl::RunAllTests() {
   // True if and only if Google Test is initialized before RUN_ALL_TESTS() is
   // called.
   const bool gtest_is_initialized_before_run_all_tests = GTestIsInitialized();

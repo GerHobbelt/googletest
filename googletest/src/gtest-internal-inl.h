@@ -56,7 +56,7 @@
 #if GTEST_CAN_STREAM_RESULTS_
 #if GTEST_OS_WINDOWS
 #include <WinSock2.h>   // NOLINT
-#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "ws2_32.lib")
 #else
 #include <arpa/inet.h>  // NOLINT
 #include <netdb.h>      // NOLINT
@@ -861,7 +861,9 @@ class GTEST_API_ UnitTestImpl {
 
   // Returns the value of GTEST_FLAG(catch_exceptions) at the moment
   // UnitTest::Run() starts.
-  bool catch_exceptions() const { return catch_exceptions_; }
+  bool catch_exceptions() const {
+	return catch_exceptions_;
+  }
 
   std::function<void(std::exception_ptr)> UserExceptionHandler = nullptr;
 
@@ -880,7 +882,9 @@ class GTEST_API_ UnitTestImpl {
 
   // Used by UnitTest::Run() to capture the state of
   // GTEST_FLAG(catch_exceptions) at the moment it starts.
-  void set_catch_exceptions(bool value) { catch_exceptions_ = value; }
+  void set_catch_exceptions(bool value) {
+	catch_exceptions_ = value;
+  }
 
   // Sets the TestSuite object for the test that's currently running.
   void set_current_test_suite(TestSuite* a_current_test_suite) {

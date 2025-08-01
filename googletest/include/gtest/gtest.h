@@ -222,6 +222,7 @@ class GTestNonCopyable {
 // in friendship clauses with same named classes on the scope.
 class Test;
 class TestSuite;
+class TestResult;
 
 // Old API is still available but deprecated
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -282,6 +283,9 @@ class GTEST_API_ Test {
   static void TearDownTestCase() {}
   static void SetUpTestCase() {}
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+
+  // Returns reference to TestResult for the current test.
+  static TestResult* current_test_result();
 
   // Returns true if and only if the current test has a fatal failure.
   static bool HasFatalFailure();
@@ -1067,6 +1071,14 @@ class GTEST_API_ TestEventListeners {
   // the ownership of the listener (i.e. it will delete the listener when
   // the test program finishes).
   void Append(TestEventListener* listener);
+
+  // Prepends an event listener to the start of the list. Google Test assumes
+  // the ownership of the listener (i.e. it will delete the listener when
+  // the test program finishes).
+  void Prepend(TestEventListener* listener);
+
+  // Return true when the specified listener is present in the registered set.
+  bool Has(TestEventListener* listener) const;
 
   // Removes the given event listener from the list and returns it.  It then
   // becomes the caller's responsibility to delete the listener. Returns
@@ -2441,14 +2453,10 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
 //
 // This function was formerly a macro; thus, it is in the global
 // namespace and has an all-caps name.
-[[nodiscard]] int RUN_ALL_TESTS() noexcept(false);
+[[nodiscard]] int RUN_ALL_TESTS();
 
-inline int RUN_ALL_TESTS() noexcept(false) {
-	try{
-		return ::testing::UnitTest::GetInstance()->Run();
-        } catch (const std::exception& e) {
-          throw e;
-        }
+inline int RUN_ALL_TESTS() { 
+  return ::testing::UnitTest::GetInstance()->Run(); 
 }
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
