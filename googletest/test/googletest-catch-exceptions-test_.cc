@@ -282,6 +282,7 @@ TEST(CxxExceptionTest, ThrowsNonStdCxxException) { throw "C-string"; }
 // ones.
 static void TerminateHandler() {
   fprintf(stderr, "%s\n", "Unhandled C++ exception terminating the program.");
+  fflush(stderr);
   fflush(nullptr);
   exit(3);
 }

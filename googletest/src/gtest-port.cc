@@ -1045,8 +1045,6 @@ GTestLog::GTestLog(GTestLogSeverity severity, const char* file, int line)
               << ": ";
 }
 
-extern "C" void BreakIntoDebugger(void);
-
 // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
 void GTestLog::CleanUp(void) {
   GetStream() << ::std::endl;
@@ -1060,15 +1058,17 @@ void GTestLog::CleanUp(void) {
         if (e) {
           std::rethrow_exception(e);
         }
-      } catch (const std::exception& e) {
-		BreakIntoDebugger();
-        auto msg = e.what();
+      } catch (const std::exception& ex) {
+        auto msg = ex.what();
+        fprintf(stderr, "Aborting Exception caught: %s. Rotten way to do this sort of thing anyway.\n", msg);
+      } catch (const std::exception* ex) {
+        auto msg = ex->what();
         fprintf(stderr, "Aborting Exception caught: %s. Rotten way to do this sort of thing anyway.\n", msg);
 	  } catch (...) {
         fprintf(stderr, "Aborting Exception caught. Rotten way to do this sort of thing anyway.\n");
 	  }
 		
-	  if (e != nullptr)
+	  if (e)
         std::rethrow_exception(e);
 	  else
 	    throw std::exception("Unknown C++ exception (abort)");
