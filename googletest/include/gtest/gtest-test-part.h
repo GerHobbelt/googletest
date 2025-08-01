@@ -66,7 +66,7 @@ class GTEST_API_ TestPartResult {
   // Always use this constructor (with parameters) to create a
   // TestPartResult object.
   TestPartResult(Type a_type, const char* a_file_name, int a_line_number,
-                 const char* a_message)
+                 const std::string& a_message)
       : type_(a_type),
         file_name_(a_file_name == nullptr ? "" : a_file_name),
         line_number_(a_line_number),
@@ -78,6 +78,11 @@ class GTEST_API_ TestPartResult {
 
   void change_type(Type a_type) {
 	  type_ = a_type;
+  }
+
+  void change_message(const std::string& a_message) {
+    message_ = a_message;
+    summary_ = ExtractSummary(a_message);
   }
 
   // Gets the name of the source file where the test part took place, or
@@ -116,7 +121,7 @@ class GTEST_API_ TestPartResult {
 
   // Gets the summary of the failure message by omitting the stack
   // trace in it.
-  static std::string ExtractSummary(const char* message);
+  static std::string ExtractSummary(const std::string& message);
 
   // The name of the source file where the test part took place, or
   // "" if the source file is unknown.
