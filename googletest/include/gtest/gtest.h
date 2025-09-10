@@ -1704,6 +1704,8 @@ GTEST_API_ AssertionResult DoubleNearPredFormat(const char* expr1,
                                                 double val1, double val2,
                                                 double abs_error);
 
+using GoogleTest_NotSupported_OnFunctionReturningNonVoid = void;
+
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 // A class that enables one to stream messages to assertion macros
 class GTEST_API_ AssertHelper {
@@ -1715,7 +1717,8 @@ class GTEST_API_ AssertHelper {
 
   // Message assignment is a semantic trick to enable assertion
   // streaming; see the GTEST_MESSAGE_ macro below.
-  void operator=(const Message& message) const;
+  GoogleTest_NotSupported_OnFunctionReturningNonVoid operator=(
+      const Message& message) const;
 
   TestPartResult::Type type() const {
       return data_->type;
