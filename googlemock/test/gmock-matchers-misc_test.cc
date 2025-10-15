@@ -153,6 +153,15 @@ TEST(IsEmptyTest, WorksWithString) {
   EXPECT_THAT(text, Not(IsEmpty()));
 }
 
+TEST(IsEmptyTest, WorksWithWideString) {
+const wchar_t* text = L"";
+EXPECT_THAT(text, IsEmpty());
+text = L"foo";
+EXPECT_THAT(text, Not(IsEmpty()));
+EXPECT_THAT(L"", IsEmpty());
+EXPECT_THAT(L"foo", Not(IsEmpty()));
+}
+
 TEST(IsEmptyTest, CanDescribeSelf) {
   Matcher<vector<int>> m = IsEmpty();
   EXPECT_EQ("is empty", Describe(m));
