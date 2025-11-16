@@ -109,6 +109,10 @@ GTEST_DECLARE_bool_(install_failure_signal_handler);
 // are actually run if the flag is provided.
 GTEST_DECLARE_bool_(list_tests);
 
+// This flag causes the Google Test to list tests inline. None of the tests listed
+// are actually run if the flag is provided.
+GTEST_DECLARE_bool_(list_tests_inline);
+
 // This flag controls whether Google Test emits a detailed XML report to a file
 // in addition to its normal textual output.
 GTEST_DECLARE_string_(output);
