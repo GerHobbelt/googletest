@@ -4302,7 +4302,7 @@ TEST(AssertionSyntaxTest, WorksWithSwitch) {
   }
 
   switch (0)
-  case 0:
+  default:
     EXPECT_FALSE(false) << "EXPECT_FALSE failed in switch case";
 
   // Binary assertions are implemented using a different code path
@@ -4314,7 +4314,7 @@ TEST(AssertionSyntaxTest, WorksWithSwitch) {
   }
 
   switch (0)
-  case 0:
+  default:
     EXPECT_NE(1, 2);
 }
 
