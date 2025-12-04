@@ -32,7 +32,15 @@
 #ifndef GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
 #define GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
 
-#include <stddef.h>
+#if defined(__has_include)
+# if __has_include(<cstddef>)
+#  include <cstddef>
+# else
+#  include <stddef.h>
+# endif
+#else
+# include <stddef.h>
+#endif
 
 // Queue is a simple queue implemented as a singled-linked list.
 //
