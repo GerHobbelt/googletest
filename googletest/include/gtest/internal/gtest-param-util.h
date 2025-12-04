@@ -778,7 +778,7 @@ class ParameterizedTestSuiteRegistry {
 };
 
 // Keep track of what type-parameterized test suite are defined and
-// where as well as which are intatiated. This allows subsequently
+// where as well as which are instantiated. This allows subsequently
 // identifying suits that are defined but never used.
 class TypeParameterizedTestSuiteRegistry {
  public:
