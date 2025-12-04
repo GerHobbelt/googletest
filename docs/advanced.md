@@ -1844,6 +1844,15 @@ TestSuite1.
 TestSuite2.
   TestName
 ```
+Including the flag
+`--gtest_list_tests_inline` overrides all other flags and lists tests in the following
+format:
+
+```none
+TestSuite1.TestName1
+TestSuite1.TestName2
+TestSuite2.TestName
+```
 
 None of the tests listed are actually run if the flag is provided. There is no
 corresponding environment variable for this flag.

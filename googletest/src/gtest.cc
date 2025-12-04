@@ -381,6 +381,10 @@ GTEST_DEFINE_bool_(
 
 GTEST_DEFINE_bool_(list_tests, false, "List all tests without running them.");
 
+GTEST_DEFINE_bool_(list_tests_inline,
+    false,
+    "List all tests in inline manner without running them.");
+
 // The net priority order after flag processing is thus:
 //   --gtest_output command line flag
 //   GTEST_OUTPUT environment variable
@@ -6762,6 +6766,11 @@ void UnitTestImpl::ListTestsMatchingFilter() {
       const TestInfo* const test_info = test_suite->test_info_list()[j];
       if (test_info->matches_filter_ && test_info->matches_size_ &&
           test_info->matches_tag_) {
+        if (GTEST_FLAG_GET(list_tests_inline)) {
+          ColoredPrintf(GTestColor::kDefault, "%s.%s\n", test_suite->name(), test_info->name());
+          continue;
+        }
+
         if (!printed_test_suite_name) {
           printed_test_suite_name = true;
 		  ColoredPrintf(GTestColor::kDefault, "%s.", test_suite->name());
@@ -7199,6 +7208,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(size);
   GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
   GTEST_INTERNAL_PARSE_FLAG(list_tests);
+  GTEST_INTERNAL_PARSE_FLAG(list_tests_inline);
   GTEST_INTERNAL_PARSE_FLAG(output);
   GTEST_INTERNAL_PARSE_FLAG(brief);
   GTEST_INTERNAL_PARSE_FLAG(print_time);
