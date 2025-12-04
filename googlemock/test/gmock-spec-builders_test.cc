@@ -162,7 +162,7 @@ class MockCC : public CC {
 // Tests that a method with expanded name compiles.
 TEST(OnCallSyntaxTest, CompilesWithMethodNameExpandedFromMacro) {
   MockCC cc;
-  ON_CALL(cc, Method());
+  (void)ON_CALL(cc, Method());
 }
 
 // Tests that the method with expanded name not only compiles but runs
@@ -195,7 +195,7 @@ TEST(OnCallSyntaxTest, EvaluatesFirstArgumentOnce) {
   MockA a;
   MockA* pa = &a;
 
-  ON_CALL(*pa++, DoA(_anything_));
+  (void)ON_CALL(*pa++, DoA(_anything_));
   EXPECT_EQ(&a + 1, pa);
 }
 
@@ -203,7 +203,7 @@ TEST(OnCallSyntaxTest, EvaluatesSecondArgumentOnce) {
   MockA a;
   int n = 0;
 
-  ON_CALL(a, DoA(n++));
+  (void)ON_CALL(a, DoA(n++));
   EXPECT_EQ(1, n);
 }
 
@@ -234,7 +234,7 @@ TEST(OnCallSyntaxTest, WillByDefaultIsMandatory) {
 
   EXPECT_DEATH_IF_SUPPORTED(
       {
-        ON_CALL(a, DoA(5));
+        (void)ON_CALL(a, DoA(5));
         a.DoA(5);
       },
       "");

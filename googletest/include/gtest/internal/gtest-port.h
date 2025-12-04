@@ -141,6 +141,7 @@
 //     GTEST_OS_WINDOWS_PHONE    - Windows Phone
 //     GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
 //   GTEST_OS_ZOS      - z/OS
+//   GTEST_OS_ZEPHYR   - Zephyr OS
 //
 // Among the platforms, Cygwin, Linux, Mac OS X, and Windows have the
 // most stable support.  Since core members of the Google Test project
@@ -530,6 +531,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAS_STD_WSTRING 0
 #endif
 #endif  // GTEST_HAS_STD_WSTRING
+
+#ifdef GTEST_OS_ZEPHYR
+#define GTEST_HAS_FILE_SYSTEM 0
+#endif
 
 #ifndef GTEST_HAS_FILE_SYSTEM
 // Most platforms support a file system.
@@ -1468,9 +1473,9 @@ class GTEST_API_ Mutex {
   Mutex();
   ~Mutex();
 
-  void Lock();
+  void lock();
 
-  void Unlock();
+  void unlock();
 
   // Does nothing if the current thread holds the mutex. Otherwise, crashes
   // with high probability.
@@ -1507,12 +1512,11 @@ class GTEST_API_ Mutex {
 // "MutexLock l(&mu)".  Hence the typedef trick below.
 class GTestMutexLock {
  public:
-  explicit GTestMutexLock(Mutex* mutex) : mutex_(mutex) { mutex_->Lock(); }
-
-  ~GTestMutexLock() { mutex_->Unlock(); }
+  explicit GTestMutexLock(Mutex& mutex) : mutex_(mutex) { mutex_.lock(); }
+  ~GTestMutexLock() { mutex_.unlock(); }
 
  private:
-  Mutex* const mutex_;
+  Mutex& mutex_;
 
   GTestMutexLock(const GTestMutexLock&) = delete;
   GTestMutexLock& operator=(const GTestMutexLock&) = delete;
@@ -1724,14 +1728,14 @@ class ThreadLocal : public ThreadLocalBase {
 class MutexBase {
  public:
   // Acquires this mutex.
-  void Lock() {
+  void lock() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
     owner_ = pthread_self();
     has_owner_ = true;
   }
 
   // Releases this mutex.
-  void Unlock() {
+  void unlock() {
     // Since the lock is being released the owner_ field should no longer be
     // considered valid. We don't protect writing to has_owner_ here, as it's
     // the caller's responsibility to ensure that the current thread holds the
@@ -1799,12 +1803,11 @@ class Mutex : public MutexBase {
 // "MutexLock l(&mu)".  Hence the typedef trick below.
 class GTestMutexLock {
  public:
-  explicit GTestMutexLock(MutexBase* mutex) : mutex_(mutex) { mutex_->Lock(); }
-
-  ~GTestMutexLock() { mutex_->Unlock(); }
+  explicit GTestMutexLock(MutexBase& mutex) : mutex_(mutex) { mutex_.lock(); }
+  ~GTestMutexLock() { mutex_.unlock(); }
 
  private:
-  MutexBase* const mutex_;
+  MutexBase& mutex_;
 
   GTestMutexLock(const GTestMutexLock&) = delete;
   GTestMutexLock& operator=(const GTestMutexLock&) = delete;
@@ -1947,8 +1950,8 @@ class GTEST_API_ ThreadLocal {
 class Mutex {
  public:
   Mutex() {}
-  void Lock() {}
-  void Unlock() {}
+  void lock() {}
+  void unlock() {}
   void AssertHeld() const {}
 };
 
@@ -1964,7 +1967,7 @@ class Mutex {
 // "MutexLock l(&mu)".  Hence the typedef trick below.
 class GTestMutexLock {
  public:
-  explicit GTestMutexLock(Mutex*) {}  // NOLINT
+  explicit GTestMutexLock(Mutex&) {}  // NOLINT
 };
 
 typedef GTestMutexLock MutexLock;
@@ -2098,6 +2101,18 @@ inline int RmDir(const char* dir) { return rmdir(dir); }
 inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 #endif
 
+#elif defined(GTEST_OS_ZEPHYR)
+static inline int FileNo(FILE* file) {
+  if (file == stdin)
+    return 1;
+  else if (file == stdout)
+    return 2;
+  else if (file == stderr)
+    return 3;
+  return -EINVAL;
+}
+
+static inline int isatty(int fd) { return true; }
 #else
 
 typedef struct stat StatStruct;
@@ -2402,6 +2417,13 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 }  // namespace internal
 }  // namespace testing
+
+#if GTEST_INTERNAL_HAVE_CPP_ATTRIBUTE(clang::annotate)
+#define GTEST_INTERNAL_DEPRECATE_AND_INLINE(msg) \
+  [[deprecated(msg), clang::annotate("inline-me")]]
+#else
+#define GTEST_INTERNAL_DEPRECATE_AND_INLINE(msg) [[deprecated(msg)]]
+#endif
 
 #ifndef GTEST_INTERNAL_HAS_STD_SPAN
 #if defined(__cpp_lib_span) || (GTEST_INTERNAL_HAS_INCLUDE(<span>) && \

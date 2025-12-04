@@ -258,7 +258,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <exception>
 #include <functional>
 #include <initializer_list>
 #include <ios>
@@ -268,12 +267,12 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "gmock/internal/gmock-internal-utils.h"
-#include "gmock/internal/gmock-port.h"
 #include "gmock/internal/gmock-pp.h"
 #include "gtest/gtest.h"
 
@@ -1330,17 +1329,23 @@ class AllOfMatcherImpl : public MatcherInterface<const T&> {
     // However, if matcher doesn't provide one, this method uses matcher's
     // description.
     std::string all_match_result;
+    bool success = true;
     for (const Matcher<T>& matcher : matchers_) {
       StringMatchResultListener slistener;
       // Return explanation for first failed matcher.
       if (!matcher.MatchAndExplain(xx, &slistener)) {
         const std::string explanation = slistener.str();
+        if (!success) {
+          // Already had a failure.
+          *listener << ", and ";
+        }
         if (!explanation.empty()) {
           *listener << explanation;
         } else {
           *listener << "which doesn't match (" << Describe(matcher) << ")";
         }
-        return false;
+        success = false;
+        continue;
       }
       // Keep track of explanations in case all matchers succeed.
       std::string explanation = slistener.str();
@@ -1357,8 +1362,10 @@ class AllOfMatcherImpl : public MatcherInterface<const T&> {
       }
     }
 
-    *listener << all_match_result;
-    return true;
+    if (success) {
+      *listener << all_match_result;
+    }
+    return success;
   }
 
  private:

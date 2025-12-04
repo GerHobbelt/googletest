@@ -304,7 +304,7 @@ GMOCK_API_ void Log(LogSeverity severity, const std::string& message,
 //
 class WithoutMatchers {
  private:
-  WithoutMatchers() {}
+  WithoutMatchers() = default;
   friend GMOCK_API_ WithoutMatchers GetWithoutMatchers();
 };
 
