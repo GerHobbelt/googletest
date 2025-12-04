@@ -767,7 +767,7 @@ class TestGenerationEnvironment : public ::testing::Environment {
       msg << "TestsExpandedAndRun/" << i;
       if (UnitTestOptions::FilterMatchesTest(
               "TestExpansionModule/MultipleTestGenerationTest",
-              msg.GetString().c_str())) {
+              msg.GetString())) {
         perform_check = true;
       }
     }
