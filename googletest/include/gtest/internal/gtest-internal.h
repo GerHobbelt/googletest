@@ -1486,7 +1486,7 @@ class NeverThrown {
     ;                                                                 \
   else                                                                \
     fail(::testing::internal::GetBoolAssertionFailureMessage(         \
-             gtest_ar_, text, #actual, #expected)                     \
+             gtest_ar_, ::testing::Message() << text, #actual, #expected)                     \
              .c_str())
 
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail)               \

@@ -2350,8 +2350,8 @@ constexpr bool StaticAssertTypeEq() noexcept {
               ::testing::internal::GetTypeId<test_fixture>())
 #if !GTEST_DONT_DEFINE_TEST_F
 #define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)
-#define TEST_F_C(test_fixture, test_name, test_tag) \
-  GTEST_TEST_F_C(test_fixture, test_name, test_tag)
+#define TEST_F_C(test_fixture, test_size, test_name, test_tag) \
+  GTEST_TEST_F_C(test_fixture, test_size, test_name, test_tag)
 #endif
 
 // Returns a path to a temporary directory, which should be writable. It is
