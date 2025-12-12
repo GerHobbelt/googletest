@@ -74,6 +74,11 @@ class IsEmptyMatcher {
     return false;
   }
 
+  // Matches Wide C-style strings.
+  bool MatchAndExplain(const wchar_t* s, MatchResultListener* listener) const {
+    return MatchAndExplain(std::wstring(s), listener);
+  }
+
   // Matches C-style strings.
   bool MatchAndExplain(const char* s, MatchResultListener* listener) const {
     return MatchAndExplain(std::string(s), listener);
