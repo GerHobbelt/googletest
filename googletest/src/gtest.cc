@@ -3111,7 +3111,7 @@ void TestInfo::Skip() {
 
   TestPartResult test_part_result =
       TestPartResult(TestPartResult::kSkip, this->file(), this->line(), "");
-  internal::GetUnitTestImpl()
+  (void)internal::GetUnitTestImpl()
       ->GetTestPartResultReporterForCurrentThread()
       ->ReportTestPartResult(test_part_result);
 
