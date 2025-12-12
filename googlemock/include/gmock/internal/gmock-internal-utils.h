@@ -221,7 +221,7 @@ using LosslessArithmeticConvertible =
 
 // This interface knows how to report a Google Mock failure (either
 // non-fatal or fatal).
-class FailureReporterInterface {
+class [[nodiscard]] FailureReporterInterface {
  public:
   // The type of a failure (either non-fatal or fatal).
   enum FailureType { kNonfatal, kFatal };
@@ -302,7 +302,7 @@ GMOCK_API_ void Log(LogSeverity severity, const std::string& message,
 //
 //    ON_CALL(mock, Method({}, nullptr))...
 //
-class WithoutMatchers {
+class [[nodiscard]] WithoutMatchers {
  private:
   WithoutMatchers() = default;
   friend GMOCK_API_ WithoutMatchers GetWithoutMatchers();
@@ -346,7 +346,7 @@ inline T Invalid() {
 // This generic version is used when RawContainer itself is already an
 // STL-style container.
 template <class RawContainer>
-class StlContainerView {
+class [[nodiscard]] StlContainerView {
  public:
   typedef RawContainer type;
   typedef const type& const_reference;
@@ -361,7 +361,7 @@ class StlContainerView {
 
 // This specialization is used when RawContainer is a native array type.
 template <typename Element, size_t N>
-class StlContainerView<Element[N]> {
+class [[nodiscard]] StlContainerView<Element[N]> {
  public:
   typedef typename std::remove_const<Element>::type RawElement;
   typedef internal::NativeArray<RawElement> type;
@@ -385,7 +385,7 @@ class StlContainerView<Element[N]> {
 // This specialization is used when RawContainer is a native array
 // represented as a (pointer, size) tuple.
 template <typename ElementPointer, typename Size>
-class StlContainerView< ::std::tuple<ElementPointer, Size> > {
+class [[nodiscard]] StlContainerView< ::std::tuple<ElementPointer, Size> > {
  public:
   typedef typename std::remove_const<
       typename std::pointer_traits<ElementPointer>::element_type>::type
