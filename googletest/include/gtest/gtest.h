@@ -263,9 +263,7 @@ class GTEST_API_ [[nodiscard]] Test {
   friend class TestInfo;
 
   // The d'tor is virtual as we intend to inherit from Test.
-protected:
-  virtual ~Test() noexcept(false);
-public:
+  virtual ~Test();
 
   // Sets up the stuff shared by all tests in this test suite.
   //
