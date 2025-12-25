@@ -774,7 +774,7 @@ you don't explicitly set an action in an `ON_CALL()` or `EXPECT_CALL()`, the
 fake will be called upon to do it.:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 
 TEST(AbcTest, Xyz) {
   MockFoo foo;
@@ -1125,7 +1125,7 @@ active will be selected (think "newer overrides older"). So, you can make a
 method do different things depending on its argument values like this:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Lt;
 using ::testing::Return;
 ...
@@ -1148,7 +1148,7 @@ The `With()` clause allows us to match all arguments of a mock function as a
 whole. For example,
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Ne;
 using ::testing::Lt;
 ...
@@ -1169,7 +1169,7 @@ You can use `Args<k1, ..., kn>(m)` to match the `n` selected arguments (as a
 tuple) against `m`. For example,
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::AllOf;
 using ::testing::Args;
 using ::testing::Lt;
@@ -1461,7 +1461,7 @@ You can use the `ElementsAre()` or `UnorderedElementsAre()` matcher in such
 cases:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::ElementsAre;
 using ::testing::Gt;
 ...
@@ -1476,7 +1476,7 @@ greater than 0, anything, and 5 respectively.
 If you instead write:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Gt;
 using ::testing::UnorderedElementsAre;
 ...
@@ -1650,7 +1650,7 @@ it will be an error.
 If a mock method shouldn't be called at all, explicitly say so:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   EXPECT_CALL(foo, Bar(_))
       .Times(0);
@@ -1785,7 +1785,7 @@ the `EXPECT_CALL()` statements in a block where you define a variable of type
 `InSequence`:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::InSequence;
 
   {
@@ -1868,7 +1868,7 @@ active. An expectation is active when created, and becomes inactive (aka
 *retires*) when a call that has to occur later has occurred. For example, in
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Sequence;
 ...
   Sequence s1, s2;
@@ -1889,7 +1889,7 @@ Note that an expectation doesn't retire automatically when it's saturated. For
 example,
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   EXPECT_CALL(log, Log(WARNING, _, _));                     // #1
   EXPECT_CALL(log, Log(WARNING, _, "File too large."));     // #2
@@ -1903,7 +1903,7 @@ If this is not what you want, you can ask an expectation to retire as soon as it
 becomes saturated:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   EXPECT_CALL(log, Log(WARNING, _, _));                     // #1
   EXPECT_CALL(log, Log(WARNING, _, "File too large."))      // #2
@@ -2004,7 +2004,7 @@ allows you to do a sequence of actions every time. Only the return value of the
 last action in the sequence will be used.
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::DoAll;
 
 class MockFoo : public Foo {
@@ -2060,7 +2060,7 @@ If all you need to do is to change an output argument, the built-in
 `SetArgPointee()` action is convenient:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::SetArgPointee;
 
 class MockMutator : public Mutator {
@@ -2086,7 +2086,7 @@ If the mock method also needs to return a value as well, you can chain
 `Return()` statement last:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SetArgPointee;
@@ -2130,7 +2130,7 @@ class MockArrayMutator : public ArrayMutator {
 This also works when the argument is an output iterator:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::SetArrayArgument;
 
 class MockRolodex : public Rolodex {
@@ -2175,7 +2175,7 @@ If the behavior change is more complex, you can store the effects in a variable
 and make a mock method get its return value from that variable:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::SaveArg;
 using ::testing::Return;
 
@@ -2243,7 +2243,7 @@ same return type and you want them to have different behaviors. The `ON_CALL()`
 macro allows you to customize your mock's behavior at the method level:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::AnyNumber;
 using ::testing::Gt;
 using ::testing::Return;
@@ -2279,7 +2279,7 @@ If the built-in actions don't suit you, you can use an existing callable
 (function, `std::function`, method, functor, lambda) as an action.
 
 ```cpp
-using ::testing::_; using ::testing::Invoke;
+using ::testing::_anything_; using ::testing::Invoke;
 
 class MockFoo : public Foo {
  public:
@@ -2384,7 +2384,7 @@ zero args as an action. Alternatively, use `InvokeWithoutArgs()`, which is like
 callee. Here's an example of each:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::InvokeWithoutArgs;
 
 class MockFoo : public Foo {
@@ -2439,7 +2439,7 @@ class MockFoo : public Foo {
 and you may want to invoke this callable argument:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   MockFoo foo;
   EXPECT_CALL(foo, DoThis(_, _))
@@ -2467,7 +2467,7 @@ pointer, a functor, or a callback. gMock handles them all.
 With that, you could write:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::InvokeArgument;
 ...
   EXPECT_CALL(foo, DoThis(_, _))
@@ -2485,7 +2485,7 @@ inside `std::ref()`:
               ((ResultCallback2<bool, int, const Helper&>* callback)),
               (override));
   ...
-  using ::testing::_;
+  using ::testing::_anything_;
   using ::testing::InvokeArgument;
   ...
   MockFoo foo;
@@ -2508,7 +2508,7 @@ temporary value:
   MOCK_METHOD(bool, DoThat, (bool (*f)(const double& x, const string& s)),
               (override));
   ...
-  using ::testing::_;
+  using ::testing::_anything_;
   using ::testing::InvokeArgument;
   ...
   MockFoo foo;
@@ -2530,7 +2530,7 @@ that returns `void` (perhaps you want to use it in a mock function that returns
 list). `IgnoreResult()` lets you do that. For example:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::DoAll;
 using ::testing::IgnoreResult;
 using ::testing::Return;
@@ -2567,7 +2567,7 @@ custom action that you want to invoke when `Foo()` is called. Trouble is, the
 custom action only wants three arguments:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Invoke;
 ...
   MOCK_METHOD(bool, Foo,
@@ -2587,7 +2587,7 @@ To please the compiler God, you need to define an "adaptor" that has the same
 signature as `Foo()` and calls the custom action with the right arguments:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Invoke;
 ...
 bool MyIsVisibleInQuadrant1(bool visible, const string& name, int x, int y,
@@ -2614,7 +2614,7 @@ indices (0-based) to the inner `action` and performs it. Using `WithArgs`, our
 original example can be written as:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Invoke;
 using ::testing::WithArgs;
 ...
@@ -2668,7 +2668,7 @@ function can be reused. For example, given
 instead of
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Invoke;
 
 double DistanceToOriginWithLabel(const string& label, double x, double y) {
@@ -2687,7 +2687,7 @@ double DistanceToOriginWithIndex(int index, double x, double y) {
 you could write
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Invoke;
 using ::testing::Unused;
 
@@ -3294,7 +3294,7 @@ flag. For example, given the test program:
 ```cpp
 #include <gmock/gmock.h>
 
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::HasSubstr;
 using ::testing::Return;
 
@@ -4250,7 +4250,7 @@ where the `t`s are the template arguments and the `v`s are the value arguments.
 The value argument types are inferred by the compiler. For example:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   int n;
   EXPECT_CALL(mock, Foo).WillOnce(DuplicateArg<1, unsigned char>(&n));
@@ -4329,7 +4329,7 @@ class ActionInterface {
 ```
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Action;
 using ::testing::ActionInterface;
 using ::testing::MakeAction;
@@ -4414,7 +4414,7 @@ PolymorphicAction<ReturnSecondArgumentAction> ReturnSecondArgument() {
 Now, you can use this polymorphic action the same way you use the built-in ones:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 
 class MockFoo : public Foo {
  public:

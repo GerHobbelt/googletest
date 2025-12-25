@@ -360,7 +360,7 @@ more, no less. If you aren't interested in the value of an argument, write `_`
 as the argument, which means "anything goes":
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
 // Expects that the turtle jumps to somewhere on the x=50 line.
 EXPECT_CALL(turtle, GoTo(50, _));
@@ -535,7 +535,7 @@ older ones."). If the matching expectation cannot take any more calls, you will
 get an upper-bound-violated failure. Here's an example:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
 EXPECT_CALL(turtle, Forward(_));  // #1
 EXPECT_CALL(turtle, Forward(10))  // #2
@@ -612,7 +612,7 @@ After you've come up with your answer, take a look at ours and compare notes
 (solve it yourself first - don't cheat!):
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::AnyNumber;
 ...
 EXPECT_CALL(turtle, GoTo(_, _))  // #1

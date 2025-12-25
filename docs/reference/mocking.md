@@ -105,7 +105,7 @@ For example, the following code sets the expectation that
 being less than the second:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Lt;
 ...
 EXPECT_CALL(my_mock, SetPosition(_, _))
@@ -297,7 +297,7 @@ function calls) after it has been *saturated* (the upper bound has been
 reached). See the following example:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::AnyNumber;
 ...
 EXPECT_CALL(my_mock, SetNumber(_))  // Expectation 1
@@ -362,7 +362,7 @@ For example, the following code sets the default behavior when
 being less than the second:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Lt;
 using ::testing::Return;
 ...

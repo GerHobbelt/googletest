@@ -116,7 +116,7 @@ using ::testing::Not;
 ### How can I assert that a function is NEVER called?
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   EXPECT_CALL(foo, Bar(_))
       .Times(0);
@@ -248,7 +248,7 @@ unnoticed.
 If, however, you are sure that the calls are OK, you can write
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   EXPECT_CALL(foo, Bar(_))
       .WillRepeatedly(...);
@@ -257,7 +257,7 @@ using ::testing::_;
 instead of
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 ...
   ON_CALL(foo, Bar(_))
       .WillByDefault(...);
@@ -276,7 +276,7 @@ argument, you can use testing::DeleteArg<N>() to delete the N'th (zero-indexed)
 argument:
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
   ...
   MOCK_METHOD(void, Bar, (X* x, const Y& y));
   ...
@@ -293,7 +293,7 @@ gMock directly, remember that you can define your own actions using
 and invoke it using [`Invoke()`](#FunctionsAsActions).
 
 ```cpp
-using ::testing::_;
+using ::testing::_anything_;
 using ::testing::Invoke;
   ...
   MOCK_METHOD(void, Bar, (X* p));
