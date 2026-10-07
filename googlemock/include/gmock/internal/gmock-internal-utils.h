@@ -305,11 +305,10 @@ GMOCK_API_ void Log(LogSeverity severity, const std::string& message,
 class [[nodiscard]] WithoutMatchers {
  private:
   WithoutMatchers() = default;
-  friend GMOCK_API_ WithoutMatchers GetWithoutMatchers();
-};
 
-// Internal use only: access the singleton instance of WithoutMatchers.
-GMOCK_API_ WithoutMatchers GetWithoutMatchers();
+ public:
+  GMOCK_API_ static WithoutMatchers Get();
+};
 
 // Invalid<T>() is usable as an expression of type T, but will terminate
 // the program with an assertion failure if actually run.  This is useful
