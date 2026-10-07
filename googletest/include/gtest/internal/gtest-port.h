@@ -1540,7 +1540,7 @@ typedef GTestMutexLock MutexLock;
 // without knowing its type.
 class [[nodiscard]] ThreadLocalValueHolderBase {
  public:
-  virtual ~ThreadLocalValueHolderBase() {}
+  virtual ~ThreadLocalValueHolderBase() = default;
 };
 
 // Provides a way for a thread to send notifications to a ThreadLocal
@@ -1554,8 +1554,8 @@ class [[nodiscard]] ThreadLocalBase {
   virtual ThreadLocalValueHolderBase* NewValueForCurrentThread() const = 0;
 
  protected:
-  ThreadLocalBase() {}
-  virtual ~ThreadLocalBase() {}
+  ThreadLocalBase() = default;
+  virtual ~ThreadLocalBase() = default;
 
  private:
   ThreadLocalBase(const ThreadLocalBase&) = delete;
@@ -1584,7 +1584,7 @@ class GTEST_API_ [[nodiscard]] ThreadWithParamBase {
  protected:
   class Runnable {
    public:
-    virtual ~Runnable() {}
+    virtual ~Runnable() = default;
     virtual void Run() = 0;
   };
 
@@ -1603,14 +1603,14 @@ class [[nodiscard]] ThreadWithParam : public ThreadWithParamBase {
 
   ThreadWithParam(UserThreadFunc* func, T param, Notification* thread_can_start)
       : ThreadWithParamBase(new RunnableImpl(func, param), thread_can_start) {}
-  virtual ~ThreadWithParam() {}
+  ~ThreadWithParam() override {}
 
  private:
   class RunnableImpl : public Runnable {
    public:
     RunnableImpl(UserThreadFunc* func, T param) : func_(func), param_(param) {}
-    virtual ~RunnableImpl() {}
-    virtual void Run() { func_(param_); }
+    ~RunnableImpl() override {}
+    void Run() override { func_(param_); }
 
    private:
     UserThreadFunc* const func_;
@@ -1693,8 +1693,8 @@ class [[nodiscard]] ThreadLocal : public ThreadLocalBase {
 
   class ValueHolderFactory {
    public:
-    ValueHolderFactory() {}
-    virtual ~ValueHolderFactory() {}
+    ValueHolderFactory() = default;
+    virtual ~ValueHolderFactory() = default;
     virtual ValueHolder* MakeNewHolder() const = 0;
 
    private:
@@ -1704,7 +1704,7 @@ class [[nodiscard]] ThreadLocal : public ThreadLocalBase {
 
   class DefaultValueHolderFactory : public ValueHolderFactory {
    public:
-    DefaultValueHolderFactory() {}
+    DefaultValueHolderFactory() = default;
     ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
 
    private:
