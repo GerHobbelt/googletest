@@ -122,6 +122,8 @@
 #define GTEST_OS_NXP_QN9090 1
 #elif defined(NRF52)
 #define GTEST_OS_NRF52 1
+#elif defined(__EMSCRIPTEN__)
+#define GTEST_OS_EMSCRIPTEN 1
 #endif  // __CYGWIN__
 
 #ifndef GTEST_OS_CYGWIN
