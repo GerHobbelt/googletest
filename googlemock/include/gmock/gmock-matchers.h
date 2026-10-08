@@ -284,7 +284,6 @@
 #define GMOCK_MAYBE_5046_
 #endif
 
-#if GTEST_HAS_RTTI
 namespace proto2 {
 namespace internal {
 
@@ -320,7 +319,6 @@ T* DynamicCastMessageForGtest(proto2::MessageLite* msg) {
 
 }  // namespace internal
 }  // namespace proto2
-#endif  // GTEST_HAS_RTTI
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
     4251 GMOCK_MAYBE_5046_ /* class A needs to have dll-interface to be used by
