@@ -336,7 +336,8 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 template <typename... Ts>
 internal::ParamGenerator<std::common_type_t<Ts...>> Values(Ts... vs) {
   return ValuesIn(
-      std::array<std::common_type_t<Ts...>, sizeof...(Ts)>{std::move(vs)...});
+	  // fix error C2397: conversion from 'int' to '_Ty' requires a narrowing conversion
+      std::array<std::common_type_t<Ts...>, sizeof...(Ts)>{std::common_type_t<Ts...>(std::move(vs))...});
 }
 
 // Bool() allows generating tests with parameters in a set of (false, true).
