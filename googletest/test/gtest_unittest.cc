@@ -157,7 +157,7 @@ TEST_F(StreamingListenerTest, OnTestEnd) {
 
 TEST_F(StreamingListenerTest, OnTestPartResult) {
   *output() = "";
-  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kFatalFailure,
+  (void)streamer_.OnTestPartResult(TestPartResult(TestPartResult::kFatalFailure,
                                             "foo.cc", 42, "failed=\n&%"));
 
   // Meta characters in the failure message should be properly escaped.
@@ -168,7 +168,7 @@ TEST_F(StreamingListenerTest, OnTestPartResult) {
 
 TEST_F(StreamingListenerTest, OnTestPartResultSkip) {
   *output() = "";
-  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kSkip,
+  (void)streamer_.OnTestPartResult(TestPartResult(TestPartResult::kSkip,
                                             "foo.cc", 42, "Skipped"));
 
   EXPECT_EQ(
@@ -178,7 +178,7 @@ TEST_F(StreamingListenerTest, OnTestPartResultSkip) {
 
 TEST_F(StreamingListenerTest, OnTestPartResultSuccess) {
   *output() = "";
-  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kSuccess,
+  (void)streamer_.OnTestPartResult(TestPartResult(TestPartResult::kSuccess,
                                             "foo.cc", 42, "Succeeded"));
 
   EXPECT_EQ(
@@ -188,7 +188,7 @@ TEST_F(StreamingListenerTest, OnTestPartResultSuccess) {
 
 TEST_F(StreamingListenerTest, OnTestPartResultNonFatalFailure) {
   *output() = "";
-  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kNonFatalFailure,
+  (void)streamer_.OnTestPartResult(TestPartResult(TestPartResult::kNonFatalFailure,
                                             "foo.cc", 42, "Failed"));
 
   EXPECT_EQ(
@@ -198,7 +198,7 @@ TEST_F(StreamingListenerTest, OnTestPartResultNonFatalFailure) {
 
 TEST_F(StreamingListenerTest, OnTestPartResultUnknown) {
   *output() = "";
-  streamer_.OnTestPartResult(TestPartResult((TestPartResult::Type)-1,
+  (void)streamer_.OnTestPartResult(TestPartResult((TestPartResult::Type)-1,
                                             "foo.cc", 42, "Other"));
 
   EXPECT_EQ(
